@@ -1,0 +1,569 @@
+/* =====================================================
+   WEBALE - Mobile Responsive Styles
+   Add this to your existing styles.css or index.css
+   ===================================================== */
+
+/* ==================== BASE RESPONSIVE ==================== */
+
+/* Smooth transitions for responsive changes */
+* {
+  transition: padding 0.2s ease, margin 0.2s ease, font-size 0.2s ease;
+}
+
+/* Better touch targets on mobile */
+@media (max-width: 768px) {
+  button, 
+  .btn,
+  a,
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
+  
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* ==================== NAVBAR RESPONSIVE ==================== */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  nav {
+    padding: 10px 16px !important;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  nav {
+    padding: 8px 12px !important;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  /* Smaller logo on mobile */
+  nav > a:first-child span:first-child {
+    font-size: 48px !important;
+  }
+  
+  nav > a:first-child > div span:first-child {
+    font-size: 16px !important;
+  }
+  
+  nav > a:first-child > div span:nth-child(2),
+  nav > a:first-child > div span:nth-child(3) {
+    font-size: 7px !important;
+  }
+  
+  /* Navbar right buttons */
+  nav > div:last-child {
+    gap: 6px !important;
+  }
+  
+  nav > div:last-child > a,
+  nav > div:last-child > button {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+  }
+  
+  /* Hide text on small mobile, show only icons */
+  @media (max-width: 480px) {
+    nav > div:last-child > a span,
+    nav > div:last-child > a:not(:has(span)) {
+      display: none;
+    }
+  }
+}
+
+/* Very small mobile */
+@media (max-width: 400px) {
+  nav > a:first-child span:first-child {
+    font-size: 40px !important;
+  }
+  
+  nav > div:last-child {
+    gap: 4px !important;
+  }
+  
+  nav > div:last-child > a,
+  nav > div:last-child > button {
+    padding: 6px 8px !important;
+    font-size: 11px !important;
+  }
+}
+
+/* ==================== SIDEBAR RESPONSIVE ==================== */
+
+/* Hide sidebar on mobile - use bottom nav instead */
+@media (max-width: 768px) {
+  .sidebar,
+  [class*="sidebar"],
+  aside {
+    display: none !important;
+  }
+  
+  /* Full width main content */
+  main,
+  .main-content {
+    margin-left: 0 !important;
+    padding: 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* ==================== CARDS RESPONSIVE ==================== */
+
+.card {
+  transition: padding 0.2s ease;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 16px !important;
+    border-radius: 12px !important;
+    margin-bottom: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 12px !important;
+    border-radius: 10px !important;
+  }
+}
+
+/* ==================== GRID RESPONSIVE ==================== */
+
+/* Stats grid */
+@media (max-width: 768px) {
+  [style*="grid-template-columns: repeat(auto-fit"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  [style*="grid-template-columns: repeat(auto-fit"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ==================== TABLES RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  th, td {
+    padding: 10px 8px !important;
+    font-size: 13px !important;
+  }
+  
+  /* Hide less important columns on mobile */
+  table th:nth-child(n+5),
+  table td:nth-child(n+5) {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  th, td {
+    padding: 8px 6px !important;
+    font-size: 12px !important;
+  }
+  
+  /* Hide even more columns */
+  table th:nth-child(n+4),
+  table td:nth-child(n+4) {
+    display: none;
+  }
+}
+
+/* ==================== FORMS RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+  .input,
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  select,
+  textarea {
+    padding: 14px 12px !important;
+    font-size: 16px !important;
+    border-radius: 10px !important;
+  }
+  
+  /* Stack form grids */
+  [style*="grid-template-columns: 1fr 1fr"],
+  [style*="grid-template-columns: 2fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  label {
+    font-size: 14px !important;
+    margin-bottom: 6px !important;
+  }
+}
+
+/* ==================== BUTTONS RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+  .btn,
+  button {
+    padding: 12px 16px !important;
+    font-size: 14px !important;
+    border-radius: 10px !important;
+  }
+  
+  /* Stack button groups */
+  [style*="display: flex"][style*="gap"] {
+    flex-wrap: wrap !important;
+  }
+  
+  /* Full width buttons in modals */
+  .modal .btn,
+  [style*="position: fixed"] .btn {
+    flex: 1 1 auto !important;
+    min-width: 120px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn,
+  button {
+    padding: 12px 14px !important;
+    font-size: 13px !important;
+    width: 100%;
+  }
+  
+  /* Stack all buttons vertically on very small screens */
+  [style*="display: flex"][style*="gap"]:has(.btn) {
+    flex-direction: column !important;
+  }
+}
+
+/* ==================== MODALS RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+  /* Full screen modals on mobile */
+  [style*="position: fixed"][style*="display: flex"][style*="align-items: center"] > .card,
+  [style*="position: fixed"] > div > .card {
+    max-width: 100% !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    overflow-y: auto !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Modal content adjustments */
+  [style*="position: fixed"] h2 {
+    font-size: 18px !important;
+  }
+  
+  [style*="position: fixed"] p {
+    font-size: 14px !important;
+  }
+}
+
+/* ==================== TABS RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+  /* Scrollable tabs */
+  [style*="border-bottom"][style*="display: flex"] {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  [style*="border-bottom"][style*="display: flex"]::-webkit-scrollbar {
+    display: none;
+  }
+  
+  [style*="border-bottom"][style*="display: flex"] button {
+    padding: 10px 14px !important;
+    font-size: 12px !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}
+
+/* ==================== TYPOGRAPHY RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 24px !important;
+  }
+  
+  h2 {
+    font-size: 20px !important;
+  }
+  
+  h3 {
+    font-size: 16px !important;
+  }
+  
+  p, span, div {
+    line-height: 1.5;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 20px !important;
+  }
+  
+  h2 {
+    font-size: 18px !important;
+  }
+  
+  h3 {
+    font-size: 15px !important;
+  }
+}
+
+/* ==================== PROGRESS BARS RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+  [style*="height: 8px"][style*="background"],
+  [style*="height: 6px"][style*="background"] {
+    height: 10px !important;
+    border-radius: 5px !important;
+  }
+}
+
+/* ==================== NOTIFICATION DROPDOWN RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+  /* Full width notification dropdown */
+  [style*="position: absolute"][style*="width: 360px"] {
+    position: fixed !important;
+    top: 60px !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-height: calc(100vh - 60px) !important;
+    border-radius: 0 !important;
+  }
+}
+
+/* ==================== LANGUAGE DROPDOWN RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+  [style*="position: absolute"][style*="min-width: 160px"] {
+    min-width: 140px !important;
+  }
+}
+
+/* ==================== PLEDGE LIST RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+  /* Card-style pledge items instead of table */
+  .pledge-item,
+  [style*="border-bottom: 1px solid"] {
+    padding: 12px !important;
+    margin-bottom: 8px !important;
+    background: #f7fafc !important;
+    border-radius: 10px !important;
+    border: none !important;
+  }
+}
+
+/* ==================== MEMBER LIST RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+  /* Smaller avatars */
+  [style*="width: 45px"][style*="height: 45px"][style*="border-radius: 50%"],
+  [style*="width: 50px"][style*="height: 50px"][style*="border-radius: 50%"] {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 14px !important;
+  }
+  
+  [style*="width: 36px"][style*="height: 36px"][style*="border-radius: 50%"] {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* ==================== FLOATING ACTION BUTTON (Mobile) ==================== */
+
+.mobile-fab {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-fab {
+    display: flex;
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 90;
+  }
+}
+
+/* ==================== BOTTOM NAVIGATION (Mobile Only) ==================== */
+
+.mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: white;
+    border-top: 1px solid #e2e8f0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 10px;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  
+  .mobile-bottom-nav a,
+  .mobile-bottom-nav button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #718096;
+    font-size: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    min-width: 60px;
+  }
+  
+  .mobile-bottom-nav a.active,
+  .mobile-bottom-nav button.active {
+    color: #667eea;
+    background: #ebf8ff;
+  }
+  
+  .mobile-bottom-nav span.icon {
+    font-size: 20px;
+    margin-bottom: 2px;
+  }
+  
+  /* Add padding to main content for bottom nav */
+  main {
+    padding-bottom: 80px !important;
+  }
+}
+
+/* ==================== DARK MODE RESPONSIVE ADJUSTMENTS ==================== */
+
+.dark-mode .mobile-bottom-nav {
+  background: #2d3748;
+  border-top-color: #4a5568;
+}
+
+.dark-mode .mobile-bottom-nav a,
+.dark-mode .mobile-bottom-nav button {
+  color: #a0aec0;
+}
+
+.dark-mode .mobile-bottom-nav a.active,
+.dark-mode .mobile-bottom-nav button.active {
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.2);
+}
+
+/* ==================== SAFE AREA INSETS (iPhone notch) ==================== */
+
+@supports (padding: env(safe-area-inset-bottom)) {
+  .mobile-bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom);
+    height: calc(60px + env(safe-area-inset-bottom));
+  }
+  
+  nav {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  main {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+  }
+}
+
+/* ==================== LANDSCAPE MODE ==================== */
+
+@media (max-width: 768px) and (orientation: landscape) {
+  nav {
+    padding: 6px 12px !important;
+  }
+  
+  nav > a:first-child span:first-child {
+    font-size: 36px !important;
+  }
+  
+  .mobile-bottom-nav {
+    height: 50px;
+  }
+  
+  .mobile-bottom-nav span.icon {
+    font-size: 18px;
+  }
+  
+  main {
+    padding-bottom: 60px !important;
+  }
+}
+
+/* ==================== PRINT STYLES ==================== */
+
+@media print {
+  nav,
+  .mobile-bottom-nav,
+  .mobile-fab,
+  button,
+  .btn {
+    display: none !important;
+  }
+  
+  .card {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+  
+  main {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+}
