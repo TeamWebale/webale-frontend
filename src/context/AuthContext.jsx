@@ -22,7 +22,7 @@ export function AuthProvider({ children }) {
         setIsAuthenticated(true);
         
         // Optionally verify token with backend
-        const response = await axios.get('http://localhost:5000/api/auth/me', {
+        const response = await axios.get('https://webale-api.onrender.com/api/auth/me', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -43,7 +43,7 @@ export function AuthProvider({ children }) {
   };
 
   const login = async (email, password) => {
-    const response = await axios.post('http://localhost:5000/api/auth/login', {
+    const response = await axios.post('https://webale-api.onrender.com/api/auth/login', {
       email,
       password
     }, {
@@ -62,7 +62,7 @@ export function AuthProvider({ children }) {
   };
 
   const register = async (userData) => {
-    const response = await axios.post('http://localhost:5000/api/auth/register', userData, {
+    const response = await axios.post('https://webale-api.onrender.com/api/auth/register', userData, {
       headers: { 'Content-Type': 'application/json' }
     });
 

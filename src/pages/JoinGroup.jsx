@@ -27,7 +27,7 @@ function JoinGroup() {
     try {
       // We need to create a new endpoint to get invitation details without joining
       // For now, we'll track the click but not join yet
-      const response = await fetch(`http://localhost:5000/api/groups/invitation/${token}`, {
+      const response = await fetch(`https://webale-api.onrender.com/api/groups/invitation/${token}`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
       });
       

@@ -22,7 +22,7 @@ function AcceptInvite() {
 
     try {
       // Validate the invitation token
-      const response = await axios.get(`http://localhost:5000/api/invitations/${token}/validate`);
+      const response = await axios.get(`https://webale-api.onrender.com/api/invitations/${token}/validate`);
       
       if (response.data.success) {
         setInvitation(response.data.data.invitation);
@@ -46,7 +46,7 @@ function AcceptInvite() {
     setAccepting(true);
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/invitations/${token}/accept`,
+        `https://webale-api.onrender.com/api/invitations/${token}/accept`,
         { visibilityPreference },
         {
           headers: {
