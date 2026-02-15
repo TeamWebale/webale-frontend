@@ -73,15 +73,15 @@ export const memberAPI = {
 
 // Pledge API
 export const pledgeAPI = {
-  getByGroup: (groupId) => api.get(`/pledges/group/${groupId}`),
-  getById: (groupId, pledgeId) => api.get(`/pledges/group/${groupId}/${pledgeId}`),
-  create: (groupId, data) => api.post(`/pledges/group/${groupId}`, data),
-  update: (groupId, pledgeId, data) => api.put(`/pledges/group/${groupId}/${pledgeId}`, data),
-  delete: (groupId, pledgeId) => api.delete(`/pledges/group/${groupId}/${pledgeId}`),
-  markAsPaid: (groupId, pledgeId, data = {}) => api.put(`/pledges/group/${groupId}/${pledgeId}/pay`, data),
-  addContribution: (groupId, pledgeId, data) => api.post(`/pledges/group/${groupId}/${pledgeId}/contribute`, data),
-  getUserPledges: (groupId) => api.get(`/pledges/group/${groupId}/my-pledges`),
-  sendReminder: (groupId, pledgeId) => api.post(`/pledges/group/${groupId}/${pledgeId}/remind`),
+  getByGroup: (groupId) => api.get(`/pledges/${groupId}/pledges`),
+  getById: (groupId, pledgeId) => api.get(`/pledges/${groupId}/pledge/${pledgeId}`),
+  create: (groupId, data) => api.post(`/pledges/${groupId}/pledge`, data),
+  update: (groupId, pledgeId, data) => api.put(`/pledges/${groupId}/pledge/${pledgeId}`, data),
+  delete: (groupId, pledgeId) => api.delete(`/pledges/${groupId}/pledge/${pledgeId}`),
+  markAsPaid: (groupId, pledgeId, data = {}) => api.put(`/pledges/${groupId}/pledge/${pledgeId}/paid`, data),
+  addContribution: (groupId, data) => api.post(`/pledges/${groupId}/contribution`, data),
+  getUserPledges: (groupId) => api.get(`/pledges/${groupId}/pledges`),
+  sendReminder: (groupId, pledgeId) => api.post(`/pledges/${groupId}/pledge/${pledgeId}/remind`),
 };
 
 // Activity API
