@@ -401,7 +401,7 @@ function GroupDetails() {
     setFormLoading(true);
     try {
       await subGoalsAPI.create(id, {
-        name: subGoalForm.name,
+        title: subGoalForm.name,
         targetAmount: parseFloat(subGoalForm.targetAmount),
         description: subGoalForm.description
       });

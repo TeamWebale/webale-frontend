@@ -135,12 +135,12 @@ export const commentsAPI = {
 
 // Sub-Goals API
 export const subGoalsAPI = {
-  getGroupSubGoals: (groupId) => api.get(`/subgoals/group/${groupId}`),
-  getByGroup: (groupId) => api.get(`/subgoals/group/${groupId}`),
-  create: (groupId, data) => api.post(`/subgoals/group/${groupId}`, data),
-  update: (groupId, subGoalId, data) => api.put(`/subgoals/group/${groupId}/${subGoalId}`, data),
-  delete: (groupId, subGoalId) => api.delete(`/subgoals/group/${groupId}/${subGoalId}`),
-  contribute: (groupId, subGoalId, data) => api.post(`/subgoals/group/${groupId}/${subGoalId}/contribute`, data),
+  getGroupSubGoals: (groupId) => api.get(`/sub-goals/group/${groupId}`),
+  getByGroup: (groupId) => api.get(`/sub-goals/group/${groupId}`),
+  create: (groupId, data) => api.post(`/sub-goals/group/${groupId}`, data),
+  update: (groupId, subGoalId, data) => api.put(`/sub-goals/group/${groupId}/${subGoalId}`, data),
+  delete: (groupId, subGoalId) => api.delete(`/sub-goals/group/${groupId}/${subGoalId}`),
+  contribute: (groupId, subGoalId, data) => api.post(`/sub-goals/group/${groupId}/${subGoalId}/contribute`, data),
 };
 
 // Messages API
