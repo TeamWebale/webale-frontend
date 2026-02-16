@@ -109,7 +109,7 @@ function GroupDetails() {
   const [messageForm, setMessageForm] = useState({ recipientId: '', content: '' });
   const [revisePledgeForm, setRevisePledgeForm] = useState({ amount: '', notes: '' });
   const [partPaymentForm, setPartPaymentForm] = useState({ amount: '' });
-  const [offlineDonationForm, setOfflineDonationForm] = useState({ donorName: '', amount: '', notes: '', date: '' });
+  const [offlineDonationForm, setOfflineDonationForm] = useState({ donorName: '', amount: '', notes: '', date: '', type: 'payment', isAnonymous: false, fulfillmentDate: '' });
   const [formLoading, setFormLoading] = useState(false);
 
   // Derived values
@@ -715,33 +715,38 @@ function GroupDetails() {
     }
     setFormLoading(true);
     try {
-      // Create a pledge entry for the offline donation
+      const isPledge = offlineDonationForm.type === 'pledge';
+      const isAnon = offlineDonationForm.isAnonymous || !offlineDonationForm.donorName;
+
+      // Create a pledge entry
       await pledgeAPI.create(id, {
         amount: parseFloat(offlineDonationForm.amount),
-        isAnonymous: !offlineDonationForm.donorName,
-        fulfillmentDate: offlineDonationForm.date || null,
+        isAnonymous: isAnon,
+        fulfillmentDate: isPledge ? (offlineDonationForm.fulfillmentDate || null) : null,
         reminderFrequency: 'none',
         currency: group?.currency || 'USD'
       });
-      // Immediately mark it as paid since it's a received offline donation
-      const pledgesRes = await pledgeAPI.getByGroup(id);
-      const allPledges = pledgesRes.data.data?.pledges || pledgesRes.data.pledges || [];
-      // Find the most recent pledge (the one we just created)
-      if (allPledges.length > 0) {
-        const latestPledge = allPledges[0]; // sorted by date DESC
-        try {
-          await pledgeAPI.markAsPaid(id, latestPledge.id);
-        } catch (e) {
-          // If mark paid fails, it's still recorded as a pledge
-          console.log('Note: pledge created but not auto-marked as paid');
+
+      // If it's a payment (not a pledge), immediately mark as paid
+      if (!isPledge) {
+        const pledgesRes = await pledgeAPI.getByGroup(id);
+        const allPledges = pledgesRes.data.data?.pledges || pledgesRes.data.pledges || [];
+        if (allPledges.length > 0) {
+          const latestPledge = allPledges[0];
+          try {
+            await pledgeAPI.markAsPaid(id, latestPledge.id);
+          } catch (e) {
+            console.log('Note: pledge created but not auto-marked as paid');
+          }
         }
       }
+
       setShowOfflineDonationModal(false);
-      setOfflineDonationForm({ donorName: '', amount: '', notes: '', date: '' });
+      setOfflineDonationForm({ donorName: '', amount: '', notes: '', date: '', type: 'payment', isAnonymous: false, fulfillmentDate: '' });
       loadGroupData();
-      alert('Offline donation recorded successfully!');
+      alert(isPledge ? 'Offshore pledge recorded! It will be tracked in the progress bars.' : 'Offshore payment recorded and marked as received!');
     } catch (err) {
-      alert('Failed to record donation: ' + (err.response?.data?.message || err.message));
+      alert('Failed to record: ' + (err.response?.data?.message || err.message));
     } finally {
       setFormLoading(false);
     }
@@ -912,8 +917,8 @@ function GroupDetails() {
             👥 Invite
           </button>
           {isAdmin && (
-            <button onClick={() => { setActiveTab('pledges'); setTimeout(() => { const el = document.getElementById('tab-content'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }, 100); }} className="btn" style={{ background: '#ed8936', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
-              💳 Record Payment
+            <button onClick={() => { setOfflineDonationForm({ donorName: '', amount: '', notes: '', date: new Date().toISOString().split('T')[0], type: 'payment', isAnonymous: false, fulfillmentDate: '' }); setShowOfflineDonationModal(true); }} className="btn" style={{ background: '#ed8936', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
+              💵 Offshore Donations
             </button>
           )}
           <button onClick={handleExportData} className="btn" style={{ background: '#e53e3e', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
@@ -1026,9 +1031,9 @@ function GroupDetails() {
               <h3 style={{ margin: 0, color: '#2d3748', fontSize: '16px' }}>💰 All Pledges ({pledges.length})</h3>
               <div style={{ display: 'flex', gap: '8px' }}>
                 {isAdmin && (
-                  <button onClick={() => { setOfflineDonationForm({ donorName: '', amount: '', notes: '', date: new Date().toISOString().split('T')[0] }); setShowOfflineDonationModal(true); }}
+                  <button onClick={() => { setOfflineDonationForm({ donorName: '', amount: '', notes: '', date: new Date().toISOString().split('T')[0], type: 'payment', isAnonymous: false, fulfillmentDate: '' }); setShowOfflineDonationModal(true); }}
                     style={{ fontSize: '12px', padding: '7px 12px', background: '#ed8936', color: 'white', border: 'none', borderRadius: '6px', fontWeight: '600', cursor: 'pointer' }}>
-                    💵 Record Offline Donation
+                    💵 Offshore Donations
                   </button>
                 )}
                 <button onClick={handleMakePledge} className="btn btn-primary" style={{ fontSize: '13px', padding: '8px 14px' }}>
@@ -1646,40 +1651,55 @@ function GroupDetails() {
         </button>
       </Modal>
 
-      {/* Offline Donation Modal (Admin) */}
-      <Modal isOpen={showOfflineDonationModal} onClose={() => setShowOfflineDonationModal(false)} title="💵 Record Offline Donation">
-        <div style={{
-          padding: '12px', background: '#fffbeb', borderRadius: '8px', marginBottom: '16px',
-          border: '1px solid #fefcbf', fontSize: '12px', color: '#975a16'
-        }}>
-          <strong>ℹ️ Offline Donation:</strong> Use this to record donations received outside the platform (cash, bank transfer, mobile money, etc.). This will be tracked in progress bars and reports.
+      {/* Offshore Donations Modal (Admin) */}
+      <Modal isOpen={showOfflineDonationModal} onClose={() => setShowOfflineDonationModal(false)} title="Offshore Donations" width="500px">
+        <div style={{ padding: '12px', background: '#fffbeb', borderRadius: '8px', marginBottom: '16px', border: '1px solid #fefcbf', fontSize: '12px', color: '#975a16' }}>
+          <strong>Offshore:</strong> Record donations or pledges from non-platform sources (cash, bank transfer, mobile money, etc.)
         </div>
-        <FormField label="Donor Name (optional — leave blank for anonymous)">
-          <input type="text" style={inputStyle} placeholder="e.g., John Smith"
-            value={offlineDonationForm.donorName} onChange={e => setOfflineDonationForm({ ...offlineDonationForm, donorName: e.target.value })} />
-        </FormField>
-        <FormField label="Amount" required>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <span style={{
-              padding: '10px 14px', background: '#f7fafc', border: '1px solid #e2e8f0',
-              borderRadius: '8px', fontSize: '14px', fontWeight: '600', color: '#4a5568'
-            }}>{currencySymbol}</span>
-            <input type="number" style={{ ...inputStyle, flex: 1 }} placeholder="Enter amount" min="0" step="0.01"
-              value={offlineDonationForm.amount} onChange={e => setOfflineDonationForm({ ...offlineDonationForm, amount: e.target.value })} />
+        <FormField label="What are you recording?" required>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button onClick={() => setOfflineDonationForm({ ...offlineDonationForm, type: 'payment' })} style={{ flex: 1, padding: '14px', border: '2px solid', borderColor: offlineDonationForm.type === 'payment' ? '#48bb78' : '#e2e8f0', background: offlineDonationForm.type === 'payment' ? '#f0fff4' : 'white', borderRadius: '10px', cursor: 'pointer', textAlign: 'center' }}>
+              <div style={{ fontSize: '24px', marginBottom: '6px' }}>{'💰'}</div>
+              <p style={{ margin: 0, fontWeight: '700', fontSize: '13px', color: offlineDonationForm.type === 'payment' ? '#276749' : '#4a5568' }}>Payment</p>
+              <p style={{ margin: '4px 0 0', fontSize: '10px', color: '#718096' }}>Money already received</p>
+            </button>
+            <button onClick={() => setOfflineDonationForm({ ...offlineDonationForm, type: 'pledge' })} style={{ flex: 1, padding: '14px', border: '2px solid', borderColor: offlineDonationForm.type === 'pledge' ? '#667eea' : '#e2e8f0', background: offlineDonationForm.type === 'pledge' ? '#ebf8ff' : 'white', borderRadius: '10px', cursor: 'pointer', textAlign: 'center' }}>
+              <div style={{ fontSize: '24px', marginBottom: '6px' }}>{'🤝'}</div>
+              <p style={{ margin: 0, fontWeight: '700', fontSize: '13px', color: offlineDonationForm.type === 'pledge' ? '#2b6cb0' : '#4a5568' }}>Pledge</p>
+              <p style={{ margin: '4px 0 0', fontSize: '10px', color: '#718096' }}>Promise to pay later</p>
+            </button>
           </div>
         </FormField>
-        <FormField label="Date Received">
-          <input type="date" style={inputStyle}
-            value={offlineDonationForm.date} onChange={e => setOfflineDonationForm({ ...offlineDonationForm, date: e.target.value })} />
+        <FormField label="Donor Name">
+          <input type="text" style={{ ...inputStyle, opacity: offlineDonationForm.isAnonymous ? 0.5 : 1 }} placeholder="e.g., John Smith" disabled={offlineDonationForm.isAnonymous} value={offlineDonationForm.donorName} onChange={e => setOfflineDonationForm({ ...offlineDonationForm, donorName: e.target.value })} />
         </FormField>
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#4a5568' }}>
+            <input type="checkbox" checked={offlineDonationForm.isAnonymous} onChange={e => setOfflineDonationForm({ ...offlineDonationForm, isAnonymous: e.target.checked, donorName: e.target.checked ? '' : offlineDonationForm.donorName })} />
+            Record as anonymous (shown as "John Doe")
+          </label>
+        </div>
+        <FormField label="Amount" required>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <span style={{ padding: '10px 14px', background: '#f7fafc', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '14px', fontWeight: '600', color: '#4a5568' }}>{currencySymbol}</span>
+            <input type="number" style={{ ...inputStyle, flex: 1 }} placeholder="Enter amount" min="0" step="0.01" value={offlineDonationForm.amount} onChange={e => setOfflineDonationForm({ ...offlineDonationForm, amount: e.target.value })} />
+          </div>
+        </FormField>
+        {offlineDonationForm.type === 'payment' && (
+          <FormField label="Date Received">
+            <input type="date" style={inputStyle} value={offlineDonationForm.date} onChange={e => setOfflineDonationForm({ ...offlineDonationForm, date: e.target.value })} />
+          </FormField>
+        )}
+        {offlineDonationForm.type === 'pledge' && (
+          <FormField label="Expected Payment Date (optional)">
+            <input type="date" style={inputStyle} value={offlineDonationForm.fulfillmentDate} onChange={e => setOfflineDonationForm({ ...offlineDonationForm, fulfillmentDate: e.target.value })} />
+          </FormField>
+        )}
         <FormField label="Notes (optional)">
-          <textarea style={{ ...inputStyle, minHeight: '60px', resize: 'vertical' }} placeholder="e.g., Cash received at Sunday meeting..."
-            value={offlineDonationForm.notes} onChange={e => setOfflineDonationForm({ ...offlineDonationForm, notes: e.target.value })} />
+          <textarea style={{ ...inputStyle, minHeight: '50px', resize: 'vertical' }} placeholder={offlineDonationForm.type === 'payment' ? 'e.g., Cash received at Sunday meeting...' : 'e.g., Promised at fundraiser event...'} value={offlineDonationForm.notes} onChange={e => setOfflineDonationForm({ ...offlineDonationForm, notes: e.target.value })} />
         </FormField>
-        <button onClick={handleOfflineDonation} disabled={formLoading} style={{
-          ...btnPrimary, background: '#ed8936', opacity: formLoading ? 0.7 : 1
-        }}>
-          {formLoading ? 'Recording...' : '💵 Record Offline Donation'}
+        <button onClick={handleOfflineDonation} disabled={formLoading} style={{ ...btnPrimary, background: offlineDonationForm.type === 'payment' ? '#48bb78' : '#667eea', opacity: formLoading ? 0.7 : 1 }}>
+          {formLoading ? 'Recording...' : offlineDonationForm.type === 'payment' ? 'Record Payment' : 'Record Pledge'}
         </button>
       </Modal>
 
