@@ -91,6 +91,7 @@ function GroupDetails() {
   const [selectedPledge, setSelectedPledge] = useState(null);
   const [showPartPaymentModal, setShowPartPaymentModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [showOfflineDonationModal, setShowOfflineDonationModal] = useState(false);
 
   // Form states
   const [pledgeForm, setPledgeForm] = useState({
@@ -108,6 +109,7 @@ function GroupDetails() {
   const [messageForm, setMessageForm] = useState({ recipientId: '', content: '' });
   const [revisePledgeForm, setRevisePledgeForm] = useState({ amount: '', notes: '' });
   const [partPaymentForm, setPartPaymentForm] = useState({ amount: '' });
+  const [offlineDonationForm, setOfflineDonationForm] = useState({ donorName: '', amount: '', notes: '', date: '' });
   const [formLoading, setFormLoading] = useState(false);
 
   // Derived values
@@ -707,6 +709,44 @@ function GroupDetails() {
     }
   };
 
+  const handleOfflineDonation = async () => {
+    if (!offlineDonationForm.amount || parseFloat(offlineDonationForm.amount) <= 0) {
+      alert('Please enter a valid amount'); return;
+    }
+    setFormLoading(true);
+    try {
+      // Create a pledge entry for the offline donation
+      await pledgeAPI.create(id, {
+        amount: parseFloat(offlineDonationForm.amount),
+        isAnonymous: !offlineDonationForm.donorName,
+        fulfillmentDate: offlineDonationForm.date || null,
+        reminderFrequency: 'none',
+        currency: group?.currency || 'USD'
+      });
+      // Immediately mark it as paid since it's a received offline donation
+      const pledgesRes = await pledgeAPI.getByGroup(id);
+      const allPledges = pledgesRes.data.data?.pledges || pledgesRes.data.pledges || [];
+      // Find the most recent pledge (the one we just created)
+      if (allPledges.length > 0) {
+        const latestPledge = allPledges[0]; // sorted by date DESC
+        try {
+          await pledgeAPI.markAsPaid(id, latestPledge.id);
+        } catch (e) {
+          // If mark paid fails, it's still recorded as a pledge
+          console.log('Note: pledge created but not auto-marked as paid');
+        }
+      }
+      setShowOfflineDonationModal(false);
+      setOfflineDonationForm({ donorName: '', amount: '', notes: '', date: '' });
+      loadGroupData();
+      alert('Offline donation recorded successfully!');
+    } catch (err) {
+      alert('Failed to record donation: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
   // ==================== RIGHT SIDEBAR ====================
   const RightSidebar = () => (
     <>
@@ -872,7 +912,7 @@ function GroupDetails() {
             👥 Invite
           </button>
           {isAdmin && (
-            <button onClick={() => setShowPaymentModal(true)} className="btn" style={{ background: '#ed8936', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
+            <button onClick={() => { setActiveTab('pledges'); setTimeout(() => { const el = document.getElementById('tab-content'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }, 100); }} className="btn" style={{ background: '#ed8936', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
               💳 Record Payment
             </button>
           )}
@@ -952,7 +992,7 @@ function GroupDetails() {
       </div>
 
       {/* Tab Content */}
-      <div style={{
+      <div id="tab-content" style={{
         background: 'white', borderRadius: '12px', padding: '20px',
         minHeight: '250px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
       }}>
@@ -982,11 +1022,19 @@ function GroupDetails() {
         {/* ==================== PLEDGES TAB ==================== */}
         {activeTab === 'pledges' && (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
               <h3 style={{ margin: 0, color: '#2d3748', fontSize: '16px' }}>💰 All Pledges ({pledges.length})</h3>
-              <button onClick={handleMakePledge} className="btn btn-primary" style={{ fontSize: '13px', padding: '8px 14px' }}>
-                + New Pledge
-              </button>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {isAdmin && (
+                  <button onClick={() => { setOfflineDonationForm({ donorName: '', amount: '', notes: '', date: new Date().toISOString().split('T')[0] }); setShowOfflineDonationModal(true); }}
+                    style={{ fontSize: '12px', padding: '7px 12px', background: '#ed8936', color: 'white', border: 'none', borderRadius: '6px', fontWeight: '600', cursor: 'pointer' }}>
+                    💵 Record Offline Donation
+                  </button>
+                )}
+                <button onClick={handleMakePledge} className="btn btn-primary" style={{ fontSize: '13px', padding: '8px 14px' }}>
+                  + New Pledge
+                </button>
+              </div>
             </div>
             {pledges.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '30px', color: '#a0aec0' }}>
@@ -1598,13 +1646,40 @@ function GroupDetails() {
         </button>
       </Modal>
 
-      {/* Record Payment Modal (Admin) */}
-      <Modal isOpen={showPaymentModal} onClose={() => setShowPaymentModal(false)} title="Record Payment">
-        <p style={{ color: '#718096', fontSize: '13px', marginBottom: '16px' }}>
-          Select a pledge from the Pledges tab and use "Part Payment" or "Mark Paid" to record payments.
-        </p>
-        <button onClick={() => { setShowPaymentModal(false); setActiveTab('pledges'); }} style={btnPrimary}>
-          Go to Pledges Tab
+      {/* Offline Donation Modal (Admin) */}
+      <Modal isOpen={showOfflineDonationModal} onClose={() => setShowOfflineDonationModal(false)} title="💵 Record Offline Donation">
+        <div style={{
+          padding: '12px', background: '#fffbeb', borderRadius: '8px', marginBottom: '16px',
+          border: '1px solid #fefcbf', fontSize: '12px', color: '#975a16'
+        }}>
+          <strong>ℹ️ Offline Donation:</strong> Use this to record donations received outside the platform (cash, bank transfer, mobile money, etc.). This will be tracked in progress bars and reports.
+        </div>
+        <FormField label="Donor Name (optional — leave blank for anonymous)">
+          <input type="text" style={inputStyle} placeholder="e.g., John Smith"
+            value={offlineDonationForm.donorName} onChange={e => setOfflineDonationForm({ ...offlineDonationForm, donorName: e.target.value })} />
+        </FormField>
+        <FormField label="Amount" required>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <span style={{
+              padding: '10px 14px', background: '#f7fafc', border: '1px solid #e2e8f0',
+              borderRadius: '8px', fontSize: '14px', fontWeight: '600', color: '#4a5568'
+            }}>{currencySymbol}</span>
+            <input type="number" style={{ ...inputStyle, flex: 1 }} placeholder="Enter amount" min="0" step="0.01"
+              value={offlineDonationForm.amount} onChange={e => setOfflineDonationForm({ ...offlineDonationForm, amount: e.target.value })} />
+          </div>
+        </FormField>
+        <FormField label="Date Received">
+          <input type="date" style={inputStyle}
+            value={offlineDonationForm.date} onChange={e => setOfflineDonationForm({ ...offlineDonationForm, date: e.target.value })} />
+        </FormField>
+        <FormField label="Notes (optional)">
+          <textarea style={{ ...inputStyle, minHeight: '60px', resize: 'vertical' }} placeholder="e.g., Cash received at Sunday meeting..."
+            value={offlineDonationForm.notes} onChange={e => setOfflineDonationForm({ ...offlineDonationForm, notes: e.target.value })} />
+        </FormField>
+        <button onClick={handleOfflineDonation} disabled={formLoading} style={{
+          ...btnPrimary, background: '#ed8936', opacity: formLoading ? 0.7 : 1
+        }}>
+          {formLoading ? 'Recording...' : '💵 Record Offline Donation'}
         </button>
       </Modal>
 
