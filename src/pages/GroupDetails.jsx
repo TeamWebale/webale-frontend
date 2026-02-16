@@ -877,15 +877,12 @@ function GroupDetails() {
             </button>
           )}
           <button onClick={handleExportData} className="btn" style={{ background: '#e53e3e', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
-            📊 Export Data
+            📊 Get Data/Report
           </button>
         </div>
 
         {/* Action Buttons Row 2 */}
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <button onClick={handleGenerateReport} className="btn" style={{ background: '#48bb78', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
-            📄 Generate Report
-          </button>
           <button onClick={handleMakePledge} className="btn" style={{ background: '#38b2ac', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
             💰 Make Pledge
           </button>
