@@ -97,6 +97,11 @@ function GroupDetails() {
   });
   const [editForm, setEditForm] = useState({ name: '', description: '', goalAmount: '', deadline: '', currency: 'USD' });
   const [inviteEmails, setInviteEmails] = useState('');
+  const [inviteTab, setInviteTab] = useState('email');
+  const [inviteLink, setInviteLink] = useState('');
+  const [inviteMessage, setInviteMessage] = useState('');
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const [inviteGenerated, setInviteGenerated] = useState(false);
   const [recurringForm, setRecurringForm] = useState({ amount: '', frequency: 'monthly', startDate: '', endDate: '' });
   const [subGoalForm, setSubGoalForm] = useState({ name: '', targetAmount: '', description: '' });
   const [messageForm, setMessageForm] = useState({ recipientId: '', content: '' });
@@ -341,24 +346,58 @@ function GroupDetails() {
   };
 
   const handleInvite = () => {
+    const userName = `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || 'A member';
+    const groupName = group?.name || 'our fundraising group';
+    const defaultMessage = `${userName} cordially invites you to "${groupName}" — a private fundraising group on Webale. Accept and join by following the link to sign-up/sign-in. See you there! 🤝`;
+    setInviteMessage(defaultMessage);
     setInviteEmails('');
+    setInviteLink('');
+    setQrCodeUrl('');
+    setInviteGenerated(false);
+    setInviteTab('email');
     setShowInviteModal(true);
   };
 
+  const generateQRCode = (text) => {
+    return `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(text)}`;
+  };
+
   const submitInvite = async () => {
-    const emails = inviteEmails.split(/[,\n]/).map(e => e.trim()).filter(Boolean);
-    if (emails.length === 0) { alert('Please enter at least one email'); return; }
-    setFormLoading(true);
-    try {
-      const res = await groupAPI.invite(id, { emails });
-      const invitations = res.data.data?.invitations || [];
-      setShowInviteModal(false);
-      const links = invitations.map(inv => inv.inviteLink).join('\n');
-      alert(`${emails.length} invitation(s) created!\n\nInvite links:\n${links}`);
-    } catch (err) {
-      alert('Failed to send invitations: ' + (err.response?.data?.message || err.message));
-    } finally {
-      setFormLoading(false);
+    if (inviteTab === 'email') {
+      const emails = inviteEmails.split(/[,\n]/).map(e => e.trim()).filter(Boolean);
+      if (emails.length === 0) { alert('Please enter at least one email'); return; }
+      setFormLoading(true);
+      try {
+        const res = await groupAPI.invite(id, { emails });
+        const invitations = res.data.data?.invitations || [];
+        if (invitations.length > 0) {
+          const link = invitations[0].inviteLink;
+          setInviteLink(link);
+          setQrCodeUrl(generateQRCode(link));
+          setInviteGenerated(true);
+        }
+      } catch (err) {
+        alert('Failed to send invitations: ' + (err.response?.data?.message || err.message));
+      } finally {
+        setFormLoading(false);
+      }
+    } else {
+      // For WhatsApp and QR, generate a generic invite link
+      setFormLoading(true);
+      try {
+        const res = await groupAPI.invite(id, { emails: ['invite@webale.app'] });
+        const invitations = res.data.data?.invitations || [];
+        if (invitations.length > 0) {
+          const link = invitations[0].inviteLink;
+          setInviteLink(link);
+          setQrCodeUrl(generateQRCode(link));
+          setInviteGenerated(true);
+        }
+      } catch (err) {
+        alert('Failed to generate invite link: ' + (err.response?.data?.message || err.message));
+      } finally {
+        setFormLoading(false);
+      }
     }
   };
 
@@ -401,7 +440,7 @@ function GroupDetails() {
     setFormLoading(true);
     try {
       await subGoalsAPI.create(id, {
-        title: subGoalForm.name,
+        name: subGoalForm.name,
         targetAmount: parseFloat(subGoalForm.targetAmount),
         description: subGoalForm.description
       });
@@ -1154,16 +1193,196 @@ ${pledges.map(p => `  ${p.is_anonymous ? 'Anonymous' : `${p.first_name} ${p.last
         </button>
       </Modal>
 
-      {/* Invite Modal */}
-      <Modal isOpen={showInviteModal} onClose={() => setShowInviteModal(false)} title="Invite Members">
-        <FormField label="Email Addresses (one per line or comma-separated)" required>
-          <textarea style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }}
-            placeholder="john@example.com&#10;jane@example.com"
-            value={inviteEmails} onChange={e => setInviteEmails(e.target.value)} />
-        </FormField>
-        <button onClick={submitInvite} disabled={formLoading} style={{ ...btnPrimary, opacity: formLoading ? 0.7 : 1 }}>
-          {formLoading ? 'Sending...' : '📧 Send Invitations'}
-        </button>
+      {/* Enhanced Invite Modal */}
+      <Modal isOpen={showInviteModal} onClose={() => setShowInviteModal(false)} title="👥 Invite Members" width="520px">
+        
+        {/* Invite Method Tabs */}
+        <div style={{ display: 'flex', gap: '0', marginBottom: '20px', borderRadius: '10px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+          {[
+            { id: 'email', icon: '📧', label: 'Email' },
+            { id: 'whatsapp', icon: '💬', label: 'WhatsApp' },
+            { id: 'qrcode', icon: '📱', label: 'QR Code' }
+          ].map(tab => (
+            <button key={tab.id} onClick={() => { setInviteTab(tab.id); setInviteGenerated(false); }} style={{
+              flex: 1, padding: '12px 8px', border: 'none', cursor: 'pointer',
+              background: inviteTab === tab.id ? '#667eea' : 'white',
+              color: inviteTab === tab.id ? 'white' : '#4a5568',
+              fontWeight: '600', fontSize: '13px', display: 'flex',
+              alignItems: 'center', justifyContent: 'center', gap: '6px',
+              transition: 'all 0.2s'
+            }}>
+              <span style={{ fontSize: '16px' }}>{tab.icon}</span> {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Personalized Message Preview */}
+        <div style={{
+          padding: '14px', background: 'linear-gradient(135deg, #ebf8ff 0%, #faf5ff 100%)',
+          borderRadius: '10px', marginBottom: '16px', border: '1px solid #e2e8f0'
+        }}>
+          <p style={{ margin: '0 0 6px', fontSize: '11px', fontWeight: '700', color: '#667eea', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            📨 Invite Message Preview
+          </p>
+          <textarea
+            value={inviteMessage}
+            onChange={e => setInviteMessage(e.target.value)}
+            style={{
+              width: '100%', border: 'none', background: 'transparent', fontSize: '13px',
+              color: '#2d3748', lineHeight: '1.5', resize: 'vertical', minHeight: '60px',
+              outline: 'none', boxSizing: 'border-box', fontStyle: 'italic'
+            }}
+          />
+        </div>
+
+        {/* EMAIL TAB */}
+        {inviteTab === 'email' && !inviteGenerated && (
+          <div>
+            <FormField label="Email Addresses (one per line or comma-separated)" required>
+              <textarea style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }}
+                placeholder={"john@example.com\njane@example.com"}
+                value={inviteEmails} onChange={e => setInviteEmails(e.target.value)} />
+            </FormField>
+            <button onClick={submitInvite} disabled={formLoading} style={{ ...btnPrimary, opacity: formLoading ? 0.7 : 1 }}>
+              {formLoading ? 'Sending...' : '📧 Send Email Invitations'}
+            </button>
+          </div>
+        )}
+
+        {/* EMAIL - After Success */}
+        {inviteTab === 'email' && inviteGenerated && (
+          <div>
+            <div style={{
+              padding: '14px', background: '#f0fff4', borderRadius: '10px',
+              border: '1px solid #c6f6d5', marginBottom: '14px'
+            }}>
+              <p style={{ margin: '0 0 8px', fontSize: '13px', fontWeight: '600', color: '#276749' }}>✅ Invitation(s) sent successfully!</p>
+              <p style={{ margin: 0, fontSize: '11px', color: '#4a5568', wordBreak: 'break-all' }}>
+                <strong>Link:</strong> {inviteLink}
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => {
+                const whatsappMsg = encodeURIComponent(inviteMessage + '\n\n' + inviteLink);
+                window.open('https://wa.me/?text=' + whatsappMsg, '_blank');
+              }} style={{ ...btnPrimary, background: '#25D366', flex: 1, fontSize: '12px', padding: '10px' }}>
+                💬 Also Share via WhatsApp
+              </button>
+              <button onClick={() => { setInviteTab('qrcode'); }} style={{ ...btnPrimary, background: '#2d3748', flex: 1, fontSize: '12px', padding: '10px' }}>
+                📱 Show QR Code
+              </button>
+            </div>
+            <button onClick={() => {
+              navigator.clipboard.writeText(inviteMessage + '\n\n' + inviteLink);
+              alert('Message + link copied to clipboard!');
+            }} style={{ ...btnPrimary, background: '#9f7aea', marginTop: '8px' }}>
+              📋 Copy Full Message + Link
+            </button>
+          </div>
+        )}
+
+        {/* WHATSAPP TAB */}
+        {inviteTab === 'whatsapp' && !inviteGenerated && (
+          <div>
+            <p style={{ color: '#718096', fontSize: '13px', marginBottom: '16px' }}>
+              Generate an invite link to share via WhatsApp. The personalized message above will be included.
+            </p>
+            <button onClick={submitInvite} disabled={formLoading} style={{ ...btnPrimary, background: '#25D366', opacity: formLoading ? 0.7 : 1 }}>
+              {formLoading ? 'Generating...' : '🔗 Generate Invite Link'}
+            </button>
+          </div>
+        )}
+
+        {inviteTab === 'whatsapp' && inviteGenerated && (
+          <div>
+            <div style={{
+              padding: '12px', background: '#f7fafc', borderRadius: '8px',
+              marginBottom: '12px', wordBreak: 'break-all', fontSize: '12px',
+              color: '#4a5568', border: '1px solid #e2e8f0'
+            }}>
+              <p style={{ margin: '0 0 4px', fontSize: '11px', fontWeight: '600', color: '#718096' }}>Invite Link:</p>
+              {inviteLink}
+            </div>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+              <button onClick={() => {
+                const whatsappMsg = encodeURIComponent(inviteMessage + '\n\n' + inviteLink);
+                window.open('https://wa.me/?text=' + whatsappMsg, '_blank');
+              }} style={{ ...btnPrimary, background: '#25D366', flex: 1 }}>
+                💬 Open WhatsApp
+              </button>
+              <button onClick={() => {
+                navigator.clipboard.writeText(inviteLink);
+                alert('Link copied to clipboard!');
+              }} style={{ ...btnSecondary, flex: 1 }}>
+                📋 Copy Link
+              </button>
+            </div>
+            <button onClick={() => {
+              navigator.clipboard.writeText(inviteMessage + '\n\n' + inviteLink);
+              alert('Message + link copied to clipboard!');
+            }} style={{ ...btnPrimary, background: '#9f7aea', width: '100%' }}>
+              📝 Copy Full Message + Link
+            </button>
+          </div>
+        )}
+
+        {/* QR CODE TAB */}
+        {inviteTab === 'qrcode' && !inviteGenerated && (
+          <div>
+            <p style={{ color: '#718096', fontSize: '13px', marginBottom: '16px' }}>
+              Generate a QR code that people can scan to join the group instantly.
+            </p>
+            <button onClick={submitInvite} disabled={formLoading} style={{ ...btnPrimary, background: '#2d3748', opacity: formLoading ? 0.7 : 1 }}>
+              {formLoading ? 'Generating...' : '📱 Generate QR Code'}
+            </button>
+          </div>
+        )}
+
+        {inviteTab === 'qrcode' && inviteGenerated && (
+          <div style={{ textAlign: 'center' }}>
+            <div style={{
+              padding: '24px', background: 'white', borderRadius: '16px',
+              display: 'inline-block', marginBottom: '16px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.1)', border: '2px solid #e2e8f0'
+            }}>
+              <img src={qrCodeUrl} alt="QR Code" style={{
+                width: '220px', height: '220px', display: 'block'
+              }} />
+              <p style={{ margin: '12px 0 0', fontSize: '13px', color: '#667eea', fontWeight: '700' }}>
+                Scan to join "{group?.name}"
+              </p>
+            </div>
+            <div style={{
+              padding: '10px', background: '#f7fafc', borderRadius: '8px',
+              marginBottom: '12px', wordBreak: 'break-all', fontSize: '11px',
+              color: '#4a5568', border: '1px solid #e2e8f0'
+            }}>
+              {inviteLink}
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => {
+                const link = document.createElement('a');
+                link.href = qrCodeUrl;
+                link.download = (group?.name || 'group') + '-qr-invite.png';
+                link.click();
+              }} style={{ ...btnPrimary, background: '#2d3748', flex: 1 }}>
+                📥 Download QR
+              </button>
+              <button onClick={() => {
+                navigator.clipboard.writeText(inviteLink);
+                alert('Link copied!');
+              }} style={{ ...btnSecondary, flex: 1 }}>
+                📋 Copy Link
+              </button>
+            </div>
+            <button onClick={() => {
+              const whatsappMsg = encodeURIComponent(inviteMessage + '\n\n' + inviteLink);
+              window.open('https://wa.me/?text=' + whatsappMsg, '_blank');
+            }} style={{ ...btnPrimary, background: '#25D366', marginTop: '8px' }}>
+              💬 Also Share via WhatsApp
+            </button>
+          </div>
+        )}
       </Modal>
 
       {/* Recurring Pledge Modal */}
