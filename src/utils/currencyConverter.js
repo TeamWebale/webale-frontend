@@ -1,103 +1,210 @@
-// Currency conversion utility
-const EXCHANGE_RATES = {
-  USD: 1.0,
+// ============================================================
+// ENHANCED CURRENCY CONVERTER UTILITY
+// Features: IP-based detection, exchange rates, auto-conversion
+// Location: frontend/src/utils/currencyConverter.js
+// ============================================================
+
+// Comprehensive currency data
+const CURRENCIES = {
+  USD: { symbol: '$', name: 'US Dollar', flag: '🇺🇸' },
+  UGX: { symbol: 'USh', name: 'Ugandan Shilling', flag: '🇺🇬' },
+  KES: { symbol: 'KSh', name: 'Kenyan Shilling', flag: '🇰🇪' },
+  TZS: { symbol: 'TSh', name: 'Tanzanian Shilling', flag: '🇹🇿' },
+  RWF: { symbol: 'FRw', name: 'Rwandan Franc', flag: '🇷🇼' },
+  NGN: { symbol: '₦', name: 'Nigerian Naira', flag: '🇳🇬' },
+  GHS: { symbol: 'GH₵', name: 'Ghanaian Cedi', flag: '🇬🇭' },
+  ZAR: { symbol: 'R', name: 'South African Rand', flag: '🇿🇦' },
+  EUR: { symbol: '€', name: 'Euro', flag: '🇪🇺' },
+  GBP: { symbol: '£', name: 'British Pound', flag: '🇬🇧' },
+  CAD: { symbol: 'CA$', name: 'Canadian Dollar', flag: '🇨🇦' },
+  AUD: { symbol: 'A$', name: 'Australian Dollar', flag: '🇦🇺' },
+  INR: { symbol: '₹', name: 'Indian Rupee', flag: '🇮🇳' },
+  CNY: { symbol: '¥', name: 'Chinese Yuan', flag: '🇨🇳' },
+  JPY: { symbol: '¥', name: 'Japanese Yen', flag: '🇯🇵' },
+  BRL: { symbol: 'R$', name: 'Brazilian Real', flag: '🇧🇷' },
+  ETB: { symbol: 'Br', name: 'Ethiopian Birr', flag: '🇪🇹' },
+  CDF: { symbol: 'FC', name: 'Congolese Franc', flag: '🇨🇩' },
+  SSP: { symbol: 'SSP', name: 'South Sudanese Pound', flag: '🇸🇸' },
+  BIF: { symbol: 'FBu', name: 'Burundian Franc', flag: '🇧🇮' },
+};
+
+// Country to currency mapping
+const COUNTRY_CURRENCY_MAP = {
+  US: 'USD', UG: 'UGX', KE: 'KES', TZ: 'TZS', RW: 'RWF',
+  NG: 'NGN', GH: 'GHS', ZA: 'ZAR', GB: 'GBP', DE: 'EUR',
+  FR: 'EUR', IT: 'EUR', ES: 'EUR', NL: 'EUR', BE: 'EUR',
+  AT: 'EUR', IE: 'EUR', PT: 'EUR', FI: 'EUR', GR: 'EUR',
+  CA: 'CAD', AU: 'AUD', IN: 'INR', CN: 'CNY', JP: 'JPY',
+  BR: 'BRL', ET: 'ETB', CD: 'CDF', SS: 'SSP', BI: 'BIF',
+};
+
+// Approximate exchange rates to USD (updated periodically)
+// In production, these would come from an API like exchangerate-api.com
+const EXCHANGE_RATES_TO_USD = {
+  USD: 1,
+  UGX: 3750,
+  KES: 155,
+  TZS: 2650,
+  RWF: 1350,
+  NGN: 1600,
+  GHS: 15.5,
+  ZAR: 18.5,
   EUR: 0.92,
   GBP: 0.79,
-  JPY: 149.50,
-  AUD: 1.52,
-  CAD: 1.35,
-  CHF: 0.88,
-  CNY: 7.24,
-  INR: 83.12,
-  MXN: 17.15,
-  BRL: 4.97,
-  ZAR: 18.65,
-  KRW: 1320.45,
-  SGD: 1.34,
-  NZD: 1.63,
-  HKD: 7.81,
-  SEK: 10.52,
-  NOK: 10.68,
-  DKK: 6.87,
-  PLN: 3.98,
-  THB: 34.85,
-  MYR: 4.47,
-  PHP: 56.32,
-  IDR: 15685.50,
-  TRY: 32.15,
-  RUB: 91.25,
-  AED: 3.67,
-  SAR: 3.75,
-  EGP: 48.75,
-  NGN: 1456.50,
-  KES: 129.35,
-  GHS: 15.82,
-  UGX: 3705.25,
+  CAD: 1.36,
+  AUD: 1.55,
+  INR: 83.5,
+  CNY: 7.25,
+  JPY: 150,
+  BRL: 5.0,
+  ETB: 57,
+  CDF: 2800,
+  SSP: 1300,
+  BIF: 2900,
 };
 
-export const CURRENCIES = [
-  { code: 'USD', symbol: '$', name: 'US Dollar' },
-  { code: 'EUR', symbol: '€', name: 'Euro' },
-  { code: 'GBP', symbol: '£', name: 'British Pound' },
-  { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
-  { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
-  { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
-  { code: 'CHF', symbol: 'CHF', name: 'Swiss Franc' },
-  { code: 'CNY', symbol: '¥', name: 'Chinese Yuan' },
-  { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
-  { code: 'MXN', symbol: 'MX$', name: 'Mexican Peso' },
-  { code: 'BRL', symbol: 'R$', name: 'Brazilian Real' },
-  { code: 'ZAR', symbol: 'R', name: 'South African Rand' },
-  { code: 'KRW', symbol: '₩', name: 'South Korean Won' },
-  { code: 'SGD', symbol: 'S$', name: 'Singapore Dollar' },
-  { code: 'NZD', symbol: 'NZ$', name: 'New Zealand Dollar' },
-  { code: 'HKD', symbol: 'HK$', name: 'Hong Kong Dollar' },
-  { code: 'SEK', symbol: 'kr', name: 'Swedish Krona' },
-  { code: 'NOK', symbol: 'kr', name: 'Norwegian Krone' },
-  { code: 'DKK', symbol: 'kr', name: 'Danish Krone' },
-  { code: 'PLN', symbol: 'zł', name: 'Polish Zloty' },
-  { code: 'THB', symbol: '฿', name: 'Thai Baht' },
-  { code: 'MYR', symbol: 'RM', name: 'Malaysian Ringgit' },
-  { code: 'PHP', symbol: '₱', name: 'Philippine Peso' },
-  { code: 'IDR', symbol: 'Rp', name: 'Indonesian Rupiah' },
-  { code: 'TRY', symbol: '₺', name: 'Turkish Lira' },
-  { code: 'RUB', symbol: '₽', name: 'Russian Ruble' },
-  { code: 'AED', symbol: 'د.إ', name: 'UAE Dirham' },
-  { code: 'SAR', symbol: 'ر.س', name: 'Saudi Riyal' },
-  { code: 'EGP', symbol: 'E£', name: 'Egyptian Pound' },
-  { code: 'NGN', symbol: '₦', name: 'Nigerian Naira' },
-  { code: 'KES', symbol: 'KSh', name: 'Kenyan Shilling' },
-  { code: 'GHS', symbol: '₵', name: 'Ghanaian Cedi' },
-  { code: 'UGX', symbol: 'USh', name: 'Ugandan Shilling' },
-];
+/**
+ * Get currency symbol for a given currency code
+ */
+export const getCurrencySymbol = (code) => {
+  return CURRENCIES[code]?.symbol || code;
+};
 
+/**
+ * Get full currency info
+ */
+export const getCurrencyInfo = (code) => {
+  return CURRENCIES[code] || { symbol: code, name: code, flag: '🌍' };
+};
+
+/**
+ * Get all supported currencies as array
+ */
+export const getAllCurrencies = () => {
+  return Object.entries(CURRENCIES).map(([code, info]) => ({
+    code,
+    ...info,
+    label: `${info.flag} ${code} - ${info.name} (${info.symbol})`
+  }));
+};
+
+/**
+ * Convert amount between currencies
+ * @param {number} amount - Amount to convert
+ * @param {string} fromCurrency - Source currency code
+ * @param {string} toCurrency - Target currency code
+ * @returns {{ converted: number, rate: number, display: string }}
+ */
 export const convertCurrency = (amount, fromCurrency, toCurrency) => {
-  if (fromCurrency === toCurrency) return amount;
-  
-  const fromRate = EXCHANGE_RATES[fromCurrency] || 1;
-  const toRate = EXCHANGE_RATES[toCurrency] || 1;
-  
-  // Convert to USD first, then to target currency
-  const usdAmount = amount / fromRate;
-  const convertedAmount = usdAmount * toRate;
-  
-  return convertedAmount;
+  if (!amount || fromCurrency === toCurrency) {
+    return { converted: amount, rate: 1, display: '' };
+  }
+
+  const fromRate = EXCHANGE_RATES_TO_USD[fromCurrency] || 1;
+  const toRate = EXCHANGE_RATES_TO_USD[toCurrency] || 1;
+
+  // Convert: from -> USD -> to
+  const amountInUSD = amount / fromRate;
+  const converted = amountInUSD * toRate;
+  const rate = toRate / fromRate;
+
+  const toSymbol = getCurrencySymbol(toCurrency);
+  const display = `≈ ${toSymbol}${converted.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })}`;
+
+  return { converted, rate, display };
 };
 
-export const formatCurrency = (amount, currencyCode) => {
-  const currency = CURRENCIES.find(c => c.code === currencyCode);
-  const symbol = currency?.symbol || '$';
-  
-  return `${symbol}${parseFloat(amount).toFixed(2)}`;
+/**
+ * Detect user's country and default currency from IP
+ * Uses free ipapi.co service (no API key needed, 1000 req/day)
+ * Caches result in localStorage
+ */
+export const detectUserCurrency = async () => {
+  // Check cache first
+  const cached = localStorage.getItem('webale_detected_currency');
+  if (cached) {
+    try {
+      const parsed = JSON.parse(cached);
+      // Cache for 24 hours
+      if (parsed.timestamp && Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
+        return parsed;
+      }
+    } catch (e) { /* ignore parse errors */ }
+  }
+
+  try {
+    const response = await fetch('https://ipapi.co/json/', { 
+      signal: AbortSignal.timeout(5000) // 5 second timeout
+    });
+    const data = await response.json();
+
+    const countryCode = data.country_code || data.country || 'US';
+    const currencyCode = COUNTRY_CURRENCY_MAP[countryCode] || 'USD';
+    const result = {
+      country: countryCode,
+      countryName: data.country_name || countryCode,
+      currency: currencyCode,
+      currencyInfo: getCurrencyInfo(currencyCode),
+      city: data.city || '',
+      timestamp: Date.now()
+    };
+
+    // Cache result
+    localStorage.setItem('webale_detected_currency', JSON.stringify(result));
+    return result;
+  } catch (err) {
+    console.log('Currency detection fallback to USD:', err.message);
+    // Fallback: check user profile for country
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (user.country) {
+        const code = user.country.toUpperCase().substring(0, 2);
+        const currencyCode = COUNTRY_CURRENCY_MAP[code] || 'USD';
+        return {
+          country: code,
+          countryName: user.country,
+          currency: currencyCode,
+          currencyInfo: getCurrencyInfo(currencyCode),
+          city: '',
+          timestamp: Date.now()
+        };
+      }
+    } catch (e) { /* ignore */ }
+
+    return {
+      country: 'US',
+      countryName: 'United States',
+      currency: 'USD',
+      currencyInfo: getCurrencyInfo('USD'),
+      city: '',
+      timestamp: Date.now()
+    };
+  }
 };
 
-export const getCurrencySymbol = (currencyCode) => {
-  const currency = CURRENCIES.find(c => c.code === currencyCode);
-  return currency?.symbol || '$';
+/**
+ * Format amount with currency
+ */
+export const formatCurrencyAmount = (amount, currencyCode) => {
+  const symbol = getCurrencySymbol(currencyCode);
+  const formatted = parseFloat(amount || 0).toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+  return `${symbol}${formatted}`;
 };
 
-export const detectUserCurrency = () => {
-  // In production, this would use IP geolocation API
-  // For now, return USD as default
-  return 'USD';
+export default {
+  getCurrencySymbol,
+  getCurrencyInfo,
+  getAllCurrencies,
+  convertCurrency,
+  detectUserCurrency,
+  formatCurrencyAmount,
+  CURRENCIES,
+  EXCHANGE_RATES_TO_USD,
+  COUNTRY_CURRENCY_MAP
 };

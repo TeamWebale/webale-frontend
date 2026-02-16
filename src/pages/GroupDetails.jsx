@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { groupAPI, pledgeAPI, activityAPI, recurringPledgeAPI, auditAPI, subGoalsAPI, messagesAPI } from '../services/api';
-import { getCurrencySymbol } from '../utils/currencyConverter';
+import { getCurrencySymbol, getAllCurrencies, convertCurrency, detectUserCurrency } from '../utils/currencyConverter';
 import { formatTimeAgo } from '../utils/timeFormatter';
 import MainLayout from '../components/MainLayout';
 import PaymentButton from '../components/PaymentButton';
@@ -74,6 +74,8 @@ function GroupDetails() {
   const [activities, setActivities] = useState([]);
   const [recurringPledges, setRecurringPledges] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
+  const [detectedCurrency, setDetectedCurrency] = useState('USD');
+  const [allCurrencies, setAllCurrencies] = useState(getAllCurrencies());
 
   // UI states
   const [activeTab, setActiveTab] = useState('overview');
@@ -120,6 +122,13 @@ function GroupDetails() {
   useEffect(() => {
     loadGroupData();
   }, [id]);
+
+  // Detect user's local currency on mount
+  useEffect(() => {
+    detectUserCurrency().then(result => {
+      setDetectedCurrency(result.currency);
+    });
+  }, []);
 
   useEffect(() => {
     if (group) {
@@ -216,7 +225,7 @@ function GroupDetails() {
 
   // ==================== ACTION HANDLERS ====================
   const handleMakePledge = async () => {
-    setPledgeForm({ amount: '', fulfillmentDate: '', reminderFrequency: 'none', isAnonymous: false, currency: group?.currency || 'USD' });
+    setPledgeForm({ amount: '', fulfillmentDate: '', reminderFrequency: 'none', isAnonymous: false, currency: detectedCurrency || group?.currency || 'USD' });
     setShowPledgeModal(true);
   };
 
@@ -1333,13 +1342,28 @@ function GroupDetails() {
         <FormField label="Currency">
           <select style={selectStyle}
             value={pledgeForm.currency} onChange={e => setPledgeForm({ ...pledgeForm, currency: e.target.value })}>
-            <option value="USD">USD ($)</option>
-            <option value="UGX">UGX (USh)</option>
-            <option value="KES">KES (KSh)</option>
-            <option value="EUR">EUR (€)</option>
-            <option value="GBP">GBP (£)</option>
+            {allCurrencies.map(c => (
+              <option key={c.code} value={c.code}>{c.flag} {c.code} - {c.name} ({c.symbol})</option>
+            ))}
           </select>
         </FormField>
+        {/* Auto-conversion display when pledge currency differs from group currency */}
+        {pledgeForm.currency && pledgeForm.currency !== (group?.currency || 'USD') && pledgeForm.amount && parseFloat(pledgeForm.amount) > 0 && (
+          <div style={{
+            padding: '12px', background: 'linear-gradient(135deg, #ebf8ff 0%, #e9d8fd 100%)',
+            borderRadius: '10px', marginBottom: '16px', border: '1px solid #bee3f8'
+          }}>
+            <p style={{ margin: '0 0 4px', fontSize: '11px', fontWeight: '700', color: '#667eea', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Estimated Equivalent
+            </p>
+            <p style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#2d3748' }}>
+              {convertCurrency(parseFloat(pledgeForm.amount), pledgeForm.currency, group?.currency || 'USD').display}
+            </p>
+            <p style={{ margin: '4px 0 0', fontSize: '10px', color: '#718096' }}>
+              in group currency ({group?.currency || 'USD'}) &bull; Rates are approximate
+            </p>
+          </div>
+        )}
         <FormField label="">
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px' }}>
             <input type="checkbox" checked={pledgeForm.isAnonymous}
@@ -1416,11 +1440,9 @@ function GroupDetails() {
         <FormField label="Currency">
           <select style={selectStyle} value={editForm.currency}
             onChange={e => setEditForm({ ...editForm, currency: e.target.value })}>
-            <option value="USD">USD</option>
-            <option value="UGX">UGX</option>
-            <option value="KES">KES</option>
-            <option value="EUR">EUR</option>
-            <option value="GBP">GBP</option>
+            {allCurrencies.map(c => (
+              <option key={c.code} value={c.code}>{c.flag} {c.code} - {c.name}</option>
+            ))}
           </select>
         </FormField>
         <button onClick={submitEditGroup} disabled={formLoading} style={{ ...btnPrimary, opacity: formLoading ? 0.7 : 1 }}>
