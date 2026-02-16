@@ -90,6 +90,7 @@ function GroupDetails() {
   const [showRevisePledgeModal, setShowRevisePledgeModal] = useState(false);
   const [selectedPledge, setSelectedPledge] = useState(null);
   const [showPartPaymentModal, setShowPartPaymentModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   // Form states
   const [pledgeForm, setPledgeForm] = useState({
@@ -481,11 +482,15 @@ function GroupDetails() {
     }
   };
 
-  const handleExportData = async () => {
+  const handleExportData = () => {
+    setShowExportModal(true);
+  };
+
+  const exportAsCSV = () => {
     try {
-      const csvRows = ['Name,Email,Amount,Status,Date'];
+      const csvRows = ['Name,Email,Amount,Paid,Status,Date'];
       pledges.forEach(p => {
-        csvRows.push(`"${p.first_name || ''} ${p.last_name || ''}","${p.email || ''}",${p.amount},${p.status},"${new Date(p.created_at).toLocaleDateString()}"`);
+        csvRows.push(`"${p.first_name || ''} ${p.last_name || ''}","${p.email || ''}",${p.amount},${p.amount_paid || 0},${p.status},"${new Date(p.created_at).toLocaleDateString()}"`);
       });
       const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
@@ -494,34 +499,201 @@ function GroupDetails() {
       a.download = `${group.name || 'group'}-pledges.csv`;
       a.click();
       URL.revokeObjectURL(url);
+      setShowExportModal(false);
     } catch (err) {
-      alert('Failed to export data');
+      alert('Failed to export CSV');
+    }
+  };
+
+  const exportAsPDF = async () => {
+    try {
+      // Dynamically load jsPDF from CDN
+      if (!window.jspdf) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+        // Also load autotable plugin for tables
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js';
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      let y = 20;
+
+      // Title bar
+      doc.setFillColor(102, 126, 234);
+      doc.rect(0, 0, pageWidth, 40, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(22);
+      doc.setFont('helvetica', 'bold');
+      doc.text('WEBALE', 14, 18);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Private Group Fundraising', 14, 26);
+      doc.setFontSize(11);
+      doc.text(`Report: ${group.name || 'Group'}`, 14, 35);
+      doc.setFontSize(9);
+      doc.text(`Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`, pageWidth - 14, 35, { align: 'right' });
+
+      y = 52;
+
+      // Summary section
+      doc.setTextColor(45, 55, 72);
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Fundraising Summary', 14, y);
+      y += 10;
+
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      const summaryData = [
+        ['Group Name', group.name || 'N/A'],
+        ['Goal Amount', `${currencySymbol}${formatAmount(group.goal_amount)}`],
+        ['Total Pledged', `${currencySymbol}${formatAmount(group.pledged_amount)} (${pledgedPercent}%)`],
+        ['Total Received', `${currencySymbol}${formatAmount(group.current_amount)} (${receivedPercent}%)`],
+        ['Outstanding', `${currencySymbol}${formatAmount((group.pledged_amount || 0) - (group.current_amount || 0))}`],
+        ['Members', `${members.length}`],
+        ['Total Pledges', `${pledges.length}`],
+        ['Currency', group.currency || 'USD'],
+        ['Deadline', group.deadline ? new Date(group.deadline).toLocaleDateString() : 'No deadline'],
+        ['Status', group.status || 'Active'],
+      ];
+
+      doc.autoTable({
+        startY: y,
+        head: [],
+        body: summaryData,
+        theme: 'plain',
+        styles: { fontSize: 10, cellPadding: 4 },
+        columnStyles: {
+          0: { fontStyle: 'bold', cellWidth: 50, textColor: [100, 100, 100] },
+          1: { textColor: [45, 55, 72] }
+        },
+        margin: { left: 14, right: 14 },
+      });
+
+      y = doc.lastAutoTable.finalY + 14;
+
+      // Progress bars (visual)
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Progress', 14, y);
+      y += 8;
+
+      // Pledged bar
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Pledged: ${pledgedPercent}%`, 14, y);
+      y += 4;
+      doc.setFillColor(226, 232, 240);
+      doc.roundedRect(14, y, pageWidth - 28, 6, 3, 3, 'F');
+      doc.setFillColor(72, 187, 120);
+      const pledgedWidth = Math.min(parseFloat(pledgedPercent) / 100, 1) * (pageWidth - 28);
+      if (pledgedWidth > 0) doc.roundedRect(14, y, pledgedWidth, 6, 3, 3, 'F');
+      y += 12;
+
+      // Received bar
+      doc.text(`Received: ${receivedPercent}%`, 14, y);
+      y += 4;
+      doc.setFillColor(226, 232, 240);
+      doc.roundedRect(14, y, pageWidth - 28, 6, 3, 3, 'F');
+      doc.setFillColor(102, 126, 234);
+      const receivedWidth = Math.min(parseFloat(receivedPercent) / 100, 1) * (pageWidth - 28);
+      if (receivedWidth > 0) doc.roundedRect(14, y, receivedWidth, 6, 3, 3, 'F');
+      y += 16;
+
+      // Pledges Table
+      if (pledges.length > 0) {
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Pledge Details', 14, y);
+        y += 4;
+
+        const tableData = pledges.map(p => [
+          p.is_anonymous ? 'John Doe' : `${p.first_name || ''} ${p.last_name || ''}`,
+          p.email || '-',
+          `${currencySymbol}${formatAmount(p.amount)}`,
+          `${currencySymbol}${formatAmount(p.amount_paid || 0)}`,
+          p.status?.toUpperCase() || 'PLEDGED',
+          new Date(p.created_at).toLocaleDateString()
+        ]);
+
+        doc.autoTable({
+          startY: y,
+          head: [['Name', 'Email', 'Pledged', 'Paid', 'Status', 'Date']],
+          body: tableData,
+          theme: 'grid',
+          headStyles: { fillColor: [102, 126, 234], textColor: 255, fontStyle: 'bold', fontSize: 9 },
+          styles: { fontSize: 9, cellPadding: 4 },
+          alternateRowStyles: { fillColor: [247, 250, 252] },
+          columnStyles: {
+            2: { halign: 'right' },
+            3: { halign: 'right' },
+            4: { halign: 'center' },
+          },
+          margin: { left: 14, right: 14 },
+        });
+
+        y = doc.lastAutoTable.finalY + 12;
+      }
+
+      // Members section
+      if (members.length > 0) {
+        if (y > 240) { doc.addPage(); y = 20; }
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Members', 14, y);
+        y += 4;
+
+        const memberData = members.map(m => [
+          `${m.first_name || ''} ${m.last_name || ''}`,
+          m.email || '-',
+          m.role || 'member',
+          m.joined_at ? new Date(m.joined_at).toLocaleDateString() : '-'
+        ]);
+
+        doc.autoTable({
+          startY: y,
+          head: [['Name', 'Email', 'Role', 'Joined']],
+          body: memberData,
+          theme: 'grid',
+          headStyles: { fillColor: [159, 122, 234], textColor: 255, fontStyle: 'bold', fontSize: 9 },
+          styles: { fontSize: 9, cellPadding: 4 },
+          alternateRowStyles: { fillColor: [250, 245, 255] },
+          margin: { left: 14, right: 14 },
+        });
+      }
+
+      // Footer
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(160, 174, 192);
+        doc.text(`Webale Fundraising Report - ${group.name} | Page ${i} of ${pageCount}`, pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
+      }
+
+      doc.save(`${group.name || 'group'}-report.pdf`);
+      setShowExportModal(false);
+    } catch (err) {
+      console.error('PDF export error:', err);
+      alert('Failed to export PDF. Please try again.');
     }
   };
 
   const handleGenerateReport = () => {
-    const report = `
-FUNDRAISING REPORT - ${group.name}
-Generated: ${new Date().toLocaleDateString()}
-${'='.repeat(40)}
-
-Goal: ${currencySymbol}${formatAmount(group.goal_amount)}
-Pledged: ${currencySymbol}${formatAmount(group.pledged_amount)} (${pledgedPercent}%)
-Received: ${currencySymbol}${formatAmount(group.current_amount)} (${receivedPercent}%)
-Members: ${members.length}
-Deadline: ${group.deadline ? new Date(group.deadline).toLocaleDateString() : 'None'}
-
-PLEDGES:
-${pledges.map(p => `  ${p.is_anonymous ? 'Anonymous' : `${p.first_name} ${p.last_name}`}: ${currencySymbol}${formatAmount(p.amount)} [${p.status}]`).join('\n')}
-    `.trim();
-
-    const blob = new Blob([report], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${group.name || 'group'}-report.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+    setShowExportModal(true);
   };
 
   const handleRemoveMember = async (userId) => {
@@ -1437,6 +1609,62 @@ ${pledges.map(p => `  ${p.is_anonymous ? 'Anonymous' : `${p.first_name} ${p.last
         <button onClick={() => { setShowPaymentModal(false); setActiveTab('pledges'); }} style={btnPrimary}>
           Go to Pledges Tab
         </button>
+      </Modal>
+
+      {/* Export Data / Generate Report Modal */}
+      <Modal isOpen={showExportModal} onClose={() => setShowExportModal(false)} title="📊 Export Data & Reports" width="460px">
+        <p style={{ color: '#718096', fontSize: '13px', marginBottom: '20px' }}>
+          Choose your preferred export format for <strong>{group?.name}</strong> data.
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {/* PDF Option */}
+          <button onClick={exportAsPDF} style={{
+            display: 'flex', alignItems: 'center', gap: '14px', padding: '16px',
+            background: 'linear-gradient(135deg, #e53e3e 0%, #c53030 100%)', color: 'white',
+            border: 'none', borderRadius: '12px', cursor: 'pointer', textAlign: 'left'
+          }}>
+            <div style={{
+              width: '44px', height: '44px', background: 'rgba(255,255,255,0.2)',
+              borderRadius: '10px', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', fontSize: '22px', flexShrink: 0
+            }}>📄</div>
+            <div>
+              <p style={{ margin: 0, fontWeight: '700', fontSize: '15px' }}>Export as PDF</p>
+              <p style={{ margin: '3px 0 0', fontSize: '11px', opacity: 0.85 }}>
+                Professional report with summary, progress bars, pledge table & member list
+              </p>
+            </div>
+          </button>
+
+          {/* CSV Option */}
+          <button onClick={exportAsCSV} style={{
+            display: 'flex', alignItems: 'center', gap: '14px', padding: '16px',
+            background: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)', color: 'white',
+            border: 'none', borderRadius: '12px', cursor: 'pointer', textAlign: 'left'
+          }}>
+            <div style={{
+              width: '44px', height: '44px', background: 'rgba(255,255,255,0.2)',
+              borderRadius: '10px', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', fontSize: '22px', flexShrink: 0
+            }}>📊</div>
+            <div>
+              <p style={{ margin: 0, fontWeight: '700', fontSize: '15px' }}>Export as CSV</p>
+              <p style={{ margin: '3px 0 0', fontSize: '11px', opacity: 0.85 }}>
+                Spreadsheet-ready data file — open in Excel, Google Sheets, etc.
+              </p>
+            </div>
+          </button>
+        </div>
+
+        <div style={{
+          marginTop: '16px', padding: '12px', background: '#f7fafc',
+          borderRadius: '8px', border: '1px solid #e2e8f0'
+        }}>
+          <p style={{ margin: 0, fontSize: '11px', color: '#718096' }}>
+            📌 <strong>Tip:</strong> PDF includes a formatted report with visuals. CSV is best for data analysis and filtering.
+          </p>
+        </div>
       </Modal>
 
       {/* Delete Confirmation Modal */}
