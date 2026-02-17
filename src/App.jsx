@@ -19,6 +19,7 @@ import GroupDetails from './pages/GroupDetails';
 import CreateGroup from './pages/CreateGroup';
 import JoinGroup from './pages/JoinGroup';
 import AcceptInvite from './pages/AcceptInvite';
+import ForgotPassword from './pages/ForgotPassword';
 
 // Auth Context
 const AuthContext = createContext(null);
@@ -132,6 +133,7 @@ function AppContent() {
           <Route path="/" element={<PublicRoute><Home /></PublicRoute>} />
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           
           {/* Invite/Join - accessible to all (no auth required) */}
           <Route path="/invite/:token" element={<AcceptInvite />} />
