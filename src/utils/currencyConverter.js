@@ -5,7 +5,7 @@
 // ============================================================
 
 // Comprehensive currency data
-const CURRENCIES = {
+const CURRENCY_DATA = {
   USD: { symbol: '$', name: 'US Dollar', flag: '🇺🇸' },
   UGX: { symbol: 'USh', name: 'Ugandan Shilling', flag: '🇺🇬' },
   KES: { symbol: 'KSh', name: 'Kenyan Shilling', flag: '🇰🇪' },
@@ -27,6 +27,15 @@ const CURRENCIES = {
   SSP: { symbol: 'SSP', name: 'South Sudanese Pound', flag: '🇸🇸' },
   BIF: { symbol: 'FBu', name: 'Burundian Franc', flag: '🇧🇮' },
 };
+
+// Array format for dropdowns (used by CreateGroup.jsx and others)
+export const CURRENCIES = Object.entries(CURRENCY_DATA).map(([code, info]) => ({
+  code,
+  symbol: info.symbol,
+  name: info.name,
+  flag: info.flag,
+  label: `${info.flag} ${code} - ${info.name} (${info.symbol})`
+}));
 
 // Country to currency mapping
 const COUNTRY_CURRENCY_MAP = {
@@ -67,25 +76,21 @@ const EXCHANGE_RATES_TO_USD = {
  * Get currency symbol for a given currency code
  */
 export const getCurrencySymbol = (code) => {
-  return CURRENCIES[code]?.symbol || code;
+  return CURRENCY_DATA[code]?.symbol || code;
 };
 
 /**
  * Get full currency info
  */
 export const getCurrencyInfo = (code) => {
-  return CURRENCIES[code] || { symbol: code, name: code, flag: '🌍' };
+  return CURRENCY_DATA[code] || { symbol: code, name: code, flag: '🌍' };
 };
 
 /**
  * Get all supported currencies as array
  */
 export const getAllCurrencies = () => {
-  return Object.entries(CURRENCIES).map(([code, info]) => ({
-    code,
-    ...info,
-    label: `${info.flag} ${code} - ${info.name} (${info.symbol})`
-  }));
+  return CURRENCIES;
 };
 
 /**

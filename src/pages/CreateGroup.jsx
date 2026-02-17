@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { groupAPI } from '../services/api';
-import { CURRENCIES } from '../utils/currencyConverter';
+import { CURRENCIES, getCurrencySymbol, detectUserCurrency } from '../utils/currencyConverter';
 import GroupTemplates, { GROUP_TEMPLATES } from '../components/GroupTemplates';
 
 function CreateGroup() {
@@ -19,15 +19,22 @@ function CreateGroup() {
     deadline: ''
   });
 
+  // Auto-detect currency on mount
+  useEffect(() => {
+    detectUserCurrency().then(result => {
+      setFormData(prev => ({ ...prev, currency: result.currency }));
+    });
+  }, []);
+
   const handleTemplateSelect = (template) => {
     setSelectedTemplate(template);
-    setFormData({
+    setFormData(prev => ({
       name: template.fields.name || '',
       description: template.fields.description || '',
       goalAmount: template.defaultGoal.toString(),
-      currency: template.currency,
+      currency: prev.currency, // Keep detected currency, don't override with template
       deadline: ''
-    });
+    }));
     setShowTemplates(false);
   };
 
@@ -68,6 +75,9 @@ function CreateGroup() {
       setLoading(false);
     }
   };
+
+  // Get current currency symbol for display
+  const currentSymbol = getCurrencySymbol(formData.currency);
 
   return (
     <div style={{ maxWidth: '600px', margin: '0 auto' }}>
@@ -113,8 +123,7 @@ function CreateGroup() {
                   border: '2px solid #e2e8f0',
                   cursor: 'pointer',
                   textAlign: 'center',
-                  transition: 'all 0.2s ease',
-                  ':hover': { borderColor: template.color }
+                  transition: 'all 0.2s ease'
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.borderColor = template.color}
                 onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e2e8f0'}
@@ -247,7 +256,7 @@ function CreateGroup() {
                 className="input"
               >
                 {CURRENCIES.map(c => (
-                  <option key={c.code} value={c.code}>{c.code}</option>
+                  <option key={c.code} value={c.code}>{c.flag} {c.code} - {c.name}</option>
                 ))}
               </select>
             </div>
@@ -267,7 +276,7 @@ function CreateGroup() {
             />
           </div>
 
-          {/* Suggested Pledge Amounts */}
+          {/* Suggested Pledge Amounts - uses dynamic currency symbol */}
           {selectedTemplate && selectedTemplate.suggestedPledges && (
             <div style={{ marginBottom: '24px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#4a5568' }}>
@@ -287,7 +296,7 @@ function CreateGroup() {
                       border: `1px solid ${selectedTemplate.color}40`
                     }}
                   >
-                    ${amount}
+                    {currentSymbol}{amount.toLocaleString()}
                   </span>
                 ))}
               </div>
