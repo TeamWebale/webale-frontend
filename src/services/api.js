@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://api.webale.net/api';
+const API_URL = 'https://webale-api.onrender.com/api';
 
 const api = axios.create({
   baseURL: API_URL,
