@@ -129,6 +129,12 @@ function PublicRoute({ children }) {
   }
 
   if (isAuthenticated) {
+    // Check for pending invite — redirect to invite page instead of dashboard
+    const pendingInvite = localStorage.getItem('pendingInvite');
+    if (pendingInvite) {
+      localStorage.removeItem('pendingInvite');
+      return <Navigate to={`/invite/${pendingInvite}`} replace />;
+    }
     return <Navigate to="/dashboard" replace />;
   }
 
