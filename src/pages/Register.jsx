@@ -48,24 +48,12 @@ function Register() {
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(normalizedUser));
 
-        // Check for pending invite and auto-accept
+        // Check for pending invite - redirect back to invite page (user chooses to accept)
         const pendingInvite = localStorage.getItem('pendingInvite');
         if (pendingInvite) {
           localStorage.removeItem('pendingInvite');
-          try {
-            const acceptRes = await axios.post(
-              `${API_URL}/invitations/${pendingInvite}/accept`, {},
-              { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
-            );
-            if (acceptRes.data.success) {
-              navigate(`/groups/${acceptRes.data.data.groupId}`, { replace: true });
-              return;
-            }
-          } catch (invErr) {
-            console.log('Auto-accept invite failed, redirecting to invite page:', invErr.message);
-            navigate(`/invite/${pendingInvite}`, { replace: true });
-            return;
-          }
+          navigate(`/invite/${pendingInvite}`, { replace: true });
+          return;
         }
 
         navigate('/dashboard', { replace: true });

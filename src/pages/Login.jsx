@@ -1,10 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
 import { authAPI } from '../services/api';
 import { useAuth } from '../App';
-
-const API_URL = 'https://webale-api.onrender.com/api';
 
 function Login() {
   const navigate = useNavigate();
@@ -34,24 +31,12 @@ function Login() {
         const { token, user } = response.data.data;
         login(token, user);
         
-        // Check for pending invite and auto-accept
+        // Check for pending invite - redirect back to invite page (don't auto-accept)
         const pendingInvite = localStorage.getItem('pendingInvite');
         if (pendingInvite) {
           localStorage.removeItem('pendingInvite');
-          try {
-            const acceptRes = await axios.post(
-              `${API_URL}/invitations/${pendingInvite}/accept`, {},
-              { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
-            );
-            if (acceptRes.data.success) {
-              navigate(`/groups/${acceptRes.data.data.groupId}`, { replace: true });
-              return;
-            }
-          } catch (invErr) {
-            console.log('Auto-accept failed, redirecting to invite page:', invErr.message);
-            navigate(`/invite/${pendingInvite}`, { replace: true });
-            return;
-          }
+          navigate(`/invite/${pendingInvite}`, { replace: true });
+          return;
         }
 
         navigate(from, { replace: true });

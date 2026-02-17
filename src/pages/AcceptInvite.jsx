@@ -198,14 +198,23 @@ function AcceptInvite() {
               <button onClick={handleAcceptInvite} disabled={accepting} className="btn btn-primary"
                 style={{
                   width: '100%', padding: '16px', fontSize: '16px', fontWeight: '700',
-                  marginBottom: '12px', borderRadius: '12px',
+                  marginBottom: '10px', borderRadius: '12px',
                   background: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
                   border: 'none', color: 'white', cursor: accepting ? 'wait' : 'pointer'
                 }}>
                 {accepting ? 'Joining...' : '✓ Accept & Join Group'}
               </button>
+              <button onClick={() => navigate('/dashboard')}
+                style={{
+                  width: '100%', padding: '14px', fontSize: '14px', fontWeight: '600',
+                  marginBottom: '8px', borderRadius: '12px',
+                  background: 'white', border: '2px solid #e2e8f0',
+                  color: '#718096', cursor: 'pointer'
+                }}>
+                ✗ Decline Invitation
+              </button>
               <p style={{ textAlign: 'center', fontSize: '12px', color: '#a0aec0' }}>
-                You're signed in. Click above to join instantly.
+                You're signed in. Choose to accept or decline.
               </p>
             </>
           ) : (
