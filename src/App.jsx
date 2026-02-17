@@ -60,9 +60,25 @@ function AuthProvider({ children }) {
   };
 
   const login = (token, userData) => {
+    // Normalize field names to snake_case (backend may send camelCase or snake_case)
+    const normalizedUser = {
+      id: userData.id,
+      email: userData.email,
+      first_name: userData.first_name || userData.firstName || '',
+      last_name: userData.last_name || userData.lastName || '',
+      country: userData.country || '',
+      phone: userData.phone || '',
+      bio: userData.bio || '',
+      avatar: userData.avatar || userData.avatarUrl || userData.avatar_url || null,
+      avatar_type: userData.avatar_type || userData.avatarType || null,
+      date_of_birth: userData.date_of_birth || userData.dateOfBirth || '',
+      social_links: userData.social_links || userData.socialLinks || '',
+      profile_public: userData.profile_public !== undefined ? userData.profile_public : (userData.profilePublic !== undefined ? userData.profilePublic : true),
+      created_at: userData.created_at || userData.createdAt || ''
+    };
     localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(normalizedUser));
+    setUser(normalizedUser);
     setIsAuthenticated(true);
   };
 
