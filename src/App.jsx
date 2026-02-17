@@ -18,6 +18,7 @@ import Settings from './pages/Settings';
 import GroupDetails from './pages/GroupDetails';
 import CreateGroup from './pages/CreateGroup';
 import JoinGroup from './pages/JoinGroup';
+import AcceptInvite from './pages/AcceptInvite';
 
 // Auth Context
 const AuthContext = createContext(null);
@@ -124,9 +125,6 @@ function AppContent() {
       {/* Navbar - Always visible */}
       <Navbar />
       
-      {/* NOTE: ProfileBanner is now inside MainLayout, NOT here */}
-      {/* This ensures it only appears in the main content column */}
-      
       {/* Main Content Area */}
       <main>
         <Routes>
@@ -135,9 +133,9 @@ function AppContent() {
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
           
-          {/* Join Group - accessible to all */}
-          <Route path="/invite/:token" element={<JoinGroup />} />
-          <Route path="/join/:token" element={<JoinGroup />} />
+          {/* Invite/Join - accessible to all (no auth required) */}
+          <Route path="/invite/:token" element={<AcceptInvite />} />
+          <Route path="/join/:token" element={<AcceptInvite />} />
           
           {/* Protected Routes */}
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

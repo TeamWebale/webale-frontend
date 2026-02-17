@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
+// Use the same API URL as the rest of the app
+const API_URL = import.meta.env.VITE_API_URL || 'https://webale-api.onrender.com/api';
+const BASE_URL = API_URL.replace('/api', '');
+
 function AcceptInvite() {
   const { token } = useParams();
   const navigate = useNavigate();
@@ -21,8 +25,7 @@ function AcceptInvite() {
     setIsLoggedIn(!!userToken);
 
     try {
-      // Validate the invitation token
-      const response = await axios.get(`https://webale-api.onrender.com/api/invitations/${token}/validate`);
+      const response = await axios.get(`${BASE_URL}/api/invitations/${token}/validate`);
       
       if (response.data.success) {
         setInvitation(response.data.data.invitation);
@@ -37,7 +40,6 @@ function AcceptInvite() {
 
   const handleAcceptInvite = async () => {
     if (!isLoggedIn) {
-      // Store token and redirect to login
       localStorage.setItem('pendingInvite', token);
       navigate('/login');
       return;
@@ -46,7 +48,7 @@ function AcceptInvite() {
     setAccepting(true);
     try {
       const response = await axios.post(
-        `https://webale-api.onrender.com/api/invitations/${token}/accept`,
+        `${BASE_URL}/api/invitations/${token}/accept`,
         { visibilityPreference },
         {
           headers: {
@@ -195,22 +197,14 @@ function AcceptInvite() {
           </label>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <label style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '10px', 
-              padding: '12px 16px',
+              display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px',
               background: visibilityPreference === 'visible' ? '#e6fffa' : '#f7fafc',
-              borderRadius: '8px',
-              cursor: 'pointer',
+              borderRadius: '8px', cursor: 'pointer',
               border: visibilityPreference === 'visible' ? '2px solid #38b2ac' : '2px solid transparent'
             }}>
-              <input 
-                type="radio" 
-                name="visibility" 
-                value="visible" 
+              <input type="radio" name="visibility" value="visible" 
                 checked={visibilityPreference === 'visible'}
-                onChange={(e) => setVisibilityPreference(e.target.value)}
-              />
+                onChange={(e) => setVisibilityPreference(e.target.value)} />
               <div>
                 <p style={{ fontWeight: '600', color: '#2d3748', margin: 0, fontSize: '14px' }}>👁️ Visible to All Members</p>
                 <p style={{ fontSize: '12px', color: '#718096', margin: 0 }}>Other members can see your profile</p>
@@ -218,22 +212,14 @@ function AcceptInvite() {
             </label>
             
             <label style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '10px', 
-              padding: '12px 16px',
+              display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px',
               background: visibilityPreference === 'private' ? '#e6fffa' : '#f7fafc',
-              borderRadius: '8px',
-              cursor: 'pointer',
+              borderRadius: '8px', cursor: 'pointer',
               border: visibilityPreference === 'private' ? '2px solid #38b2ac' : '2px solid transparent'
             }}>
-              <input 
-                type="radio" 
-                name="visibility" 
-                value="private" 
+              <input type="radio" name="visibility" value="private"
                 checked={visibilityPreference === 'private'}
-                onChange={(e) => setVisibilityPreference(e.target.value)}
-              />
+                onChange={(e) => setVisibilityPreference(e.target.value)} />
               <div>
                 <p style={{ fontWeight: '600', color: '#2d3748', margin: 0, fontSize: '14px' }}>🔒 Private (Admin Only)</p>
                 <p style={{ fontSize: '12px', color: '#718096', margin: 0 }}>Only admins can see your profile</p>
