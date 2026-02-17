@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 import { authAPI } from '../services/api';
 import { useAuth } from '../App';
+
+const API_URL = 'https://webale-api.onrender.com/api';
 
 function Login() {
   const navigate = useNavigate();
@@ -31,19 +34,31 @@ function Login() {
         const { token, user } = response.data.data;
         login(token, user);
         
-        // Check for pending invite
+        // Check for pending invite and auto-accept
         const pendingInvite = localStorage.getItem('pendingInvite');
         if (pendingInvite) {
           localStorage.removeItem('pendingInvite');
-          navigate(`/invite/${pendingInvite}`, { replace: true });
-        } else {
-          navigate(from, { replace: true });
+          try {
+            const acceptRes = await axios.post(
+              `${API_URL}/invitations/${pendingInvite}/accept`, {},
+              { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+            );
+            if (acceptRes.data.success) {
+              navigate(`/groups/${acceptRes.data.data.groupId}`, { replace: true });
+              return;
+            }
+          } catch (invErr) {
+            console.log('Auto-accept failed, redirecting to invite page:', invErr.message);
+            navigate(`/invite/${pendingInvite}`, { replace: true });
+            return;
+          }
         }
+
+        navigate(from, { replace: true });
       } else {
         setError(response.data.message || 'Login failed');
       }
     } catch (err) {
-      console.error('Login error:', err);
       setError(err.response?.data?.message || 'Invalid email or password');
     } finally {
       setLoading(false);
@@ -56,7 +71,6 @@ function Login() {
       justifyContent: 'center', padding: '40px 20px'
     }}>
       <div style={{ width: '100%', maxWidth: '420px' }}>
-        {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div style={{
             width: '80px', height: '80px', borderRadius: '50%',
@@ -64,29 +78,29 @@ function Login() {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             margin: '0 auto 20px', fontSize: '36px',
             boxShadow: '0 10px 30px rgba(102, 126, 234, 0.3)'
-          }}>
-            👋
-          </div>
+          }}>👋</div>
           <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2d3748', marginBottom: '8px' }}>
             Welcome Back!
           </h1>
           <p style={{ color: '#718096' }}>Sign in to continue to your dashboard</p>
         </div>
 
-        {/* Form Card */}
         <div className="card" style={{ padding: '32px' }}>
-          {/* Dismissible Error */}
+          {/* Pending invite notice */}
+          {localStorage.getItem('pendingInvite') && (
+            <div style={{ padding: '12px 16px', background: '#ebf8ff', border: '1px solid #bee3f8',
+              borderRadius: '8px', marginBottom: '16px', color: '#2b6cb0', fontSize: '13px', textAlign: 'center' }}>
+              💌 Sign in to accept your group invitation!
+            </div>
+          )}
+
           {error && (
-            <div style={{
-              padding: '12px 16px', background: '#fed7d7', borderRadius: '8px',
+            <div style={{ padding: '12px 16px', background: '#fed7d7', borderRadius: '8px',
               marginBottom: '20px', color: '#c53030', fontSize: '14px',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-            }}>
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span>⚠️ {error}</span>
-              <button onClick={() => setError('')} style={{
-                background: 'none', border: 'none', color: '#c53030', cursor: 'pointer',
-                fontSize: '18px', fontWeight: 'bold', padding: '0 4px'
-              }}>✕</button>
+              <button onClick={() => setError('')} style={{ background: 'none', border: 'none',
+                color: '#c53030', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold' }}>✕</button>
             </div>
           )}
 
@@ -116,10 +130,8 @@ function Login() {
               style={{ width: '100%', padding: '14px', fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
               {loading ? (
                 <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                  <div style={{
-                    width: '18px', height: '18px', border: '2px solid rgba(255,255,255,0.3)',
-                    borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite'
-                  }}></div>
+                  <div style={{ width: '18px', height: '18px', border: '2px solid rgba(255,255,255,0.3)',
+                    borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></div>
                   Signing in...
                 </span>
               ) : '🔑 Sign In'}
@@ -129,9 +141,7 @@ function Login() {
           <div style={{ textAlign: 'center', paddingTop: '20px', borderTop: '1px solid #e2e8f0' }}>
             <p style={{ color: '#718096', fontSize: '14px' }}>
               Don't have an account?{' '}
-              <Link to="/register" style={{ color: '#667eea', fontWeight: '600', textDecoration: 'none' }}>
-                Sign up free
-              </Link>
+              <Link to="/register" style={{ color: '#667eea', fontWeight: '600', textDecoration: 'none' }}>Sign up free</Link>
             </p>
           </div>
         </div>

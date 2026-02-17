@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { COUNTRIES } from '../utils/countries';
 
+const API_URL = 'https://webale-api.onrender.com/api';
+
 function Register() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -27,15 +29,46 @@ function Register() {
 
     setLoading(true);
     try {
-      const response = await axios.post('https://webale-api.onrender.com/api/auth/register', {
+      const response = await axios.post(`${API_URL}/auth/register`, {
         firstName: formData.firstName, lastName: formData.lastName,
         email: formData.email, password: formData.password, country: formData.country
       }, { headers: { 'Content-Type': 'application/json' } });
 
       if (response.data.success) {
-        localStorage.setItem('token', response.data.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.data.user));
-        navigate('/dashboard');
+        const { token, user } = response.data.data;
+        // Normalize user data to snake_case
+        const normalizedUser = {
+          id: user.id, email: user.email,
+          first_name: user.first_name || user.firstName || '',
+          last_name: user.last_name || user.lastName || '',
+          country: user.country || '',
+          avatar: user.avatar || user.avatarUrl || user.avatar_url || null,
+          created_at: user.created_at || user.createdAt || ''
+        };
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(normalizedUser));
+
+        // Check for pending invite and auto-accept
+        const pendingInvite = localStorage.getItem('pendingInvite');
+        if (pendingInvite) {
+          localStorage.removeItem('pendingInvite');
+          try {
+            const acceptRes = await axios.post(
+              `${API_URL}/invitations/${pendingInvite}/accept`, {},
+              { headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } }
+            );
+            if (acceptRes.data.success) {
+              navigate(`/groups/${acceptRes.data.data.groupId}`, { replace: true });
+              return;
+            }
+          } catch (invErr) {
+            console.log('Auto-accept invite failed, redirecting to invite page:', invErr.message);
+            navigate(`/invite/${pendingInvite}`, { replace: true });
+            return;
+          }
+        }
+
+        navigate('/dashboard', { replace: true });
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
@@ -70,6 +103,14 @@ function Register() {
           <p style={{ color: '#718096', fontSize: '15px' }}>Join Webale and start fundraising</p>
         </div>
 
+        {/* Pending invite notice */}
+        {localStorage.getItem('pendingInvite') && (
+          <div style={{ padding: '12px 16px', background: '#ebf8ff', border: '1px solid #bee3f8',
+            borderRadius: '8px', marginBottom: '20px', color: '#2b6cb0', fontSize: '13px', textAlign: 'center' }}>
+            💌 Create your account to accept the group invitation!
+          </div>
+        )}
+
         {/* Dismissible Error */}
         {error && (
           <div style={{ padding: '12px 16px', background: '#fed7d7', border: '1px solid #fc8181',
@@ -77,7 +118,7 @@ function Register() {
             display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>⚠️ {error}</span>
             <button onClick={() => setError('')} style={{ background: 'none', border: 'none',
-              color: '#c53030', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold', padding: '0 4px' }}>✕</button>
+              color: '#c53030', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold' }}>✕</button>
           </div>
         )}
 
@@ -116,7 +157,6 @@ function Register() {
               <option value="">Select your country...</option>
               {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.flag} {c.name}</option>)}
             </select>
-            <p style={{ fontSize: '11px', color: '#718096', marginTop: '4px' }}>Required for regional features and currency defaults</p>
           </div>
 
           <div style={{ marginBottom: '16px' }}>

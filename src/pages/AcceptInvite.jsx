@@ -2,9 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
-// Use the same API URL as the rest of the app
-const API_URL = import.meta.env.VITE_API_URL || 'https://webale-api.onrender.com/api';
-const BASE_URL = API_URL.replace('/api', '');
+const API_URL = 'https://webale-api.onrender.com/api';
 
 function AcceptInvite() {
   const { token } = useParams();
@@ -14,7 +12,6 @@ function AcceptInvite() {
   const [invitation, setInvitation] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [accepting, setAccepting] = useState(false);
-  const [visibilityPreference, setVisibilityPreference] = useState('visible');
 
   useEffect(() => {
     checkLoginAndLoadInvite();
@@ -25,8 +22,7 @@ function AcceptInvite() {
     setIsLoggedIn(!!userToken);
 
     try {
-      const response = await axios.get(`${BASE_URL}/api/invitations/${token}/validate`);
-      
+      const response = await axios.get(`${API_URL}/invitations/${token}/validate`);
       if (response.data.success) {
         setInvitation(response.data.data.invitation);
       }
@@ -40,16 +36,17 @@ function AcceptInvite() {
 
   const handleAcceptInvite = async () => {
     if (!isLoggedIn) {
+      // Store invite token for after login/register
       localStorage.setItem('pendingInvite', token);
-      navigate('/login');
+      navigate('/login', { state: { fromInvite: true } });
       return;
     }
 
     setAccepting(true);
     try {
       const response = await axios.post(
-        `${BASE_URL}/api/invitations/${token}/accept`,
-        { visibilityPreference },
+        `${API_URL}/invitations/${token}/accept`,
+        {},
         {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -57,25 +54,31 @@ function AcceptInvite() {
           }
         }
       );
-
       if (response.data.success) {
         navigate(`/groups/${response.data.data.groupId}`);
       }
     } catch (err) {
-      console.error('Error accepting invitation:', err);
       setError(err.response?.data?.message || 'Failed to accept invitation');
     } finally {
       setAccepting(false);
     }
   };
 
+  const handleGoToRegister = () => {
+    localStorage.setItem('pendingInvite', token);
+    navigate('/register', { state: { fromInvite: true } });
+  };
+
+  const handleGoToLogin = () => {
+    localStorage.setItem('pendingInvite', token);
+    navigate('/login', { state: { fromInvite: true } });
+  };
+
+  // ==================== LOADING ====================
   if (loading) {
     return (
       <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
       }}>
         <div style={{ textAlign: 'center', color: 'white' }}>
@@ -86,171 +89,168 @@ function AcceptInvite() {
     );
   }
 
+  // ==================== ERROR ====================
   if (error) {
     return (
       <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        padding: '20px'
+        minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: '20px'
       }}>
         <div style={{
-          background: 'white',
-          borderRadius: '20px',
-          padding: '40px',
-          maxWidth: '450px',
-          width: '100%',
-          textAlign: 'center',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
+          background: 'white', borderRadius: '20px', padding: '40px', maxWidth: '450px',
+          width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
         }}>
-          <div style={{ fontSize: '60px', marginBottom: '20px' }}>❌</div>
+          <div style={{ fontSize: '60px', marginBottom: '20px' }}>😔</div>
           <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#2d3748', marginBottom: '12px' }}>
-            Invalid Invitation
+            Invitation Unavailable
           </h1>
           <p style={{ color: '#718096', marginBottom: '24px' }}>{error}</p>
           <Link to="/login">
-            <button className="btn btn-primary" style={{ padding: '12px 32px' }}>
-              Go to Login
-            </button>
+            <button className="btn btn-primary" style={{ padding: '12px 32px' }}>Go to Login</button>
           </Link>
         </div>
       </div>
     );
   }
 
+  // ==================== MAIN INVITE PAGE ====================
+  const inviterName = invitation?.inviterName || 'Someone';
+  const groupName = invitation?.groupName || 'a fundraising group';
+  const groupDescription = invitation?.groupDescription || '';
+
   return (
     <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: 'linear-gradient(135deg, #1a202c 0%, #2d3748 30%, #553c9a 70%, #667eea 100%)',
       padding: '20px'
     }}>
       <div style={{
-        background: 'white',
-        borderRadius: '20px',
-        padding: '40px',
-        maxWidth: '500px',
-        width: '100%',
-        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
+        background: 'white', borderRadius: '24px', width: '100%', maxWidth: '480px',
+        overflow: 'hidden', boxShadow: '0 25px 80px rgba(0, 0, 0, 0.4)'
       }}>
-        {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <div style={{
-            width: '70px',
-            height: '70px',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            borderRadius: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 16px',
-            boxShadow: '0 8px 20px rgba(102, 126, 234, 0.4)'
-          }}>
-            <span style={{ 
-              color: 'white', 
-              fontSize: '36px', 
-              fontWeight: 'bold',
-              fontFamily: '"Lucida Calligraphy", "Lucida Handwriting", cursive, serif'
-            }}>W</span>
-          </div>
-        </div>
 
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>🎉</div>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#2d3748', marginBottom: '8px' }}>
-            You're Invited!
-          </h1>
-          <p style={{ color: '#718096', fontSize: '15px' }}>
-            You've been invited to join a fundraising group
+        {/* Top Decorative Header */}
+        <div style={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          padding: '32px 30px 40px', textAlign: 'center', position: 'relative'
+        }}>
+          {/* Floating envelope icon */}
+          <div style={{
+            width: '70px', height: '70px', borderRadius: '50%',
+            background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 16px', fontSize: '36px',
+            border: '3px solid rgba(255,255,255,0.3)'
+          }}>
+            💌
+          </div>
+          <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '4px' }}>
+            You've Been Invited
+          </p>
+          {/* Webale logo small */}
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px', marginTop: '8px' }}>
+            via Webale Private Fundraising
           </p>
         </div>
 
-        {invitation && (
+        {/* Personalized Invitation Card */}
+        <div style={{ padding: '30px' }}>
+
+          {/* The invitation message */}
           <div style={{
-            padding: '20px',
-            background: '#f7fafc',
-            borderRadius: '12px',
-            marginBottom: '24px'
+            padding: '24px', borderRadius: '16px', marginBottom: '24px',
+            background: 'linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%)',
+            border: '1px solid #e2e8f0', position: 'relative'
           }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#2d3748', marginBottom: '8px' }}>
-              {invitation.groupName}
+            {/* Decorative quote mark */}
+            <div style={{
+              position: 'absolute', top: '-12px', left: '20px',
+              width: '28px', height: '28px', borderRadius: '50%',
+              background: 'linear-gradient(135deg, #667eea, #764ba2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'white', fontSize: '16px', fontWeight: 'bold'
+            }}>✉</div>
+
+            <p style={{ fontSize: '16px', color: '#2d3748', lineHeight: '1.7', margin: '8px 0 0' }}>
+              <strong style={{ color: '#553c9a' }}>{inviterName}</strong>{' '}
+              cordially invites you to join
+            </p>
+            <h2 style={{
+              fontSize: '22px', fontWeight: '800', color: '#2d3748',
+              margin: '8px 0', lineHeight: '1.3'
+            }}>
+              "{groupName}"
             </h2>
-            {invitation.groupDescription && (
-              <p style={{ color: '#718096', fontSize: '14px', marginBottom: '12px' }}>
-                {invitation.groupDescription}
+            {groupDescription && (
+              <p style={{ fontSize: '14px', color: '#718096', margin: '8px 0 0', fontStyle: 'italic', lineHeight: '1.5' }}>
+                {groupDescription}
               </p>
             )}
-            <p style={{ fontSize: '13px', color: '#667eea' }}>
-              Invited by: {invitation.inviterName}
+            <p style={{ fontSize: '14px', color: '#4a5568', margin: '12px 0 0', lineHeight: '1.6' }}>
+              A private fundraising group on the <strong>Webale</strong> platform.
+              Follow the steps below to accept and join — see you there! 🤝
             </p>
           </div>
-        )}
 
-        {/* Visibility Preference */}
-        <div style={{ marginBottom: '24px' }}>
-          <label style={{ display: 'block', marginBottom: '12px', fontWeight: '600', color: '#2d3748', fontSize: '14px' }}>
-            Visibility Preference
-          </label>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <label style={{ 
-              display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px',
-              background: visibilityPreference === 'visible' ? '#e6fffa' : '#f7fafc',
-              borderRadius: '8px', cursor: 'pointer',
-              border: visibilityPreference === 'visible' ? '2px solid #38b2ac' : '2px solid transparent'
-            }}>
-              <input type="radio" name="visibility" value="visible" 
-                checked={visibilityPreference === 'visible'}
-                onChange={(e) => setVisibilityPreference(e.target.value)} />
-              <div>
-                <p style={{ fontWeight: '600', color: '#2d3748', margin: 0, fontSize: '14px' }}>👁️ Visible to All Members</p>
-                <p style={{ fontSize: '12px', color: '#718096', margin: 0 }}>Other members can see your profile</p>
+          {/* Action Buttons */}
+          {isLoggedIn ? (
+            <>
+              <button onClick={handleAcceptInvite} disabled={accepting} className="btn btn-primary"
+                style={{
+                  width: '100%', padding: '16px', fontSize: '16px', fontWeight: '700',
+                  marginBottom: '12px', borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
+                  border: 'none', color: 'white', cursor: accepting ? 'wait' : 'pointer'
+                }}>
+                {accepting ? 'Joining...' : '✓ Accept & Join Group'}
+              </button>
+              <p style={{ textAlign: 'center', fontSize: '12px', color: '#a0aec0' }}>
+                You're signed in. Click above to join instantly.
+              </p>
+            </>
+          ) : (
+            <>
+              {/* Sign In Button */}
+              <button onClick={handleGoToLogin}
+                style={{
+                  width: '100%', padding: '16px', fontSize: '16px', fontWeight: '700',
+                  marginBottom: '10px', borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  border: 'none', color: 'white', cursor: 'pointer'
+                }}>
+                🔑 Sign In to Accept
+              </button>
+
+              {/* Sign Up Button */}
+              <button onClick={handleGoToRegister}
+                style={{
+                  width: '100%', padding: '16px', fontSize: '16px', fontWeight: '700',
+                  marginBottom: '12px', borderRadius: '12px',
+                  background: 'white', border: '2px solid #667eea',
+                  color: '#667eea', cursor: 'pointer'
+                }}>
+                ✨ Create Account & Join
+              </button>
+
+              <div style={{
+                padding: '12px', background: '#fffbeb', borderRadius: '8px',
+                border: '1px solid #fefcbf', fontSize: '12px', color: '#975a16', textAlign: 'center'
+              }}>
+                After signing in or creating an account, you'll automatically be added to this group.
               </div>
-            </label>
-            
-            <label style={{ 
-              display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px',
-              background: visibilityPreference === 'private' ? '#e6fffa' : '#f7fafc',
-              borderRadius: '8px', cursor: 'pointer',
-              border: visibilityPreference === 'private' ? '2px solid #38b2ac' : '2px solid transparent'
-            }}>
-              <input type="radio" name="visibility" value="private"
-                checked={visibilityPreference === 'private'}
-                onChange={(e) => setVisibilityPreference(e.target.value)} />
-              <div>
-                <p style={{ fontWeight: '600', color: '#2d3748', margin: 0, fontSize: '14px' }}>🔒 Private (Admin Only)</p>
-                <p style={{ fontSize: '12px', color: '#718096', margin: 0 }}>Only admins can see your profile</p>
-              </div>
-            </label>
-          </div>
+            </>
+          )}
         </div>
 
-        <button
-          onClick={handleAcceptInvite}
-          className="btn btn-primary"
-          disabled={accepting}
-          style={{
-            width: '100%',
-            padding: '14px',
-            fontSize: '16px',
-            fontWeight: '600',
-            marginBottom: '12px'
-          }}
-        >
-          {accepting ? 'Joining...' : isLoggedIn ? '✓ Accept & Join Group' : 'Login to Accept'}
-        </button>
-
-        {!isLoggedIn && (
-          <p style={{ textAlign: 'center', color: '#718096', fontSize: '14px' }}>
-            Don't have an account?{' '}
-            <Link to="/register" style={{ color: '#667eea', fontWeight: '600', textDecoration: 'none' }}>
-              Create Account
-            </Link>
+        {/* Footer */}
+        <div style={{
+          padding: '16px 30px', background: '#f7fafc', borderTop: '1px solid #e2e8f0',
+          textAlign: 'center'
+        }}>
+          <p style={{ fontSize: '11px', color: '#a0aec0', margin: 0 }}>
+            🔒 Webale — Private Group Fundraising Platform
           </p>
-        )}
+        </div>
       </div>
     </div>
   );
