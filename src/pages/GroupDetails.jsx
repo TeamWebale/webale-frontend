@@ -236,12 +236,25 @@ function GroupDetails() {
     }
     setFormLoading(true);
     try {
+      const pledgeAmount = parseFloat(pledgeForm.amount);
+      const groupCurrency = group?.currency || 'USD';
+      let finalAmount = pledgeAmount;
+      let originalAmount = pledgeAmount;
+
+      // If pledge currency differs from group currency, convert
+      if (pledgeForm.currency && pledgeForm.currency !== groupCurrency) {
+        const converted = convertCurrency(pledgeAmount, pledgeForm.currency, groupCurrency);
+        finalAmount = converted.converted;
+        originalAmount = pledgeAmount;
+      }
+
       await pledgeAPI.create(id, {
-        amount: parseFloat(pledgeForm.amount),
+        amount: finalAmount,
         fulfillmentDate: pledgeForm.fulfillmentDate || null,
         reminderFrequency: pledgeForm.reminderFrequency,
         isAnonymous: pledgeForm.isAnonymous,
-        currency: pledgeForm.currency
+        currency: pledgeForm.currency,
+        originalAmount: originalAmount
       });
       setShowPledgeModal(false);
       loadGroupData();
@@ -1320,25 +1333,6 @@ function GroupDetails() {
 
       {/* Make Pledge Modal */}
       <Modal isOpen={showPledgeModal} onClose={() => setShowPledgeModal(false)} title="Make a Pledge">
-        <FormField label="Pledge Amount" required>
-          <input type="number" style={inputStyle} placeholder="Enter amount" min="0" step="0.01"
-            value={pledgeForm.amount} onChange={e => setPledgeForm({ ...pledgeForm, amount: e.target.value })} />
-        </FormField>
-        <FormField label="Proposed Fulfillment Date (optional)">
-          <input type="date" style={inputStyle}
-            value={pledgeForm.fulfillmentDate} onChange={e => setPledgeForm({ ...pledgeForm, fulfillmentDate: e.target.value })} />
-        </FormField>
-        <FormField label="Reminder / Notification Frequency (optional)">
-          <select style={selectStyle}
-            value={pledgeForm.reminderFrequency} onChange={e => setPledgeForm({ ...pledgeForm, reminderFrequency: e.target.value })}>
-            <option value="none">No reminders</option>
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="biweekly">Bi-Weekly</option>
-            <option value="triweekly">Tri-Weekly</option>
-            <option value="monthly">Monthly</option>
-          </select>
-        </FormField>
         <FormField label="Currency">
           <select style={selectStyle}
             value={pledgeForm.currency} onChange={e => setPledgeForm({ ...pledgeForm, currency: e.target.value })}>
@@ -1346,6 +1340,10 @@ function GroupDetails() {
               <option key={c.code} value={c.code}>{c.flag} {c.code} - {c.name} ({c.symbol})</option>
             ))}
           </select>
+        </FormField>
+        <FormField label="Pledge Amount" required>
+          <input type="number" style={inputStyle} placeholder="Enter amount" min="0" step="0.01"
+            value={pledgeForm.amount} onChange={e => setPledgeForm({ ...pledgeForm, amount: e.target.value })} />
         </FormField>
         {/* Auto-conversion display when pledge currency differs from group currency */}
         {pledgeForm.currency && pledgeForm.currency !== (group?.currency || 'USD') && pledgeForm.amount && parseFloat(pledgeForm.amount) > 0 && (
@@ -1364,6 +1362,21 @@ function GroupDetails() {
             </p>
           </div>
         )}
+        <FormField label="Proposed Fulfillment Date (optional)">
+          <input type="date" style={inputStyle}
+            value={pledgeForm.fulfillmentDate} onChange={e => setPledgeForm({ ...pledgeForm, fulfillmentDate: e.target.value })} />
+        </FormField>
+        <FormField label="Reminder / Notification Frequency (optional)">
+          <select style={selectStyle}
+            value={pledgeForm.reminderFrequency} onChange={e => setPledgeForm({ ...pledgeForm, reminderFrequency: e.target.value })}>
+            <option value="none">No reminders</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="biweekly">Bi-Weekly</option>
+            <option value="triweekly">Tri-Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </FormField>
         <FormField label="">
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px' }}>
             <input type="checkbox" checked={pledgeForm.isAnonymous}
