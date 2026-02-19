@@ -38,11 +38,17 @@ function ProfileBanner() {
   const getFlag = (countryCode) => {
     if (!countryCode) return '';
     const flags = {
-      'UG': '🇺🇬', 'KE': '🇰🇪', 'TZ': '🇹🇿', 'RW': '🇷🇼', 'US': '🇺🇸',
-      'GB': '🇬🇧', 'CA': '🇨🇦', 'AU': '🇦🇺', 'DE': '🇩🇪', 'FR': '🇫🇷',
-      'NG': '🇳🇬', 'GH': '🇬🇭', 'ZA': '🇿🇦', 'IN': '🇮🇳', 'CN': '🇨🇳'
+      'UG': '[UG]', 'KE': '[KE]', 'TZ': '[TZ]', 'RW': '[RW]', 'US': '[US]',
+      'GB': '[UK]', 'CA': '[CA]', 'AU': '[AU]', 'DE': '[DE]', 'FR': '[FR]',
+      'NG': '[NG]', 'GH': '[GH]', 'ZA': '[ZA]', 'IN': '[IN]', 'CN': '[CN]',
+      'JP': '[JP]', 'BR': '[BR]', 'ET': '[ET]', 'CD': '[CD]', 'SS': '[SS]',
+      'BI': '[BI]', 'EU': '[EU]'
     };
-    return flags[countryCode?.toUpperCase()] || '🌍';
+    return flags[countryCode?.toUpperCase()] || `[${countryCode?.toUpperCase()}]`;
+  };
+
+  const getAvatar = () => {
+    return user.avatar || user.avatar_url || null;
   };
 
   // Navigate to profile and open avatar modal
@@ -73,9 +79,9 @@ function ProfileBanner() {
           justifyContent: 'center',
           color: 'white',
           fontWeight: 'bold',
-          fontSize: '20px'
+          fontSize: getAvatar() ? '28px' : '20px'
         }}>
-          {getInitials()}
+          {getAvatar() || getInitials()}
         </div>
         {/* Edit button - opens avatar modal */}
         <button
@@ -117,13 +123,6 @@ function ProfileBanner() {
             </span>
           )}
         </h2>
-        <p style={{
-          color: 'rgba(255,255,255,0.85)',
-          fontSize: '13px',
-          margin: '0 0 2px 0'
-        }}>
-          {user.email}
-        </p>
         <p style={{
           color: 'rgba(255,255,255,0.7)',
           fontSize: '12px',
