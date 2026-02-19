@@ -113,7 +113,7 @@ function GroupDetails() {
   const [recurringForm, setRecurringForm] = useState({ amount: '', frequency: 'monthly', startDate: '', endDate: '' });
   const [subGoalForm, setSubGoalForm] = useState({ name: '', targetAmount: '', description: '' });
   const [messageForm, setMessageForm] = useState({ recipientId: '', content: '' });
-  const [revisePledgeForm, setRevisePledgeForm] = useState({ amount: '', notes: '' });
+  const [revisePledgeForm, setRevisePledgeForm] = useState({ amount: '', currency: '', fulfillmentDate: '', reminderFrequency: 'none', isAnonymous: false, notes: '' });
   const [partPaymentForm, setPartPaymentForm] = useState({ amount: '' });
   const [offlineDonationForm, setOfflineDonationForm] = useState({ donorName: '', amount: '', notes: '', date: '', type: 'payment', isAnonymous: false, fulfillmentDate: '' });
   const [formLoading, setFormLoading] = useState(false);
@@ -304,7 +304,14 @@ function GroupDetails() {
 
   const openRevisePledge = (pledge) => {
     setSelectedPledge(pledge);
-    setRevisePledgeForm({ amount: pledge.amount, notes: pledge.notes || '' });
+    setRevisePledgeForm({
+      amount: pledge.original_amount || pledge.amount,
+      currency: pledge.pledge_currency || group?.currency || 'USD',
+      fulfillmentDate: pledge.fulfillment_date ? new Date(pledge.fulfillment_date).toISOString().split('T')[0] : '',
+      reminderFrequency: pledge.reminder_frequency || 'none',
+      isAnonymous: pledge.is_anonymous || false,
+      notes: pledge.notes || ''
+    });
     setShowRevisePledgeModal(true);
   };
 
@@ -315,8 +322,24 @@ function GroupDetails() {
     }
     setFormLoading(true);
     try {
+      const pledgeAmount = parseFloat(revisePledgeForm.amount);
+      const groupCurrency = group?.currency || 'USD';
+      let finalAmount = pledgeAmount;
+      let originalAmount = pledgeAmount;
+
+      if (revisePledgeForm.currency && revisePledgeForm.currency !== groupCurrency) {
+        const converted = convertCurrency(pledgeAmount, revisePledgeForm.currency, groupCurrency);
+        finalAmount = converted.converted;
+        originalAmount = pledgeAmount;
+      }
+
       await pledgeAPI.update(id, selectedPledge.id, {
-        amount: parseFloat(revisePledgeForm.amount),
+        amount: finalAmount,
+        fulfillmentDate: revisePledgeForm.fulfillmentDate || null,
+        reminderFrequency: revisePledgeForm.reminderFrequency,
+        isAnonymous: revisePledgeForm.isAnonymous,
+        currency: revisePledgeForm.currency,
+        originalAmount: originalAmount,
         notes: revisePledgeForm.notes
       });
       setShowRevisePledgeModal(false);
@@ -1400,25 +1423,77 @@ function GroupDetails() {
       </Modal>
 
       {/* Revise Pledge Modal */}
-      <Modal isOpen={showRevisePledgeModal} onClose={() => setShowRevisePledgeModal(false)} title="Revise Your Pledge">
+      <Modal isOpen={showRevisePledgeModal} onClose={() => setShowRevisePledgeModal(false)} title="✏️ Revise Your Pledge">
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '-16px', marginBottom: '12px' }}>
           <button onClick={handleCancelPledge} disabled={formLoading} style={{
             padding: '6px 14px', background: '#fed7d7', color: '#c53030', border: 'none',
             borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer'
           }}>
-            ❌ Cancel Pledge
+            🗑️ Delete This Pledge
           </button>
         </div>
+        {selectedPledge && (
+          <div style={{ padding: '10px 14px', background: '#f7fafc', borderRadius: '8px', marginBottom: '16px', fontSize: '12px', color: '#718096' }}>
+            Current pledge: <strong style={{ color: '#2d3748' }}>{currencySymbol}{formatAmount(selectedPledge.amount)}</strong> •
+            Status: {selectedPledge.status} • Created {formatTimeAgo(selectedPledge.created_at)}
+          </div>
+        )}
+        <FormField label="Currency">
+          <select style={selectStyle}
+            value={revisePledgeForm.currency} onChange={e => setRevisePledgeForm({ ...revisePledgeForm, currency: e.target.value })}>
+            {allCurrencies.map(c => (
+              <option key={c.code} value={c.code}>{c.flag} {c.code} - {c.name} ({c.symbol})</option>
+            ))}
+          </select>
+        </FormField>
         <FormField label="Revised Amount" required>
           <input type="number" style={inputStyle} placeholder="Enter new amount" min="0" step="0.01"
             value={revisePledgeForm.amount} onChange={e => setRevisePledgeForm({ ...revisePledgeForm, amount: e.target.value })} />
         </FormField>
-        <FormField label="Notes">
-          <textarea style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }} placeholder="Reason for revision..."
+        {revisePledgeForm.currency && revisePledgeForm.currency !== (group?.currency || 'USD') && revisePledgeForm.amount && parseFloat(revisePledgeForm.amount) > 0 && (
+          <div style={{
+            padding: '12px', background: 'linear-gradient(135deg, #ebf8ff 0%, #e9d8fd 100%)',
+            borderRadius: '10px', marginBottom: '16px', border: '1px solid #bee3f8'
+          }}>
+            <p style={{ margin: '0 0 4px', fontSize: '11px', fontWeight: '700', color: '#667eea', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Estimated Equivalent
+            </p>
+            <p style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#2d3748' }}>
+              {convertCurrency(parseFloat(revisePledgeForm.amount), revisePledgeForm.currency, group?.currency || 'USD').display}
+            </p>
+            <p style={{ margin: '4px 0 0', fontSize: '10px', color: '#718096' }}>
+              in group currency ({group?.currency || 'USD'}) &bull; Rates are approximate
+            </p>
+          </div>
+        )}
+        <FormField label="Proposed Fulfillment Date (optional)">
+          <input type="date" style={inputStyle}
+            value={revisePledgeForm.fulfillmentDate} onChange={e => setRevisePledgeForm({ ...revisePledgeForm, fulfillmentDate: e.target.value })} />
+        </FormField>
+        <FormField label="Reminder / Notification Frequency (optional)">
+          <select style={selectStyle}
+            value={revisePledgeForm.reminderFrequency} onChange={e => setRevisePledgeForm({ ...revisePledgeForm, reminderFrequency: e.target.value })}>
+            <option value="none">No reminders</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="biweekly">Bi-Weekly</option>
+            <option value="triweekly">Tri-Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </FormField>
+        <FormField label="">
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px' }}>
+            <input type="checkbox" checked={revisePledgeForm.isAnonymous}
+              onChange={e => setRevisePledgeForm({ ...revisePledgeForm, isAnonymous: e.target.checked })} />
+            Make this pledge anonymous
+          </label>
+        </FormField>
+        <FormField label="Notes (optional)">
+          <textarea style={{ ...inputStyle, minHeight: '60px', resize: 'vertical' }} placeholder="Reason for revision..."
             value={revisePledgeForm.notes} onChange={e => setRevisePledgeForm({ ...revisePledgeForm, notes: e.target.value })} />
         </FormField>
         <button onClick={submitRevisePledge} disabled={formLoading} style={{ ...btnPrimary, opacity: formLoading ? 0.7 : 1 }}>
-          {formLoading ? 'Updating...' : '✏️ Revise Pledge'}
+          {formLoading ? 'Updating...' : '✏️ Save Revised Pledge'}
         </button>
       </Modal>
 
@@ -1877,10 +1952,8 @@ function GroupDetails() {
                   {pledge.status !== 'paid' && (
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button onClick={() => {
-                        setSelectedPledge(pledge);
-                        setRevisePledgeForm({ amount: pledge.amount, notes: '' });
                         setShowMyPledgesModal(false);
-                        setShowRevisePledgeModal(true);
+                        openRevisePledge(pledge);
                       }} style={{
                         flex: 1, padding: '8px', background: '#ebf8ff', color: '#2b6cb0',
                         border: '1px solid #bee3f8', borderRadius: '8px', fontSize: '13px',
