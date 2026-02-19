@@ -210,11 +210,20 @@ function Profile() {
   };
 
   const handleAvatarSelect = (avatar) => { setSelectedAvatar(avatar.emoji); };
-  const handleAvatarSave = () => {
+  const handleAvatarSave = async () => {
     if (user) {
-      const updatedUser = { ...user, avatar: selectedAvatar };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      setUser(updatedUser);
+      try {
+        // Save to database
+        await authAPI.updateProfile({ avatarUrl: selectedAvatar, avatarType: 'emoji' });
+        // Update localStorage
+        const updatedUser = { ...user, avatar: selectedAvatar, avatar_url: selectedAvatar, avatar_type: 'emoji' };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+        setMessage({ type: 'success', text: 'Avatar updated!' });
+      } catch (err) {
+        console.error('Failed to save avatar:', err);
+        setMessage({ type: 'error', text: 'Failed to save avatar' });
+      }
     }
     setShowAvatarModal(false);
   };
