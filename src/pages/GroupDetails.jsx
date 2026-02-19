@@ -92,6 +92,7 @@ function GroupDetails() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showConverterModal, setShowConverterModal] = useState(false);
   const [converterForm, setConverterForm] = useState({ amount: '', fromCurrency: 'USD', toCurrency: 'EUR' });
+  const [showMyPledgesModal, setShowMyPledgesModal] = useState(false);
   const [showRevisePledgeModal, setShowRevisePledgeModal] = useState(false);
   const [selectedPledge, setSelectedPledge] = useState(null);
   const [showPartPaymentModal, setShowPartPaymentModal] = useState(false);
@@ -950,7 +951,7 @@ function GroupDetails() {
             </button>
           )}
           <button onClick={handleExportData} className="btn" style={{ background: '#e53e3e', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
-            📊 Get Data/Report
+            📊 Group Data/Report
           </button>
         </div>
 
@@ -958,6 +959,9 @@ function GroupDetails() {
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button onClick={handleMakePledge} className="btn" style={{ background: '#38b2ac', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
             💰 Make Pledge
+          </button>
+          <button onClick={() => setShowMyPledgesModal(true)} className="btn" style={{ background: '#d69e2e', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
+            ✏️ Revise/Delete Pledge
           </button>
           <button onClick={() => setShowMessageModal(true)} className="btn" style={{ background: '#667eea', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
             💬 Interactions
@@ -1003,7 +1007,7 @@ function GroupDetails() {
           </div>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#718096', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
-          <span>🎯 Goal: {currencySymbol}{formatAmount(group.goal_amount)}</span>
+          <span>🎯 Target/Goal: {currencySymbol}{formatAmount(group.goal_amount)}</span>
           <span>👥 {members.length || 0} members</span>
           <span>📅 {group.deadline ? new Date(group.deadline).toLocaleDateString() : 'No deadline'}</span>
         </div>
@@ -1824,6 +1828,91 @@ function GroupDetails() {
             {formLoading ? 'Deleting...' : '🗑️ Delete Forever'}
           </button>
         </div>
+      </Modal>
+
+      {/* My Pledges - Revise/Delete Modal */}
+      <Modal isOpen={showMyPledgesModal} onClose={() => setShowMyPledgesModal(false)} title="✏️ Revise / Delete Pledge" width="520px">
+        {(() => {
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          const myPledges = pledges.filter(p => String(p.user_id) === String(user.id));
+          if (myPledges.length === 0) {
+            return (
+              <div style={{ textAlign: 'center', padding: '30px' }}>
+                <div style={{ fontSize: '48px', marginBottom: '12px' }}>📭</div>
+                <p style={{ color: '#718096', fontSize: '15px' }}>You haven't made any pledges yet.</p>
+                <button onClick={() => { setShowMyPledgesModal(false); handleMakePledge(); }}
+                  className="btn btn-primary" style={{ marginTop: '12px', padding: '10px 24px' }}>
+                  💰 Make Your First Pledge
+                </button>
+              </div>
+            );
+          }
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {myPledges.map(pledge => (
+                <div key={pledge.id} style={{
+                  padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0',
+                  background: pledge.status === 'paid' ? '#f0fff4' : '#f7fafc'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '18px', fontWeight: '700', color: '#2d3748' }}>
+                      {currencySymbol}{formatAmount(pledge.amount)}
+                    </span>
+                    <span style={{
+                      padding: '3px 10px', borderRadius: '10px', fontSize: '11px', fontWeight: '600',
+                      background: pledge.status === 'paid' ? '#c6f6d5' : pledge.status === 'pledged' ? '#bee3f8' : '#fed7d7',
+                      color: pledge.status === 'paid' ? '#22543d' : pledge.status === 'pledged' ? '#2a4365' : '#742a2a'
+                    }}>
+                      {pledge.status === 'paid' ? '✅ Paid' : pledge.status === 'pledged' ? '🕐 Pledged' : pledge.status}
+                    </span>
+                  </div>
+                  {pledge.pledge_currency && pledge.pledge_currency !== (group?.currency || 'USD') && (
+                    <p style={{ fontSize: '12px', color: '#718096', margin: '0 0 6px' }}>
+                      Original: {getCurrencySymbol(pledge.pledge_currency)}{formatAmount(pledge.original_amount)} {pledge.pledge_currency}
+                    </p>
+                  )}
+                  <p style={{ fontSize: '11px', color: '#a0aec0', margin: '0 0 10px' }}>
+                    {pledge.fulfillment_date ? `Due: ${new Date(pledge.fulfillment_date).toLocaleDateString()}` : 'No due date'} • Created {formatTimeAgo(pledge.created_at)}
+                  </p>
+                  {pledge.status !== 'paid' && (
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button onClick={() => {
+                        setSelectedPledge(pledge);
+                        setRevisePledgeForm({ amount: pledge.amount, notes: '' });
+                        setShowMyPledgesModal(false);
+                        setShowRevisePledgeModal(true);
+                      }} style={{
+                        flex: 1, padding: '8px', background: '#ebf8ff', color: '#2b6cb0',
+                        border: '1px solid #bee3f8', borderRadius: '8px', fontSize: '13px',
+                        fontWeight: '600', cursor: 'pointer'
+                      }}>
+                        ✏️ Revise Amount
+                      </button>
+                      <button onClick={() => {
+                        if (window.confirm(`Delete pledge of ${currencySymbol}${formatAmount(pledge.amount)}? This cannot be undone.`)) {
+                          setSelectedPledge(pledge);
+                          handleCancelPledge();
+                          setShowMyPledgesModal(false);
+                        }
+                      }} style={{
+                        flex: 1, padding: '8px', background: '#fff5f5', color: '#e53e3e',
+                        border: '1px solid #fed7d7', borderRadius: '8px', fontSize: '13px',
+                        fontWeight: '600', cursor: 'pointer'
+                      }}>
+                        🗑️ Delete Pledge
+                      </button>
+                    </div>
+                  )}
+                  {pledge.status === 'paid' && (
+                    <p style={{ fontSize: '12px', color: '#48bb78', fontStyle: 'italic' }}>
+                      ✅ This pledge has been fulfilled and cannot be edited.
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          );
+        })()}
       </Modal>
 
       {/* Currency Converter Modal */}
