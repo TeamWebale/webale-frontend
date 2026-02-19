@@ -90,6 +90,8 @@ function GroupDetails() {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showSubGoalModal, setShowSubGoalModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showConverterModal, setShowConverterModal] = useState(false);
+  const [converterForm, setConverterForm] = useState({ amount: '', fromCurrency: 'USD', toCurrency: 'EUR' });
   const [showRevisePledgeModal, setShowRevisePledgeModal] = useState(false);
   const [selectedPledge, setSelectedPledge] = useState(null);
   const [showPartPaymentModal, setShowPartPaymentModal] = useState(false);
@@ -960,7 +962,7 @@ function GroupDetails() {
           <button onClick={() => setShowMessageModal(true)} className="btn" style={{ background: '#667eea', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
             💬 Interactions
           </button>
-          <button className="btn" style={{ background: '#718096', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
+          <button onClick={() => setShowConverterModal(true)} className="btn" style={{ background: '#718096', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
             💱 Convert $-€-£-¥
           </button>
         </div>
@@ -1465,6 +1467,18 @@ function GroupDetails() {
         <button onClick={submitEditGroup} disabled={formLoading} style={{ ...btnPrimary, opacity: formLoading ? 0.7 : 1 }}>
           {formLoading ? 'Saving...' : '💾 Save Changes'}
         </button>
+        {isAdmin && (
+          <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '2px solid #fed7d7' }}>
+            <p style={{ fontSize: '12px', color: '#e53e3e', marginBottom: '10px', fontWeight: '600' }}>⚠️ Danger Zone</p>
+            <button onClick={() => { setShowEditModal(false); setShowDeleteConfirm(true); }} style={{
+              width: '100%', padding: '12px', background: '#fff5f5', color: '#e53e3e',
+              border: '2px solid #fed7d7', borderRadius: '8px', fontSize: '14px',
+              fontWeight: '600', cursor: 'pointer'
+            }}>
+              🗑️ Delete This Group
+            </button>
+          </div>
+        )}
       </Modal>
 
       {/* Enhanced Invite Modal */}
@@ -1810,6 +1824,48 @@ function GroupDetails() {
             {formLoading ? 'Deleting...' : '🗑️ Delete Forever'}
           </button>
         </div>
+      </Modal>
+
+      {/* Currency Converter Modal */}
+      <Modal isOpen={showConverterModal} onClose={() => setShowConverterModal(false)} title="💱 Currency Converter" width="420px">
+        <FormField label="Amount">
+          <input type="number" style={inputStyle} placeholder="Enter amount" min="0" step="0.01"
+            value={converterForm.amount} onChange={e => setConverterForm({ ...converterForm, amount: e.target.value })} />
+        </FormField>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '10px', alignItems: 'end', marginBottom: '16px' }}>
+          <FormField label="From">
+            <select style={selectStyle} value={converterForm.fromCurrency}
+              onChange={e => setConverterForm({ ...converterForm, fromCurrency: e.target.value })}>
+              {allCurrencies.map(c => (
+                <option key={c.code} value={c.code}>{c.flag} {c.code}</option>
+              ))}
+            </select>
+          </FormField>
+          <button onClick={() => setConverterForm({ ...converterForm, fromCurrency: converterForm.toCurrency, toCurrency: converterForm.fromCurrency })}
+            style={{ background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer', marginBottom: '20px', color: '#667eea' }}>⇄</button>
+          <FormField label="To">
+            <select style={selectStyle} value={converterForm.toCurrency}
+              onChange={e => setConverterForm({ ...converterForm, toCurrency: e.target.value })}>
+              {allCurrencies.map(c => (
+                <option key={c.code} value={c.code}>{c.flag} {c.code}</option>
+              ))}
+            </select>
+          </FormField>
+        </div>
+        {converterForm.amount && parseFloat(converterForm.amount) > 0 && (
+          <div style={{
+            padding: '20px', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            borderRadius: '12px', textAlign: 'center', color: 'white'
+          }}>
+            <p style={{ margin: '0 0 4px', fontSize: '12px', opacity: 0.8 }}>
+              {getCurrencySymbol(converterForm.fromCurrency)} {parseFloat(converterForm.amount).toLocaleString()} {converterForm.fromCurrency} =
+            </p>
+            <p style={{ margin: 0, fontSize: '28px', fontWeight: '700' }}>
+              {convertCurrency(parseFloat(converterForm.amount), converterForm.fromCurrency, converterForm.toCurrency).display}
+            </p>
+            <p style={{ margin: '8px 0 0', fontSize: '11px', opacity: 0.7 }}>Rates are approximate</p>
+          </div>
+        )}
       </Modal>
 
     </MainLayout>
