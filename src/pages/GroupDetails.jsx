@@ -25,9 +25,10 @@ const Modal = ({ isOpen, onClose, title, children, width = '500px' }) => {
         }}>
           <h3 style={{ margin: 0, fontSize: '17px', color: '#2d3748', fontWeight: '700' }}>{title}</h3>
           <button onClick={onClose} style={{
-            background: 'none', border: 'none', fontSize: '22px', cursor: 'pointer',
-            color: '#a0aec0', padding: '0 4px', lineHeight: 1
-          }}>×</button>
+            background: '#fed7d7', border: 'none', fontSize: '18px', cursor: 'pointer',
+            color: '#e53e3e', padding: '4px 10px', lineHeight: 1, borderRadius: '8px',
+            fontWeight: '700', transition: 'all 0.2s'
+          }}>✕</button>
         </div>
         <div style={{ padding: '24px' }}>{children}</div>
       </div>
@@ -779,8 +780,8 @@ function GroupDetails() {
     <>
       {/* Live Donor Feed */}
       <div style={{
-        background: 'white', borderRadius: '12px', padding: '16px',
-        marginBottom: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+        background: 'linear-gradient(135deg, #ffffff 0%, #f7fafc 100%)', borderRadius: '12px', padding: '16px',
+        marginBottom: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -825,8 +826,8 @@ function GroupDetails() {
 
       {/* Milestones */}
       <div style={{
-        background: 'white', borderRadius: '12px', padding: '16px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+        background: 'linear-gradient(135deg, #ffffff 0%, #faf5ff 100%)', borderRadius: '12px', padding: '16px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0'
       }}>
         <h3 style={{ margin: '0 0 12px', fontSize: '15px', color: '#2d3748', fontWeight: '700' }}>Milestones</h3>
         {subGoals.length === 0 ? (
@@ -915,14 +916,17 @@ function GroupDetails() {
           }}>
             {group.name?.charAt(0) || 'G'}
           </div>
-          <div>
-            <span style={{
-              padding: '3px 10px', background: isAdmin ? '#ed8936' : '#48bb78',
-              borderRadius: '10px', fontSize: '11px', fontWeight: '600'
-            }}>
-              {isAdmin ? 'Admin' : 'Member'}
-            </span>
-            <p style={{ opacity: 0.9, fontSize: '13px', margin: '6px 0 0' }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+              <h2 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: 'white' }}>{group.name}</h2>
+              <span style={{
+                padding: '3px 10px', background: isAdmin ? '#ed8936' : '#48bb78',
+                borderRadius: '10px', fontSize: '11px', fontWeight: '600'
+              }}>
+                {isAdmin ? 'Admin' : 'Member'}
+              </span>
+            </div>
+            <p style={{ opacity: 0.85, fontSize: '13px', margin: 0, lineHeight: '1.4' }}>
               {group.description || 'One For All, All For One!'}
             </p>
           </div>
@@ -932,11 +936,11 @@ function GroupDetails() {
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
           {isAdmin && (
             <button onClick={handleEditGroup} className="btn" style={{ background: '#4299e1', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
-              ✏️ Edit
+              ✏️ Edit / Delete Group
             </button>
           )}
           <button onClick={handleInvite} className="btn" style={{ background: '#667eea', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
-            👥 Invite
+            👥 Invite Participants
           </button>
           {isAdmin && (
             <button onClick={() => { setOfflineDonationForm({ donorName: '', amount: '', notes: '', date: new Date().toISOString().split('T')[0], type: 'payment', isAnonymous: false, fulfillmentDate: '' }); setShowOfflineDonationModal(true); }} className="btn" style={{ background: '#ed8936', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
@@ -954,18 +958,18 @@ function GroupDetails() {
             💰 Make Pledge
           </button>
           <button onClick={() => setShowMessageModal(true)} className="btn" style={{ background: '#667eea', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
-            💬 Messages
+            💬 Interactions
           </button>
           <button className="btn" style={{ background: '#718096', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
-            💱 Convert
+            💱 Convert $-€-£-¥
           </button>
         </div>
       </div>
 
       {/* Stats Bar */}
       <div style={{
-        background: 'white', borderRadius: '12px', padding: '16px',
-        marginBottom: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+        background: 'linear-gradient(135deg, #ffffff 0%, #f0fff4 100%)', borderRadius: '12px', padding: '16px',
+        marginBottom: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
           <span style={{ color: '#48bb78', fontWeight: '600', fontSize: '14px' }}>
