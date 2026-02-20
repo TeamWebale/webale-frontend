@@ -63,15 +63,15 @@ function Login() {
       }}>
         {/* Branding Header */}
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          {/* Welcome back */}
-          <h2 style={{
-            fontSize: '26px',
-            fontWeight: '700',
-            color: '#4a5568',
+          {/* Webale! above emoji */}
+          <h1 style={{
+            fontSize: '28px',
+            fontWeight: '800',
+            color: '#2d3748',
             margin: '0 0 16px 0'
           }}>
-            Welcome back
-          </h2>
+            Webale!
+          </h1>
 
           {/* Emoji */}
           <div style={{
@@ -88,16 +88,6 @@ function Login() {
           }}>
             👋
           </div>
-
-          {/* Webale! */}
-          <h1 style={{
-            fontSize: '26px',
-            fontWeight: '800',
-            color: '#2d3748',
-            margin: '0 0 8px 0'
-          }}>
-            Webale!
-          </h1>
 
           {/* Tagline: Private Group / Fundraising */}
           <p style={{

@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/api';
 import MainLayout from '../components/MainLayout';
 
 function Profile() {
   const location = useLocation();
+  const navigate = useNavigate();
 
   // User data
   const [user, setUser] = useState(null);
@@ -226,6 +227,7 @@ function Profile() {
       }
     }
     setShowAvatarModal(false);
+    navigate('/dashboard');
   };
 
   const getInitials = () => {
