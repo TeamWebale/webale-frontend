@@ -379,7 +379,9 @@ function NotificationBell() {
                     display: 'flex', alignItems: 'center', gap: '10px', background: '#f7fafc'
                   }}>
                     <button onClick={goBackToConversations} style={{
-                      background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#667eea', padding: 0
+                      background: '#ebf4ff', border: '1px solid #bee3f8', cursor: 'pointer',
+                      fontSize: '16px', color: '#667eea', padding: '4px 10px',
+                      borderRadius: '8px', fontWeight: '700'
                     }}>←</button>
                     <div>
                       <p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: '#2d3748' }}>{activeConversation.userName}</p>
@@ -457,7 +459,9 @@ function NotificationBell() {
                     display: 'flex', alignItems: 'center', gap: '10px', background: '#f7fafc'
                   }}>
                     <button onClick={goBackToGroups} style={{
-                      background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#667eea', padding: 0
+                      background: '#ebf4ff', border: '1px solid #bee3f8', cursor: 'pointer',
+                      fontSize: '16px', color: '#667eea', padding: '4px 10px',
+                      borderRadius: '8px', fontWeight: '700'
                     }}>←</button>
                     <p style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: '#2d3748' }}>
                       {activeConversation.groupName}
