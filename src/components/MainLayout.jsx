@@ -37,14 +37,25 @@ function ProfileBanner() {
 
   const getFlag = (countryCode) => {
     if (!countryCode) return '';
+    // Handle full country names
+    const nameToCode = {
+      'UGANDA': 'UG', 'KENYA': 'KE', 'TANZANIA': 'TZ', 'RWANDA': 'RW',
+      'UNITED STATES': 'US', 'USA': 'US', 'UNITED KINGDOM': 'UK', 'UK': 'UK',
+      'CANADA': 'CA', 'AUSTRALIA': 'AU', 'GERMANY': 'DE', 'FRANCE': 'FR',
+      'NIGERIA': 'NG', 'GHANA': 'GH', 'SOUTH AFRICA': 'ZA', 'INDIA': 'IN',
+      'CHINA': 'CN', 'JAPAN': 'JP', 'BRAZIL': 'BR', 'ETHIOPIA': 'ET',
+      'CONGO': 'CD', 'SOUTH SUDAN': 'SS', 'BURUNDI': 'BI'
+    };
+    const upper = countryCode.toUpperCase().trim();
+    const code = nameToCode[upper] || (upper.length <= 3 ? upper : '');
     const flags = {
       'UG': '[UG]', 'KE': '[KE]', 'TZ': '[TZ]', 'RW': '[RW]', 'US': '[US]',
-      'GB': '[UK]', 'CA': '[CA]', 'AU': '[AU]', 'DE': '[DE]', 'FR': '[FR]',
-      'NG': '[NG]', 'GH': '[GH]', 'ZA': '[ZA]', 'IN': '[IN]', 'CN': '[CN]',
-      'JP': '[JP]', 'BR': '[BR]', 'ET': '[ET]', 'CD': '[CD]', 'SS': '[SS]',
-      'BI': '[BI]', 'EU': '[EU]'
+      'GB': '[UK]', 'UK': '[UK]', 'CA': '[CA]', 'AU': '[AU]', 'DE': '[DE]',
+      'FR': '[FR]', 'NG': '[NG]', 'GH': '[GH]', 'ZA': '[ZA]', 'IN': '[IN]',
+      'CN': '[CN]', 'JP': '[JP]', 'BR': '[BR]', 'ET': '[ET]', 'CD': '[CD]',
+      'SS': '[SS]', 'BI': '[BI]', 'EU': '[EU]'
     };
-    return flags[countryCode?.toUpperCase()] || `[${countryCode?.toUpperCase()}]`;
+    return flags[code] || (code ? `[${code}]` : '');
   };
 
   const getAvatar = () => {

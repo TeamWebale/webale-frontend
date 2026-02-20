@@ -61,6 +61,13 @@ const btnPrimary = {
 const btnDanger = { ...btnPrimary, background: '#e53e3e' };
 const btnSecondary = { ...btnPrimary, background: '#718096' };
 
+const menuItemStyle = {
+  display: 'flex', alignItems: 'center', gap: '10px', width: '100%',
+  padding: '14px 18px', background: 'white', border: 'none',
+  borderBottom: '1px solid #f0f0f0', fontSize: '14px', fontWeight: '500',
+  color: '#2d3748', cursor: 'pointer', textAlign: 'left'
+};
+
 function GroupDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -93,6 +100,7 @@ function GroupDetails() {
   const [showConverterModal, setShowConverterModal] = useState(false);
   const [converterForm, setConverterForm] = useState({ amount: '', fromCurrency: 'USD', toCurrency: 'EUR' });
   const [showMyPledgesModal, setShowMyPledgesModal] = useState(false);
+  const [showActionMenu, setShowActionMenu] = useState(false);
   const [showRevisePledgeModal, setShowRevisePledgeModal] = useState(false);
   const [selectedPledge, setSelectedPledge] = useState(null);
   const [showPartPaymentModal, setShowPartPaymentModal] = useState(false);
@@ -958,40 +966,52 @@ function GroupDetails() {
           </div>
         </div>
 
-        {/* Action Buttons Row 1 */}
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
-          {isAdmin && (
-            <button onClick={handleEditGroup} className="btn" style={{ background: '#4299e1', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
-              ✏️ Edit / Delete Group
-            </button>
+        {/* Action Menu */}
+        <div style={{ position: 'relative' }}>
+          <button onClick={() => setShowActionMenu(!showActionMenu)} className="btn" style={{
+            background: 'rgba(255,255,255,0.2)', color: 'white', padding: '10px 18px',
+            fontSize: '14px', fontWeight: '600', width: '100%', display: 'flex',
+            alignItems: 'center', justifyContent: 'center', gap: '8px',
+            border: '1px solid rgba(255,255,255,0.3)', borderRadius: '10px'
+          }}>
+            ☰ Actions Menu ▾
+          </button>
+          {showActionMenu && (
+            <div style={{
+              position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px',
+              background: 'white', borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
+              zIndex: 50, overflow: 'hidden'
+            }}>
+              {isAdmin && (
+                <button onClick={() => { setShowActionMenu(false); handleEditGroup(); }} style={menuItemStyle}>
+                  ✏️ Edit / Delete Group
+                </button>
+              )}
+              <button onClick={() => { setShowActionMenu(false); handleInvite(); }} style={menuItemStyle}>
+                👥 Invite Participants
+              </button>
+              {isAdmin && (
+                <button onClick={() => { setShowActionMenu(false); setOfflineDonationForm({ donorName: '', amount: '', notes: '', date: new Date().toISOString().split('T')[0], type: 'payment', isAnonymous: false, fulfillmentDate: '' }); setShowOfflineDonationModal(true); }} style={menuItemStyle}>
+                  💵 Offshore Donations
+                </button>
+              )}
+              <button onClick={() => { setShowActionMenu(false); handleExportData(); }} style={menuItemStyle}>
+                📊 Group Data/Report
+              </button>
+              <button onClick={() => { setShowActionMenu(false); handleMakePledge(); }} style={menuItemStyle}>
+                💰 Make Pledge
+              </button>
+              <button onClick={() => { setShowActionMenu(false); setShowMyPledgesModal(true); }} style={menuItemStyle}>
+                ✏️ Revise/Delete Pledge
+              </button>
+              <button onClick={() => { setShowActionMenu(false); setShowMessageModal(true); }} style={menuItemStyle}>
+                💬 Interactions
+              </button>
+              <button onClick={() => { setShowActionMenu(false); setShowConverterModal(true); }} style={menuItemStyle}>
+                💱 Convert $-€-£-¥
+              </button>
+            </div>
           )}
-          <button onClick={handleInvite} className="btn" style={{ background: '#667eea', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
-            👥 Invite Participants
-          </button>
-          {isAdmin && (
-            <button onClick={() => { setOfflineDonationForm({ donorName: '', amount: '', notes: '', date: new Date().toISOString().split('T')[0], type: 'payment', isAnonymous: false, fulfillmentDate: '' }); setShowOfflineDonationModal(true); }} className="btn" style={{ background: '#ed8936', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
-              💵 Offshore Donations
-            </button>
-          )}
-          <button onClick={handleExportData} className="btn" style={{ background: '#e53e3e', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
-            📊 Group Data/Report
-          </button>
-        </div>
-
-        {/* Action Buttons Row 2 */}
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <button onClick={handleMakePledge} className="btn" style={{ background: '#38b2ac', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
-            💰 Make Pledge
-          </button>
-          <button onClick={() => setShowMyPledgesModal(true)} className="btn" style={{ background: '#d69e2e', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
-            ✏️ Revise/Delete Pledge
-          </button>
-          <button onClick={() => setShowMessageModal(true)} className="btn" style={{ background: '#667eea', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
-            💬 Interactions
-          </button>
-          <button onClick={() => setShowConverterModal(true)} className="btn" style={{ background: '#718096', color: 'white', padding: '8px 14px', fontSize: '13px' }}>
-            💱 Convert $-€-£-¥
-          </button>
         </div>
       </div>
 
