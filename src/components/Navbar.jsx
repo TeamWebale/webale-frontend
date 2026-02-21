@@ -1,234 +1,196 @@
-import { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useLanguage } from '../context/LanguageContext';
-import { useTheme } from '../context/ThemeContext';
-import LanguageSwitcher from './LanguageSwitcher';
-import NotificationBell from './NotificationBell';
+/**
+ * Navbar.jsx
+ * Destination: src/components/Navbar.jsx
+ */
 
-function Navbar() {
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import WebaleLogo from "./WebaleLogo";
+import { useAuth } from "../context/AuthContext";
+import NotificationBell from "./NotificationBell";
+
+export default function Navbar() {
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const { t } = useLanguage();
-  const { isDarkMode, toggleDarkMode } = useTheme();
-  const isAuthenticated = localStorage.getItem('token');
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const menuRef = useRef(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/');
-    window.location.reload();
+    logout();
+    navigate("/login");
+    setMenuOpen(false);
   };
 
-  // Close menu on outside click
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setShowMobileMenu(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
   return (
-    <nav style={{
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      padding: '12px 24px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      boxShadow: '0 4px 20px rgba(102, 126, 234, 0.3)',
-      position: 'sticky',
-      top: 0,
-      zIndex: 100
-    }}>
-      {/* Logo */}
-      <Link 
-        to={isAuthenticated ? '/dashboard' : '/'} 
-        style={{ 
-          textDecoration: 'none',
-          display: 'flex',
-          alignItems: 'center',
-          position: 'relative'
-        }}
-      >
-        <span style={{ 
-          fontSize: '72px', 
-          fontWeight: '900', 
-          color: 'white',
-          lineHeight: 0.7,
-          textShadow: '2px 2px 4px rgba(0,0,0,0.2)',
-          marginRight: '-10px'
-        }}>
-          W
-        </span>
-        <div style={{ 
-          display: 'flex', 
-          flexDirection: 'column', 
-          justifyContent: 'center',
-          marginLeft: '-8px',
-          paddingTop: '8px'
-        }}>
-          <span style={{
-            fontSize: '20px',
-            fontWeight: 'bold',
-            color: 'white',
-            lineHeight: 1.1,
-            marginBottom: '1px'
-          }}>
-            {t('app_name')}
+    <nav style={styles.nav}>
+      <div style={styles.inner}>
+
+        {/* ── Logo ── */}
+        <Link to="/dashboard" style={{ textDecoration: "none" }}>
+          {/* Desktop: compact  |  Mobile: icon only */}
+          <span className="logo-desktop">
+            <WebaleLogo variant="compact" size="sm" theme="light" />
           </span>
-          <span className="hide-mobile" style={{
-            fontSize: '8px',
-            color: 'rgba(255,255,255,0.9)',
-            lineHeight: 1.2,
-            fontWeight: '500',
-            letterSpacing: '0.3px'
-          }}>
-            Private Group
+          <span className="logo-mobile">
+            <WebaleLogo variant="icon" size={30} theme="light" />
           </span>
-          <span className="hide-mobile" style={{
-            fontSize: '8px',
-            color: 'rgba(255,255,255,0.9)',
-            lineHeight: 1.2,
-            fontWeight: '500',
-            letterSpacing: '0.3px'
-          }}>
-            Fundraising
-          </span>
+        </Link>
+
+        {/* ── Desktop nav links ── */}
+        <div style={styles.links} className="nav-links-desktop">
+          <Link to="/dashboard"    style={styles.link}>Dashboard</Link>
+          <Link to="/create-group" style={styles.link}>New Group</Link>
+          <Link to="/profile"      style={styles.link}>Profile</Link>
         </div>
-      </Link>
 
-      {/* Right side */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        {/* Notification Bell - Always visible when authenticated */}
-        {isAuthenticated && <NotificationBell />}
+        {/* ── Right side ── */}
+        <div style={styles.right}>
+          <NotificationBell />
 
-        {isAuthenticated ? (
-          <>
-            {/* Desktop items - hidden on mobile */}
-            <button onClick={toggleDarkMode} className="hide-mobile" style={{
-              background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '8px',
-              padding: '8px 10px', cursor: 'pointer', color: 'white', fontSize: '18px'
-            }} title={isDarkMode ? 'Light Mode' : 'Dark Mode'}>
-              {isDarkMode ? '☀️' : '🌙'}
-            </button>
+          {/* Desktop logout */}
+          <button
+            onClick={handleLogout}
+            style={styles.logoutBtn}
+            className="nav-logout-desktop"
+          >
+            🚪 Logout
+          </button>
 
-            <span className="hide-mobile"><LanguageSwitcher compact /></span>
-
-            <Link to="/dashboard" className="hide-mobile" style={{
-              background: 'rgba(255,255,255,0.15)', color: 'white', padding: '8px 14px',
-              borderRadius: '8px', textDecoration: 'none', fontSize: '14px', fontWeight: '500',
-              display: 'flex', alignItems: 'center', gap: '6px'
-            }}>
-              🏠 {t('nav_home')}
-            </Link>
-            
-            <button onClick={handleLogout} className="hide-mobile" style={{
-              background: 'rgba(255,255,255,0.9)', color: '#667eea', border: 'none',
-              padding: '8px 14px', borderRadius: '8px', cursor: 'pointer',
-              fontSize: '14px', fontWeight: '600'
-            }}>
-              🚪 Logout
-            </button>
-
-            {/* Hamburger - mobile only */}
-            <div ref={menuRef} style={{ position: 'relative' }} className="show-mobile-only-flex">
-              <button onClick={() => setShowMobileMenu(!showMobileMenu)} style={{
-                background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '8px',
-                padding: '8px 12px', cursor: 'pointer', color: 'white', fontSize: '22px'
-              }}>
-                {showMobileMenu ? '✕' : '☰'}
-              </button>
-
-              {showMobileMenu && (
-                <div style={{
-                  position: 'absolute', top: '100%', right: 0, marginTop: '8px',
-                  width: '220px', background: 'white', borderRadius: '12px',
-                  boxShadow: '0 10px 40px rgba(0,0,0,0.2)', overflow: 'hidden', zIndex: 200
-                }}>
-                  <Link to="/dashboard" onClick={() => setShowMobileMenu(false)} style={mobileMenuItem}>
-                    🏠 Home
-                  </Link>
-                  <Link to="/groups/create" onClick={() => setShowMobileMenu(false)} style={mobileMenuItem}>
-                    ➕ Create Group
-                  </Link>
-                  <Link to="/profile" onClick={() => setShowMobileMenu(false)} style={mobileMenuItem}>
-                    👤 Profile
-                  </Link>
-                  <Link to="/settings" onClick={() => setShowMobileMenu(false)} style={mobileMenuItem}>
-                    ⚙️ Settings
-                  </Link>
-                  <button onClick={toggleDarkMode} style={{ ...mobileMenuItem, border: 'none', background: 'white', width: '100%', textAlign: 'left' }}>
-                    {isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
-                  </button>
-                  <div style={{ padding: '8px 18px', borderTop: '1px solid #e2e8f0' }}>
-                    <LanguageSwitcher compact />
-                  </div>
-                  <button onClick={() => { setShowMobileMenu(false); handleLogout(); }}
-                    style={{
-                      ...mobileMenuItem, color: '#e53e3e', borderTop: '1px solid #e2e8f0',
-                      background: '#fff5f5', border: 'none', width: '100%', textAlign: 'left',
-                      fontWeight: '600'
-                    }}>
-                    🚪 Logout
-                  </button>
-                </div>
-              )}
-            </div>
-          </>
-        ) : (
-          <>
-            <button onClick={toggleDarkMode} style={{
-              background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '8px',
-              padding: '8px 10px', cursor: 'pointer', color: 'white', fontSize: '18px'
-            }}>
-              {isDarkMode ? '☀️' : '🌙'}
-            </button>
-            <LanguageSwitcher compact />
-            <Link to="/login" style={{
-              background: 'rgba(255,255,255,0.15)', color: 'white', padding: '8px 14px',
-              borderRadius: '8px', textDecoration: 'none', fontSize: '14px', fontWeight: '500'
-            }}>
-              {t('nav_login')}
-            </Link>
-            <Link to="/register" className="hide-small-mobile" style={{
-              background: 'rgba(255,255,255,0.9)', color: '#667eea', padding: '8px 14px',
-              borderRadius: '8px', textDecoration: 'none', fontSize: '14px', fontWeight: '600'
-            }}>
-              {t('nav_register')}
-            </Link>
-          </>
-        )}
+          {/* Hamburger — mobile only */}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            style={styles.hamburger}
+            className="nav-hamburger"
+            aria-label="Menu"
+          >
+            <span style={styles.bar}></span>
+            <span style={styles.bar}></span>
+            <span style={styles.bar}></span>
+          </button>
+        </div>
       </div>
 
+      {/* ── Mobile dropdown ── */}
+      {menuOpen && (
+        <div style={styles.mobileMenu}>
+          <Link to="/dashboard"    style={styles.mobileLink} onClick={() => setMenuOpen(false)}>Dashboard</Link>
+          <Link to="/create-group" style={styles.mobileLink} onClick={() => setMenuOpen(false)}>New Group</Link>
+          <Link to="/profile"      style={styles.mobileLink} onClick={() => setMenuOpen(false)}>Profile</Link>
+          <button onClick={handleLogout} style={styles.mobileLogout}>🚪 Logout</button>
+        </div>
+      )}
+
+      {/* Responsive CSS */}
       <style>{`
-        @media (max-width: 768px) {
-          .hide-mobile { display: none !important; }
-          nav > a:first-child span:first-child { font-size: 48px !important; }
-        }
-        @media (min-width: 769px) {
-          .show-mobile-only-flex { display: none !important; }
-        }
-        @media (max-width: 768px) {
-          .show-mobile-only-flex { display: flex !important; }
-        }
-        @media (max-width: 480px) {
-          .hide-small-mobile { display: none !important; }
-          nav { padding: 8px 12px !important; }
-          nav > a:first-child span:first-child { font-size: 40px !important; }
+        .logo-mobile  { display: none; }
+        .logo-desktop { display: inline-flex; }
+        .nav-links-desktop { display: flex; }
+        .nav-logout-desktop { display: inline-flex; }
+        .nav-hamburger { display: none !important; }
+
+        @media (max-width: 640px) {
+          .logo-mobile        { display: inline-flex; }
+          .logo-desktop       { display: none; }
+          .nav-links-desktop  { display: none !important; }
+          .nav-logout-desktop { display: none !important; }
+          .nav-hamburger      { display: flex !important; }
         }
       `}</style>
     </nav>
   );
 }
 
-const mobileMenuItem = {
-  display: 'flex', alignItems: 'center', gap: '10px',
-  padding: '14px 18px', textDecoration: 'none', color: '#2d3748',
-  fontSize: '15px', fontWeight: '500', borderBottom: '1px solid #f0f0f0',
-  cursor: 'pointer'
+const styles = {
+  nav: {
+    background  : "#FFFFFF",
+    borderBottom: "1px solid #E8EEF5",
+    position    : "sticky",
+    top         : 0,
+    zIndex      : 100,
+    boxShadow   : "0 1px 8px rgba(27,45,79,0.06)",
+  },
+  inner: {
+    maxWidth      : "1200px",
+    margin        : "0 auto",
+    padding       : "0 20px",
+    height        : "58px",
+    display       : "flex",
+    alignItems    : "center",
+    justifyContent: "space-between",
+    gap           : "16px",
+  },
+  links: {
+    display   : "flex",
+    gap       : "24px",
+    alignItems: "center",
+  },
+  link: {
+    fontSize      : "14px",
+    color         : "#5A6A7E",
+    fontWeight    : 500,
+    textDecoration: "none",
+    transition    : "color 0.15s",
+  },
+  right: {
+    display   : "flex",
+    alignItems: "center",
+    gap       : "12px",
+  },
+  logoutBtn: {
+    background  : "transparent",
+    border      : "1px solid #D0DCE8",
+    borderRadius: "8px",
+    padding     : "6px 14px",
+    fontSize    : "13px",
+    fontWeight  : 500,
+    color       : "#5A6A7E",
+    cursor      : "pointer",
+    fontFamily  : "'Segoe UI', sans-serif",
+  },
+  hamburger: {
+    background    : "transparent",
+    border        : "none",
+    cursor        : "pointer",
+    padding       : "4px",
+    display       : "flex",
+    flexDirection : "column",
+    gap           : "5px",
+    alignItems    : "center",
+    justifyContent: "center",
+  },
+  bar: {
+    display     : "block",
+    width       : "20px",
+    height      : "2px",
+    background  : "#1B2D4F",
+    borderRadius: "2px",
+  },
+  mobileMenu: {
+    background  : "#FFFFFF",
+    borderTop   : "1px solid #E8EEF5",
+    padding     : "12px 20px 16px",
+    display     : "flex",
+    flexDirection: "column",
+    gap         : "2px",
+  },
+  mobileLink: {
+    fontSize      : "15px",
+    color         : "#1B2D4F",
+    fontWeight    : 500,
+    textDecoration: "none",
+    padding       : "10px 0",
+    borderBottom  : "1px solid #F0F4F9",
+  },
+  mobileLogout: {
+    marginTop  : "8px",
+    background : "transparent",
+    border     : "1px solid #D0DCE8",
+    borderRadius: "8px",
+    padding    : "10px 0",
+    fontSize   : "14px",
+    fontWeight : 500,
+    color      : "#5A6A7E",
+    cursor     : "pointer",
+    fontFamily : "'Segoe UI', sans-serif",
+    textAlign  : "left",
+  },
 };
-
-export default Navbar;

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Navy rounded background -->
+  <rect width="32" height="32" rx="7" fill="#1B2D4F"/>
+  <!-- White calligraphic W, centred -->
+  <image x="4" y="4" width="24" height="24"
+    href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIIAAABiCAYAAACcRwt/AAADc0lEQVR4nO2dyZajMAxFRU79/y/Tm6aadjB4kvSQ3l3VgkGRr2XjmJQIIYQQosu+77t3DAQICkHIC9m0LtxTEbZt245zjr+JLUuTvmI4oAg+LEm6xnyAQtgynWztSSGFsGE4yZZPBZRBn8/ISdaPhnwU1adbBK9GoQy6dIng3Rje949M89g7si4wev7I9ckcPy0HPTXiU8OUC0Xs2Xg89qxZCWaurXVf8s3tHEFTgtnzWVXWUhVBW4LV1yFzXDaClQQ997SMpZcj9pVfnlmv2H5VBA8JVqKVwPK6+4nyWPQcXcX3EWlPnuYHHL12GbtWjOfeHnF+8hH5/0PWDrSwHL0naQhQqzSr73NQy/Gn5aCMDTTCSBxlbr1y/TVH8G507/vXQJFNi8uVRW4d86WW814Ze9pu6GtobUbkuxprV8WDUA16O2VvDm9FeHM1eHPsV2h/HoiKgNDjaqDE1vM0MSINhAhXgSP0aBQJRJJUhFUgNJx3DKPChBKBjNO0McUDz57l3auvaIlpZviArQjbX3rP49tWY8CK4AliRXhiVl6K8AIsxKQIBSuSbl1RVgxl8CJkHK/PWEkFL4IlGecGBxSBiAhF+AWxGljuHw0pAmKjohNShF40et6sjNa7ySkCERGK0NzzLB9jPd4teYUIWo3AucQ/XiGCFx6LWV5vmlEEIiIUoUqmaiCSWIS3zQ+4Z9EBjyeEXjFXi5xSBKtqsGp7mcUu75Qi3HGX4MiPsWFFqL0Ch5D0HqyGqbAilLSWYGtRUMRMI4KI/pbw1VjGkkqEOxDXDSxJI8JT0pEaRcReTNg3nSxpTXq031w4k6IirEq6VS/1GKZSiHBHb9J7j7+SEK0aiCQQATHpiIQWwfPbvBqIMYkEF+FteK5hpBUBsRp4klYENLxXNFOKwGrwTUoRyDfpRECsBt7DgkhCEdBAkEAkmQgoSUcklQhnECZvSGKmEaFM+kwjIDXgKtKIgFABzqDJlGI/AlrSEUlTEZBAFDO8CIhJRyS8CGigihlaBNSkIxJaBDSQxQwrAlrS0eIpCSsCGmjrGCUh1xHQeh9aPFewIhARCSgCWu9Di6dGOBHIGKFEQOt9aPHcEUqEM+izdDTCiLByv8EKvO/fSxgRyBwhREDrfWjxtPDKBSW0RKPFQ0he+HRAfuF/lieEEEKW8we5cszyhe65/AAAAABJRU5ErkJggg=="
+    preserveAspectRatio="xMidYMid meet"/>
+</svg>

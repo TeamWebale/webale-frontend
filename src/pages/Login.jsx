@@ -1,264 +1,227 @@
-import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { authAPI } from '../services/api';
-import { useAuth } from '../App';
+/**
+ * Login.jsx
+ * Destination: src/pages/Login.jsx
+ */
 
-function Login() {
-  const navigate = useNavigate();
-  const location = useLocation();
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import WebaleLogo from "../components/WebaleLogo";
+
+export default function Login() {
   const { login } = useAuth();
-  
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const navigate  = useNavigate();
 
-  const from = location.state?.from?.pathname || '/dashboard';
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-    setError('');
-  };
+  const [email,    setEmail]    = useState("");
+  const [password, setPassword] = useState("");
+  const [error,    setError]    = useState("");
+  const [loading,  setLoading]  = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
-
     try {
-      const response = await authAPI.login(formData);
-      
-      if (response.data.success) {
-        const { token, user } = response.data.data;
-        login(token, user);
-        navigate(from, { replace: true });
-      } else {
-        setError(response.data.message || 'Login failed');
-      }
+      await login(email, password);
+      navigate("/dashboard");
     } catch (err) {
-      console.error('Login error:', err);
-      setError(err.response?.data?.message || 'Invalid email or password');
+      setError(err.message || "Invalid email or password.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{
-      minHeight: 'calc(100vh - 80px)',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '30px 20px 20px'
-    }}>
-      <div style={{
-        width: '100%',
-        maxWidth: '420px'
-      }}>
-        {/* Branding Header */}
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          {/* Webale! above emoji */}
-          <h1 style={{
-            fontSize: '28px',
-            fontWeight: '800',
-            color: '#2d3748',
-            margin: '0 0 16px 0'
-          }}>
-            Webale!
-          </h1>
+    <div style={styles.page}>
+      <div style={styles.card}>
 
-          {/* Emoji */}
-          <div style={{
-            width: '80px',
-            height: '80px',
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 16px',
-            fontSize: '36px',
-            boxShadow: '0 10px 30px rgba(102, 126, 234, 0.3)'
-          }}>
-            👋
-          </div>
-
-          {/* Tagline: Private Group / Fundraising */}
-          <p style={{
-            fontSize: '20px',
-            fontWeight: '700',
-            color: '#667eea',
-            margin: '0 0 2px 0',
-            lineHeight: '1.3'
-          }}>
-            Private Group
-          </p>
-          <p style={{
-            fontSize: '20px',
-            fontWeight: '700',
-            color: '#667eea',
-            margin: '0 0 10px 0',
-            lineHeight: '1.3'
-          }}>
-            Fundraising
-          </p>
-
-          {/* Teams, Targets, Tracking */}
-          <p style={{
-            fontSize: '16px',
-            fontWeight: '600',
-            color: '#764ba2',
-            margin: '0 0 4px 0',
-            letterSpacing: '0.5px'
-          }}>
-            ( Teams, Targets, Tracking )
-          </p>
+        {/* ── Brand ── */}
+        <div style={styles.brand}>
+          <WebaleLogo variant="full" size="lg" theme="dark" />
         </div>
 
-        {/* Form Card */}
-        <div className="card" style={{ padding: '32px' }}>
-          {error && (
-            <div style={{
-              padding: '12px 16px',
-              background: '#fed7d7',
-              borderRadius: '8px',
-              marginBottom: '20px',
-              color: '#c53030',
-              fontSize: '14px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}>
-              ⚠️ {error}
-            </div>
-          )}
+        <p style={styles.welcome}>Welcome back</p>
 
-          <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{
-                display: 'block',
-                marginBottom: '8px',
-                fontWeight: '600',
-                color: '#4a5568',
-                fontSize: '14px'
-              }}>
-                Email Address
-              </label>
-              <input
-                type="email"
-                name="email"
-                className="input"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                required
-                autoComplete="email"
-                style={{ padding: '14px 16px' }}
-              />
-            </div>
-
-            <div style={{ marginBottom: '24px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <label style={{
-                  fontWeight: '600',
-                  color: '#4a5568',
-                  fontSize: '14px'
-                }}>
-                  Password
-                </label>
-                <Link 
-                  to="/forgot-password" 
-                  style={{ 
-                    fontSize: '13px', 
-                    color: '#667eea',
-                    textDecoration: 'none'
-                  }}
-                >
-                  Forgot password?
-                </Link>
-              </div>
-              <input
-                type="password"
-                name="password"
-                className="input"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                required
-                autoComplete="current-password"
-                style={{ padding: '14px 16px' }}
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn btn-primary"
-              style={{
-                width: '100%',
-                padding: '14px',
-                fontSize: '16px',
-                fontWeight: '600',
-                marginBottom: '16px'
-              }}
-            >
-              {loading ? (
-                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                  <div className="spinner-sm" style={{
-                    width: '18px',
-                    height: '18px',
-                    border: '2px solid rgba(255,255,255,0.3)',
-                    borderTopColor: 'white',
-                    borderRadius: '50%',
-                    animation: 'spin 0.8s linear infinite'
-                  }}></div>
-                  Signing in...
-                </span>
-              ) : (
-                '🔐 Sign In'
-              )}
-            </button>
-          </form>
-
-          <div style={{
-            textAlign: 'center',
-            paddingTop: '20px',
-            borderTop: '1px solid #e2e8f0'
-          }}>
-            <p style={{ color: '#718096', fontSize: '14px' }}>
-              Don't have an account?{' '}
-              <Link 
-                to="/register" 
-                style={{ 
-                  color: '#667eea', 
-                  fontWeight: '600',
-                  textDecoration: 'none'
-                }}
-              >
-                Sign up free
-              </Link>
-            </p>
+        {/* ── Error ── */}
+        {error && (
+          <div style={styles.error}>
+            <span>{error}</span>
+            <button onClick={() => setError("")} style={styles.errorClose}>✕</button>
           </div>
-        </div>
+        )}
+
+        {/* ── Form ── */}
+        <form onSubmit={handleSubmit} style={styles.form}>
+          <div style={styles.field}>
+            <label style={styles.label}>Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="you@example.com"
+              style={styles.input}
+            />
+          </div>
+
+          <div style={styles.field}>
+            <label style={styles.label}>Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="••••••••"
+              style={styles.input}
+            />
+          </div>
+
+          <div style={styles.forgotRow}>
+            <Link to="/forgot-password" style={styles.forgotLink}>
+              Forgot password?
+            </Link>
+          </div>
+
+          <button type="submit" disabled={loading} style={styles.btn}>
+            {loading ? "Signing in…" : "Sign In"}
+          </button>
+        </form>
+
+        {/* ── Register link ── */}
+        <p style={styles.registerRow}>
+          Don't have an account?{" "}
+          <Link to="/register" style={styles.registerLink}>Create one</Link>
+        </p>
+
+        {/* ── Footer ── */}
+        <p style={styles.footer}>© 2026 Webale · webale.net</p>
       </div>
-
-      {/* Copyright Footer */}
-      <p style={{
-        marginTop: '30px',
-        fontSize: '12px',
-        color: '#a0aec0',
-        textAlign: 'center'
-      }}>
-        &copy; Copyright 2026 Landfolks Aitech (U) Limited
-      </p>
     </div>
   );
 }
 
-export default Login;
+const styles = {
+  page: {
+    minHeight      : "100vh",
+    background     : "#0D1B2E",
+    display        : "flex",
+    alignItems     : "center",
+    justifyContent : "center",
+    padding        : "24px 16px",
+  },
+  card: {
+    background   : "#0D1B2E",
+    borderRadius : "20px",
+    border       : "1px solid rgba(255,255,255,0.08)",
+    padding      : "44px 40px 32px",
+    width        : "100%",
+    maxWidth     : "400px",
+    display      : "flex",
+    flexDirection: "column",
+    alignItems   : "center",
+    gap          : "0",
+    boxShadow    : "0 8px 48px rgba(0,0,0,0.4)",
+  },
+  brand: {
+    marginBottom: "24px",
+  },
+  welcome: {
+    fontSize    : "14px",
+    color       : "rgba(255,255,255,0.45)",
+    marginBottom: "24px",
+    letterSpacing: "0.3px",
+  },
+  error: {
+    width          : "100%",
+    background     : "rgba(220,53,69,0.15)",
+    border         : "1px solid rgba(220,53,69,0.4)",
+    borderRadius   : "8px",
+    padding        : "10px 14px",
+    color          : "#ff8a8a",
+    fontSize       : "13px",
+    marginBottom   : "16px",
+    display        : "flex",
+    justifyContent : "space-between",
+    alignItems     : "center",
+    gap            : "8px",
+  },
+  errorClose: {
+    background: "transparent",
+    border    : "none",
+    color     : "#ff8a8a",
+    cursor    : "pointer",
+    fontSize  : "14px",
+    padding   : "0",
+    flexShrink: 0,
+  },
+  form: {
+    width        : "100%",
+    display      : "flex",
+    flexDirection: "column",
+    gap          : "16px",
+  },
+  field: {
+    display      : "flex",
+    flexDirection: "column",
+    gap          : "6px",
+  },
+  label: {
+    fontSize    : "12px",
+    fontWeight  : 500,
+    color       : "rgba(255,255,255,0.55)",
+    letterSpacing: "0.5px",
+    textTransform: "uppercase",
+    fontFamily  : "'Segoe UI', sans-serif",
+  },
+  input: {
+    background  : "rgba(255,255,255,0.06)",
+    border      : "1px solid rgba(255,255,255,0.12)",
+    borderRadius: "10px",
+    padding     : "11px 14px",
+    fontSize    : "15px",
+    color       : "#FFFFFF",
+    outline     : "none",
+    fontFamily  : "'Segoe UI', sans-serif",
+    transition  : "border-color 0.15s",
+  },
+  forgotRow: {
+    textAlign: "right",
+    marginTop: "-4px",
+  },
+  forgotLink: {
+    fontSize      : "13px",
+    color         : "#00C2CC",
+    textDecoration: "none",
+  },
+  btn: {
+    marginTop   : "4px",
+    background  : "linear-gradient(135deg, #00C2CC 0%, #4A7FC1 100%)",
+    color       : "#FFFFFF",
+    border      : "none",
+    borderRadius: "10px",
+    padding     : "13px",
+    fontSize    : "15px",
+    fontWeight  : 600,
+    cursor      : "pointer",
+    fontFamily  : "'Segoe UI', sans-serif",
+    transition  : "opacity 0.15s",
+  },
+  registerRow: {
+    marginTop : "20px",
+    fontSize  : "14px",
+    color     : "rgba(255,255,255,0.4)",
+    fontFamily: "'Segoe UI', sans-serif",
+  },
+  registerLink: {
+    color         : "#00C2CC",
+    textDecoration: "none",
+    fontWeight    : 500,
+  },
+  footer: {
+    marginTop   : "28px",
+    fontSize    : "11px",
+    color       : "rgba(255,255,255,0.2)",
+    letterSpacing: "0.3px",
+    fontFamily  : "'Segoe UI', sans-serif",
+  },
+};
