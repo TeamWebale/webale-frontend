@@ -17,26 +17,31 @@ export function AuthProvider({ children }) {
     const storedUser = localStorage.getItem('user');
 
     if (token && storedUser) {
+      // Immediately restore user from localStorage so app feels instant
+      setUser(JSON.parse(storedUser));
+      setIsAuthenticated(true);
+
+      // Background verify — use AbortController so unmount doesn't throw
+      const controller = new AbortController();
       try {
-        setUser(JSON.parse(storedUser));
-        setIsAuthenticated(true);
-        
-        // Optionally verify token with backend
         const response = await axios.get('https://webale-api.onrender.com/api/auth/me', {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { 'Authorization': `Bearer ${token}` },
+          signal: controller.signal,
         });
-        
         if (response.data.success) {
           const userData = response.data.data.user;
           setUser(userData);
           localStorage.setItem('user', JSON.stringify(userData));
         }
       } catch (error) {
-        console.error('Auth check failed:', error);
-        // Token might be invalid, clear storage
+        if (axios.isCancel(error) || error.code === 'ERR_CANCELED') {
+          // Request aborted on unmount — not an error, ignore silently
+          return;
+        }
         if (error.response?.status === 401) {
           logout();
         }
+        // Any other network error: stay logged in from localStorage
       }
     }
     setLoading(false);
