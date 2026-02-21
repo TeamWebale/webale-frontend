@@ -10,7 +10,7 @@
  *     → redirect to /login if not authenticated
  */
 
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 
 // Layouts
@@ -53,8 +53,7 @@ function ProtectedRoute({ children }) {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
+    <Routes>
 
         {/* ── Public routes — no Navbar ── */}
         <Route
@@ -103,6 +102,5 @@ export default function App() {
         <Route path="*" element={<Navigate to="/login" replace />} />
 
       </Routes>
-    </BrowserRouter>
   );
 }
