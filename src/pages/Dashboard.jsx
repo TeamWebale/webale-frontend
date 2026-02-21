@@ -249,7 +249,7 @@ function Dashboard() {
             📁 My Groups
           </h2>
           <button
-            onClick={() => navigate('/groups/create')}
+            onClick={() => navigate('/create-group')}
             className="btn btn-primary"
             style={{ fontSize: '13px', padding: '8px 16px' }}
           >
@@ -262,7 +262,7 @@ function Dashboard() {
             <div style={{ fontSize: '48px', marginBottom: '12px' }}>📁</div>
             <p style={{ margin: '0 0 16px', fontSize: '14px' }}>You haven't joined any groups yet</p>
             <button
-              onClick={() => navigate('/groups/create')}
+              onClick={() => navigate('/create-group')}
               className="btn btn-primary"
             >
               Create Your First Group

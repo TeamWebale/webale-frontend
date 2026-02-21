@@ -76,4 +76,9 @@ export function getCurrencyData(code) {
   return CURRENCY_DATA[code] || null;
 }
 
+// ── Backward-compatible alias used by Dashboard / GroupDetails ────
+export function getCurrencySymbol(code) {
+  return CURRENCY_DATA[code]?.symbol || "$";
+}
+
 export default CURRENCY_DATA;
