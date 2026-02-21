@@ -3,14 +3,16 @@
  * Destination: src/components/Navbar.jsx
  */
 
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import WebaleLogo from "./WebaleLogo";
-import { useAuth } from "../context/AuthContext";
+import { AuthContext } from "../context/AuthContext";
 import NotificationBell from "./NotificationBell";
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  // Safe — won't crash if rendered outside AuthProvider
+  const auth     = useContext(AuthContext);
+  const logout   = auth?.logout;
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 

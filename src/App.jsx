@@ -1,174 +1,108 @@
-import { useState, useEffect, createContext, useContext } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { ThemeProvider } from './context/ThemeContext';
-import { LanguageProvider } from './context/LanguageContext';
-import { NotificationProvider } from './context/NotificationContext';
+/**
+ * App.jsx
+ * Destination: src/App.jsx
+ *
+ * Layout logic:
+ *   Public routes  (Login, Register, ForgotPassword, AcceptInvite)
+ *     → rendered bare, NO Navbar, NO MainLayout
+ *   Protected routes (Dashboard, Groups, Profile, etc.)
+ *     → wrapped in MainLayout which includes Navbar
+ *     → redirect to /login if not authenticated
+ */
 
-// Layout Components
-import Navbar from './components/Navbar';
-import ErrorBoundary from './components/ErrorBoundary';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 
-// Pages
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import Profile from './pages/Profile';
-import Settings from './pages/Settings';
-import GroupDetails from './pages/GroupDetails';
-import CreateGroup from './pages/CreateGroup';
-import JoinGroup from './pages/JoinGroup';
+// Layouts
+import MainLayout from "./components/MainLayout";
 
-// Auth Context
-const AuthContext = createContext(null);
+// Public pages
+import Login          from "./pages/Login";
+import Register       from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import AcceptInvite   from "./pages/AcceptInvite";
 
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
+// Protected pages
+import Dashboard   from "./pages/Dashboard";
+import CreateGroup from "./pages/CreateGroup";
+import GroupDetails from "./pages/GroupDetails";
+import Profile     from "./pages/Profile";
 
-// Auth Provider Component
-function AuthProvider({ children }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState(null);
+// ─── Route guards ────────────────────────────────────────────────
 
-  useEffect(() => {
-    checkAuth();
-    window.addEventListener('storage', checkAuth);
-    return () => window.removeEventListener('storage', checkAuth);
-  }, []);
-
-  const checkAuth = () => {
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
-    
-    if (token && userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
-        setIsAuthenticated(true);
-      } catch (e) {
-        logout();
-      }
-    } else {
-      setIsAuthenticated(false);
-      setUser(null);
-    }
-    setIsLoading(false);
-  };
-
-  const login = (token, userData) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
-    setIsAuthenticated(true);
-  };
-
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
-    setIsAuthenticated(false);
-  };
-
-  return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, user, login, logout, checkAuth }}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
-
-// Protected Route
-function ProtectedRoute({ children }) {
-  const { isAuthenticated, isLoading } = useAuth();
-  const location = useLocation();
-
-  if (isLoading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-        <div className="spinner"></div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  return children;
-}
-
-// Public Route
+/** Redirect authenticated users away from login/register */
 function PublicRoute({ children }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user } = useAuth();
 
-  if (isLoading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-        <div className="spinner"></div>
-      </div>
-    );
+  // If logged in and there's a pending invite, honour it first
+  const pendingInvite = localStorage.getItem("pendingInvite");
+  if (user && pendingInvite) {
+    return <Navigate to={`/invite/${pendingInvite}`} replace />;
   }
 
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  return children;
+  return user ? <Navigate to="/dashboard" replace /> : children;
 }
 
-// Main App Content
-function AppContent() {
+/** Redirect unauthenticated users to login */
+function ProtectedRoute({ children }) {
+  const { user } = useAuth();
+  return user ? children : <Navigate to="/login" replace />;
+}
+
+// ─── App ─────────────────────────────────────────────────────────
+
+export default function App() {
   return (
-    <div className="app">
-      {/* Navbar - Always visible */}
-      <Navbar />
-      
-      {/* NOTE: ProfileBanner is now inside MainLayout, NOT here */}
-      {/* This ensures it only appears in the main content column */}
-      
-      {/* Main Content Area */}
-      <main>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<PublicRoute><Login /></PublicRoute>} />
-          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-          <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-          
-          {/* Join Group - accessible to all */}
-          <Route path="/invite/:token" element={<JoinGroup />} />
-          <Route path="/join/:token" element={<JoinGroup />} />
-          
-          {/* Protected Routes */}
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-          <Route path="/groups/create" element={<ProtectedRoute><CreateGroup /></ProtectedRoute>} />
-          <Route path="/groups/:id" element={<ProtectedRoute><GroupDetails /></ProtectedRoute>} />
-          
-          {/* Catch all */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
-    </div>
+    <BrowserRouter>
+      <Routes>
+
+        {/* ── Public routes — no Navbar ── */}
+        <Route
+          path="/"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
+          }
+        />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/invite/:token"   element={<AcceptInvite />} />
+        <Route path="/join/:token"     element={<AcceptInvite />} />
+
+        {/* ── Protected routes — wrapped in MainLayout (includes Navbar) ── */}
+        <Route
+          element={
+            <ProtectedRoute>
+              <MainLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="/dashboard"      element={<Dashboard />} />
+          <Route path="/create-group"   element={<CreateGroup />} />
+          <Route path="/groups/:id"     element={<GroupDetails />} />
+          <Route path="/profile"        element={<Profile />} />
+        </Route>
+
+        {/* ── Catch-all ── */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
+
+      </Routes>
+    </BrowserRouter>
   );
 }
-
-// Root App Component
-function App() {
-  return (
-    <ErrorBoundary>
-      <LanguageProvider>
-        <ThemeProvider>
-          <AuthProvider>
-            <NotificationProvider>
-              <AppContent />
-            </NotificationProvider>
-          </AuthProvider>
-        </ThemeProvider>
-      </LanguageProvider>
-    </ErrorBoundary>
-  );
-}
-
-export default App;
