@@ -1,268 +1,181 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+/**
+ * AcceptInvite.jsx
+ * Destination: src/pages/AcceptInvite.jsx
+ *
+ * - Does NOT use useAuth() directly (avoids AuthProvider crash on public route)
+ * - Validates token via GET /api/invitations/:token/validate
+ * - If not logged in: saves token to localStorage.pendingInvite, redirects to login/register
+ * - If logged in: shows Accept & Join / Decline buttons
+ * - Accept calls POST /api/invitations/:token/accept with JWT
+ */
 
-const API_URL = 'https://webale-api.onrender.com/api';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import axios from "axios";
+import WebaleLogo from "../components/WebaleLogo";
 
-function AcceptInvite() {
-  const { token } = useParams();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [invitation, setInvitation] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [accepting, setAccepting] = useState(false);
+const API = "https://webale-api.onrender.com/api";
+
+export default function AcceptInvite() {
+  const { token }  = useParams();
+  const navigate   = useNavigate();
+
+  const [invite,  setInvite]  = useState(null);
+  const [status,  setStatus]  = useState("loading"); // loading | valid | invalid | accepted | declined
+  const [error,   setError]   = useState("");
+  const [working, setWorking] = useState(false);
+
+  // Check if user is already logged in
+  const authToken  = localStorage.getItem("token");
+  const isLoggedIn = !!authToken;
 
   useEffect(() => {
-    checkLoginAndLoadInvite();
+    validateToken();
   }, [token]);
 
-  const checkLoginAndLoadInvite = async () => {
-    const userToken = localStorage.getItem('token');
-    setIsLoggedIn(!!userToken);
-
+  const validateToken = async () => {
     try {
-      const response = await axios.get(`${API_URL}/invitations/${token}/validate`);
-      if (response.data.success) {
-        setInvitation(response.data.data.invitation);
-      }
+      const res = await axios.get(`${API}/invitations/${token}/validate`);
+      setInvite(res.data.data || res.data);
+      setStatus("valid");
     } catch (err) {
-      console.error('Error validating invitation:', err);
-      setError(err.response?.data?.message || 'Invalid or expired invitation link');
-    } finally {
-      setLoading(false);
+      setStatus("invalid");
+      setError(err.response?.data?.message || "This invitation link is invalid or has expired.");
     }
   };
 
-  const handleAcceptInvite = async () => {
-    if (!isLoggedIn) {
-      // Store invite token for after login/register
-      localStorage.setItem('pendingInvite', token);
-      navigate('/login', { state: { fromInvite: true } });
-      return;
-    }
+  const handleSignIn = () => {
+    localStorage.setItem("pendingInvite", token);
+    navigate("/login");
+  };
 
-    setAccepting(true);
+  const handleRegister = () => {
+    localStorage.setItem("pendingInvite", token);
+    navigate("/register");
+  };
+
+  const handleAccept = async () => {
+    setWorking(true); setError("");
     try {
-      const response = await axios.post(
-        `${API_URL}/invitations/${token}/accept`,
+      const res = await axios.post(
+        `${API}/invitations/${token}/accept`,
         {},
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-          }
-        }
+        { headers: { Authorization: `Bearer ${authToken}` } }
       );
-      if (response.data.success) {
-        navigate(`/groups/${response.data.data.groupId}`);
-      }
+      localStorage.removeItem("pendingInvite");
+      setStatus("accepted");
+      const groupId = res.data?.data?.group_id || res.data?.groupId;
+      if (groupId) setTimeout(() => navigate(`/groups/${groupId}`), 1500);
+      else         setTimeout(() => navigate("/dashboard"), 1500);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to accept invitation');
-    } finally {
-      setAccepting(false);
+      setError(err.response?.data?.message || "Could not accept invitation.");
+      setWorking(false);
     }
   };
 
-  const handleGoToRegister = () => {
-    localStorage.setItem('pendingInvite', token);
-    navigate('/register', { state: { fromInvite: true } });
+  const handleDecline = () => {
+    localStorage.removeItem("pendingInvite");
+    setStatus("declined");
+    setTimeout(() => navigate(isLoggedIn ? "/dashboard" : "/login"), 1500);
   };
-
-  const handleGoToLogin = () => {
-    localStorage.setItem('pendingInvite', token);
-    navigate('/login', { state: { fromInvite: true } });
-  };
-
-  // ==================== LOADING ====================
-  if (loading) {
-    return (
-      <div style={{
-        minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-      }}>
-        <div style={{ textAlign: 'center', color: 'white' }}>
-          <div className="spinner" style={{ width: '50px', height: '50px', margin: '0 auto 20px' }}></div>
-          <p style={{ fontSize: '18px' }}>Validating invitation...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // ==================== ERROR ====================
-  if (error) {
-    return (
-      <div style={{
-        minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: '20px'
-      }}>
-        <div style={{
-          background: 'white', borderRadius: '20px', padding: '40px', maxWidth: '450px',
-          width: '100%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
-        }}>
-          <div style={{ fontSize: '60px', marginBottom: '20px' }}>😔</div>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#2d3748', marginBottom: '12px' }}>
-            Invitation Unavailable
-          </h1>
-          <p style={{ color: '#718096', marginBottom: '24px' }}>{error}</p>
-          <Link to="/login">
-            <button className="btn btn-primary" style={{ padding: '12px 32px' }}>Go to Login</button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  // ==================== MAIN INVITE PAGE ====================
-  const inviterName = invitation?.inviterName || 'Someone';
-  const groupName = invitation?.groupName || 'a fundraising group';
-  const groupDescription = invitation?.groupDescription || '';
 
   return (
-    <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'linear-gradient(135deg, #1a202c 0%, #2d3748 30%, #553c9a 70%, #667eea 100%)',
-      padding: '20px'
-    }}>
-      <div style={{
-        background: 'white', borderRadius: '24px', width: '100%', maxWidth: '480px',
-        overflow: 'hidden', boxShadow: '0 25px 80px rgba(0, 0, 0, 0.4)'
-      }}>
-
-        {/* Top Decorative Header */}
-        <div style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          padding: '32px 30px 40px', textAlign: 'center', position: 'relative'
-        }}>
-          {/* Floating envelope icon */}
-          <div style={{
-            width: '70px', height: '70px', borderRadius: '50%',
-            background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 16px', fontSize: '36px',
-            border: '3px solid rgba(255,255,255,0.3)'
-          }}>
-            💌
-          </div>
-          <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '4px' }}>
-            You've Been Invited
-          </p>
-          {/* Webale logo small */}
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px', marginTop: '8px' }}>
-            via Webale Private Fundraising
-          </p>
+    <div style={styles.page}>
+      <div style={styles.card}>
+        <div style={styles.brand}>
+          <WebaleLogo variant="compact" size="md" theme="dark" />
         </div>
 
-        {/* Personalized Invitation Card */}
-        <div style={{ padding: '30px' }}>
+        {/* ── Loading ── */}
+        {status === "loading" && (
+          <p style={styles.msg}>Validating invitation…</p>
+        )}
 
-          {/* The invitation message */}
-          <div style={{
-            padding: '24px', borderRadius: '16px', marginBottom: '24px',
-            background: 'linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%)',
-            border: '1px solid #e2e8f0', position: 'relative'
-          }}>
-            {/* Decorative quote mark */}
-            <div style={{
-              position: 'absolute', top: '-12px', left: '20px',
-              width: '28px', height: '28px', borderRadius: '50%',
-              background: 'linear-gradient(135deg, #667eea, #764ba2)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: 'white', fontSize: '16px', fontWeight: 'bold'
-            }}>✉</div>
-
-            <p style={{ fontSize: '16px', color: '#2d3748', lineHeight: '1.7', margin: '8px 0 0' }}>
-              <strong style={{ color: '#553c9a' }}>{inviterName}</strong>{' '}
-              cordially invites you to join
-            </p>
-            <h2 style={{
-              fontSize: '22px', fontWeight: '800', color: '#2d3748',
-              margin: '8px 0', lineHeight: '1.3'
-            }}>
-              "{groupName}"
-            </h2>
-            {groupDescription && (
-              <p style={{ fontSize: '14px', color: '#718096', margin: '8px 0 0', fontStyle: 'italic', lineHeight: '1.5' }}>
-                {groupDescription}
-              </p>
-            )}
-            <p style={{ fontSize: '14px', color: '#4a5568', margin: '12px 0 0', lineHeight: '1.6' }}>
-              A private fundraising group on the <strong>Webale</strong> platform.
-              Follow the steps below to accept and join — see you there! 🤝
-            </p>
+        {/* ── Invalid ── */}
+        {status === "invalid" && (
+          <div style={styles.center}>
+            <div style={styles.iconBad}>✕</div>
+            <h2 style={styles.title}>Invalid Invitation</h2>
+            <p style={styles.sub}>{error}</p>
+            <Link to="/login" style={styles.btn}>Go to Sign In</Link>
           </div>
+        )}
 
-          {/* Action Buttons */}
-          {isLoggedIn ? (
-            <>
-              <button onClick={handleAcceptInvite} disabled={accepting} className="btn btn-primary"
-                style={{
-                  width: '100%', padding: '16px', fontSize: '16px', fontWeight: '700',
-                  marginBottom: '10px', borderRadius: '12px',
-                  background: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
-                  border: 'none', color: 'white', cursor: accepting ? 'wait' : 'pointer'
-                }}>
-                {accepting ? 'Joining...' : '✓ Accept & Join Group'}
-              </button>
-              <button onClick={() => navigate('/dashboard')}
-                style={{
-                  width: '100%', padding: '14px', fontSize: '14px', fontWeight: '600',
-                  marginBottom: '8px', borderRadius: '12px',
-                  background: 'white', border: '2px solid #e2e8f0',
-                  color: '#718096', cursor: 'pointer'
-                }}>
-                ✗ Decline Invitation
-              </button>
-              <p style={{ textAlign: 'center', fontSize: '12px', color: '#a0aec0' }}>
-                You're signed in. Choose to accept or decline.
-              </p>
-            </>
-          ) : (
-            <>
-              {/* Sign In Button */}
-              <button onClick={handleGoToLogin}
-                style={{
-                  width: '100%', padding: '16px', fontSize: '16px', fontWeight: '700',
-                  marginBottom: '10px', borderRadius: '12px',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  border: 'none', color: 'white', cursor: 'pointer'
-                }}>
-                🔑 Sign In to Accept
-              </button>
+        {/* ── Valid ── */}
+        {status === "valid" && invite && (
+          <div style={styles.center}>
+            <div style={styles.iconGood}>✉</div>
+            <h2 style={styles.title}>You're Invited!</h2>
+            <p style={styles.sub}>
+              You've been invited to join{" "}
+              <strong style={{ color: "#00C2CC" }}>
+                {invite.group_name || invite.groupName || "a group"}
+              </strong>
+              {invite.invited_by_name || invite.invitedByName
+                ? ` by ${invite.invited_by_name || invite.invitedByName}`
+                : ""}.
+            </p>
 
-              {/* Sign Up Button */}
-              <button onClick={handleGoToRegister}
-                style={{
-                  width: '100%', padding: '16px', fontSize: '16px', fontWeight: '700',
-                  marginBottom: '12px', borderRadius: '12px',
-                  background: 'white', border: '2px solid #667eea',
-                  color: '#667eea', cursor: 'pointer'
-                }}>
-                ✨ Create Account & Join
-              </button>
+            {error && <div style={styles.error}>{error}</div>}
 
-              <div style={{
-                padding: '12px', background: '#fffbeb', borderRadius: '8px',
-                border: '1px solid #fefcbf', fontSize: '12px', color: '#975a16', textAlign: 'center'
-              }}>
-                After signing in or creating an account, you'll automatically be added to this group.
+            {isLoggedIn ? (
+              <div style={styles.btnRow}>
+                <button onClick={handleAccept} disabled={working} style={styles.acceptBtn}>
+                  {working ? "Joining…" : "✓ Accept & Join"}
+                </button>
+                <button onClick={handleDecline} disabled={working} style={styles.declineBtn}>
+                  Decline
+                </button>
               </div>
-            </>
-          )}
-        </div>
+            ) : (
+              <div style={styles.btnCol}>
+                <p style={styles.loginNote}>Sign in to accept this invitation:</p>
+                <button onClick={handleSignIn}   style={styles.acceptBtn}>Sign In to Accept</button>
+                <button onClick={handleRegister} style={styles.declineBtn}>Create Account & Join</button>
+              </div>
+            )}
+          </div>
+        )}
 
-        {/* Footer */}
-        <div style={{
-          padding: '16px 30px', background: '#f7fafc', borderTop: '1px solid #e2e8f0',
-          textAlign: 'center'
-        }}>
-          <p style={{ fontSize: '11px', color: '#a0aec0', margin: 0 }}>
-            🔒 Webale — Private Group Fundraising Platform
-          </p>
-        </div>
+        {/* ── Accepted ── */}
+        {status === "accepted" && (
+          <div style={styles.center}>
+            <div style={styles.iconGood}>✓</div>
+            <h2 style={styles.title}>You've Joined!</h2>
+            <p style={styles.sub}>Taking you to the group…</p>
+          </div>
+        )}
+
+        {/* ── Declined ── */}
+        {status === "declined" && (
+          <div style={styles.center}>
+            <h2 style={styles.title}>Invitation Declined</h2>
+            <p style={styles.sub}>Redirecting…</p>
+          </div>
+        )}
+
+        <p style={styles.footer}>© 2026 Webale · webale.net</p>
       </div>
     </div>
   );
 }
 
-export default AcceptInvite;
+const styles = {
+  page: { minHeight: "100vh", background: "#0D1B2E", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 16px" },
+  card: { background: "#0D1B2E", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "20px", padding: "44px 40px 32px", width: "100%", maxWidth: "420px", display: "flex", flexDirection: "column", alignItems: "center", boxShadow: "0 8px 48px rgba(0,0,0,0.4)" },
+  brand: { marginBottom: "24px" },
+  center: { display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", width: "100%" },
+  iconGood: { width: "56px", height: "56px", borderRadius: "50%", background: "rgba(0,194,204,0.15)", border: "2px solid #00C2CC", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", color: "#00C2CC" },
+  iconBad:  { width: "56px", height: "56px", borderRadius: "50%", background: "rgba(220,53,69,0.15)", border: "2px solid rgba(220,53,69,0.5)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", color: "#ff8a8a" },
+  title: { fontSize: "20px", fontWeight: 700, color: "#FFFFFF", textAlign: "center", fontFamily: "'Segoe UI', sans-serif" },
+  sub:   { fontSize: "14px", color: "rgba(255,255,255,0.5)", textAlign: "center", lineHeight: 1.6, fontFamily: "'Segoe UI', sans-serif" },
+  msg:   { fontSize: "14px", color: "rgba(255,255,255,0.4)", fontFamily: "'Segoe UI', sans-serif" },
+  error: { width: "100%", background: "rgba(220,53,69,0.15)", border: "1px solid rgba(220,53,69,0.4)", borderRadius: "8px", padding: "10px 14px", color: "#ff8a8a", fontSize: "13px", fontFamily: "'Segoe UI', sans-serif" },
+  btnRow: { display: "flex", gap: "12px", width: "100%", marginTop: "8px" },
+  btnCol: { display: "flex", flexDirection: "column", gap: "10px", width: "100%", marginTop: "8px" },
+  loginNote: { fontSize: "13px", color: "rgba(255,255,255,0.4)", fontFamily: "'Segoe UI', sans-serif", alignSelf: "flex-start" },
+  acceptBtn:  { flex: 1, background: "linear-gradient(135deg,#00C2CC,#4A7FC1)", color: "#fff", border: "none", borderRadius: "10px", padding: "13px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: "'Segoe UI', sans-serif" },
+  declineBtn: { flex: 1, background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "10px", padding: "13px", fontSize: "15px", cursor: "pointer", fontFamily: "'Segoe UI', sans-serif" },
+  btn: { marginTop: "8px", background: "linear-gradient(135deg,#00C2CC,#4A7FC1)", color: "#fff", border: "none", borderRadius: "10px", padding: "13px 28px", fontSize: "15px", fontWeight: 600, cursor: "pointer", textDecoration: "none", fontFamily: "'Segoe UI', sans-serif" },
+  footer: { marginTop: "32px", fontSize: "11px", color: "rgba(255,255,255,0.2)", fontFamily: "'Segoe UI', sans-serif" },
+};

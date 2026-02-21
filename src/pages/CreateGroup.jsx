@@ -1,251 +1,190 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { groupAPI } from '../services/api';
-import { CURRENCIES, getCurrencySymbol } from '../utils/currencyConverter';
-import GroupTemplates, { GROUP_TEMPLATES } from '../components/GroupTemplates';
+/**
+ * CreateGroup.jsx
+ * Destination: src/pages/CreateGroup.jsx
+ *
+ * - Currency defaults to profile country (not IP-based)
+ * - Template labels show "(optional)"
+ * - Close ✕ button navigates back
+ * - Placeholder clears when template is selected/filled
+ */
 
-// Country to currency mapping
-const COUNTRY_CURRENCY = {
-  US: 'USD', UG: 'UGX', KE: 'KES', TZ: 'TZS', RW: 'RWF',
-  NG: 'NGN', GH: 'GHS', ZA: 'ZAR', GB: 'GBP', DE: 'EUR',
-  FR: 'EUR', IT: 'EUR', ES: 'EUR', NL: 'EUR', BE: 'EUR',
-  CA: 'CAD', AU: 'AUD', IN: 'INR', CN: 'CNY', JP: 'JPY',
-  BR: 'BRL', ET: 'ETB', CD: 'CDF', SS: 'SSP', BI: 'BIF'
-};
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import axios from "axios";
+import { CURRENCIES, getCurrencyForCountry } from "../utils/currencyConverter";
 
-function CreateGroup() {
-  const navigate = useNavigate();
-  const [showTemplates, setShowTemplates] = useState(true);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    goalAmount: '',
-    currency: 'USD',
-    deadline: ''
+const API = "https://webale-api.onrender.com/api";
+
+function authHeaders() {
+  const token = localStorage.getItem("token");
+  return { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
+}
+
+const TEMPLATES = [
+  { label: "Wedding Fundraiser (optional)", name: "Wedding Fundraiser", description: "Help us celebrate our special day by contributing to our wedding fund." },
+  { label: "Medical Emergency (optional)",  name: "Medical Emergency",  description: "Support needed for urgent medical treatment and hospital expenses." },
+  { label: "School Fees (optional)",        name: "School Fees",        description: "Help fund education costs for the upcoming term or semester." },
+  { label: "Business Startup (optional)",   name: "Business Startup",   description: "Join us in funding a new business venture and sharing in its success." },
+  { label: "Community Project (optional)",  name: "Community Project",  description: "Contribute to a local community improvement initiative." },
+];
+
+export default function CreateGroup() {
+  const { user } = useAuth();
+  const navigate  = useNavigate();
+
+  const defaultCurrency = getCurrencyForCountry(user?.country || user?.profile?.country || "");
+
+  const [form, setForm] = useState({
+    name        : "",
+    description : "",
+    goal_amount : "",
+    currency    : defaultCurrency,
+    deadline    : "",
   });
-
-  // Default currency from user's profile country (not IP)
-  useEffect(() => {
-    try {
-      const userData = localStorage.getItem('user');
-      if (userData) {
-        const user = JSON.parse(userData);
-        const country = user.country;
-        if (country && COUNTRY_CURRENCY[country]) {
-          setFormData(prev => ({ ...prev, currency: COUNTRY_CURRENCY[country] }));
-        }
-      }
-    } catch (e) {
-      console.log('Could not detect currency from profile');
-    }
-  }, []);
-
-  const handleTemplateSelect = (template) => {
-    setSelectedTemplate(template);
-    setFormData(prev => ({
-      name: template.fields.name || '',
-      description: template.fields.description || '',
-      goalAmount: template.defaultGoal.toString(),
-      currency: prev.currency,
-      deadline: ''
-    }));
-    setShowTemplates(false);
-  };
+  const [error,   setError]   = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setError("");
+  };
+
+  const applyTemplate = (template) => {
+    setForm(f => ({
+      ...f,
+      name       : template.name,
+      description: template.description,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    if (!formData.name.trim()) { setError('Please enter a group name'); return; }
-    if (!formData.goalAmount || parseFloat(formData.goalAmount) <= 0) { setError('Please enter a valid goal amount'); return; }
-
-    setLoading(true);
+    setError(""); setLoading(true);
     try {
-      const response = await groupAPI.create({
-        name: formData.name.trim(),
-        description: formData.description.trim(),
-        goalAmount: parseFloat(formData.goalAmount),
-        currency: formData.currency,
-        deadline: formData.deadline || null
-      });
-      const groupId = response.data.data.group.id;
-      navigate(`/groups/${groupId}`);
-    } catch (error) {
-      setError(error.response?.data?.message || 'Failed to create group');
-    } finally { setLoading(false); }
+      const res = await axios.post(
+        `${API}/groups`,
+        {
+          name        : form.name,
+          description : form.description,
+          goal_amount : parseFloat(form.goal_amount),
+          currency    : form.currency,
+          deadline    : form.deadline || null,
+        },
+        { headers: authHeaders() }
+      );
+      const groupId = res.data?.data?.id || res.data?.id;
+      navigate(groupId ? `/groups/${groupId}` : "/dashboard");
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to create group.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const currentSymbol = getCurrencySymbol(formData.currency);
-
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', position: 'relative' }}>
-      {/* Close Button */}
-      <button onClick={() => navigate('/dashboard')} title="Close" style={{
-        position: 'absolute', top: '0', right: '0', width: '36px', height: '36px',
-        borderRadius: '50%', background: '#fed7d7', border: 'none',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        cursor: 'pointer', fontSize: '16px', color: '#e53e3e', fontWeight: '700', zIndex: 10
-      }}>✕</button>
+    <div style={styles.page}>
+      <div style={styles.card}>
 
-      <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2d3748', marginBottom: '8px' }}>
-        ➕ Create New Group
-      </h1>
-      <p style={{ color: '#718096', marginBottom: '24px' }}>
-        Start a new fundraising group and invite members to contribute.
-      </p>
+        {/* Header */}
+        <div style={styles.header}>
+          <h1 style={styles.title}>Create New Group</h1>
+          <button onClick={() => navigate("/dashboard")} style={styles.closeBtn} aria-label="Close">✕</button>
+        </div>
 
-      {/* Template Selection */}
-      {showTemplates && (
-        <div className="card" style={{ marginBottom: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h2 style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>🎨 Choose a Template <span style={{ fontSize: '13px', color: '#a0aec0', fontWeight: '400' }}>(optional)</span></h2>
-            <button onClick={() => setShowTemplates(false)} style={{
-              background: 'none', border: 'none', color: '#667eea', cursor: 'pointer', fontSize: '14px', fontWeight: '600'
-            }}>Skip →</button>
-          </div>
-          
-          <p style={{ color: '#718096', fontSize: '14px', marginBottom: '16px' }}>
-            Quick-start with a pre-configured template or start from scratch.
-          </p>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
-            {GROUP_TEMPLATES.slice(0, 8).map(template => (
-              <div key={template.id} onClick={() => handleTemplateSelect(template)} style={{
-                padding: '16px', borderRadius: '12px', border: '2px solid #e2e8f0',
-                cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s'
-              }}
-                onMouseEnter={(e) => e.currentTarget.style.borderColor = template.color}
-                onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e2e8f0'}>
-                <div style={{
-                  width: '45px', height: '45px', borderRadius: '10px', background: `${template.color}20`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', margin: '0 auto 10px'
-                }}>{template.icon}</div>
-                <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#2d3748', margin: 0 }}>{template.name}</h3>
-              </div>
+        {/* Templates */}
+        <div style={styles.section}>
+          <p style={styles.sectionLabel}>Quick Templates <span style={styles.opt}>(optional)</span></p>
+          <div style={styles.templateRow}>
+            {TEMPLATES.map(t => (
+              <button key={t.name} onClick={() => applyTemplate(t)} style={styles.templateBtn}>
+                {t.label}
+              </button>
             ))}
           </div>
         </div>
-      )}
 
-      {/* Selected Template Badge */}
-      {selectedTemplate && (
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px',
-          background: `${selectedTemplate.color}15`, borderRadius: '10px', marginBottom: '20px',
-          border: `2px solid ${selectedTemplate.color}40`
-        }}>
-          <span style={{ fontSize: '24px' }}>{selectedTemplate.icon}</span>
-          <div style={{ flex: 1 }}>
-            <p style={{ margin: 0, fontWeight: '600', color: '#2d3748' }}>Using {selectedTemplate.name} Template</p>
-            <p style={{ margin: 0, fontSize: '12px', color: '#718096' }}>{selectedTemplate.description}</p>
-          </div>
-          <button onClick={() => setShowTemplates(true)} style={{
-            background: 'none', border: 'none', color: selectedTemplate.color, cursor: 'pointer', fontSize: '13px', fontWeight: '600'
-          }}>Change</button>
-        </div>
-      )}
+        {error && <div style={styles.error}>{error}</div>}
 
-      {/* Create Form */}
-      <div className="card">
-        <form onSubmit={handleSubmit}>
-          {error && (
-            <div style={{
-              padding: '12px 16px', background: '#fed7d7', color: '#c53030', borderRadius: '8px',
-              marginBottom: '16px', fontSize: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-            }}>
-              <span>⚠️ {error}</span>
-              <button type="button" onClick={() => setError('')} style={{
-                background: 'none', border: 'none', color: '#c53030', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold'
-              }}>✕</button>
-            </div>
-          )}
+        {/* Form */}
+        <form onSubmit={handleSubmit} style={styles.form}>
 
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '14px', color: '#4a5568' }}>
-              Group Name *
-            </label>
-            <input type="text" name="name" value={formData.name} onChange={handleChange}
-              className="input" placeholder={formData.name ? '' : 'e.g., Wedding Fund - John & Jane'} required />
+          <div style={styles.field}>
+            <label style={styles.label}>Group Name</label>
+            <input
+              name="name" value={form.name} onChange={handleChange} required
+              placeholder="e.g. Kampala Wedding 2026" style={styles.input}
+            />
           </div>
 
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '14px', color: '#4a5568' }}>
-              Description
-            </label>
-            <textarea name="description" value={formData.description} onChange={handleChange}
-              className="input" placeholder={formData.description ? '' : 'What is this group raising funds for?'} rows="3" />
+          <div style={styles.field}>
+            <label style={styles.label}>Description</label>
+            <textarea
+              name="description" value={form.description} onChange={handleChange}
+              placeholder="What is this group fundraising for?" required
+              style={{ ...styles.input, height: "90px", resize: "vertical" }}
+            />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '16px', marginBottom: '20px' }}>
-            <div>
-              <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '14px', color: '#4a5568' }}>
-                Currency
-              </label>
-              <select name="currency" value={formData.currency} onChange={handleChange} className="input">
+          <div style={styles.row}>
+            <div style={styles.field}>
+              <label style={styles.label}>Currency</label>
+              <select name="currency" value={form.currency} onChange={handleChange} style={styles.input}>
                 {CURRENCIES.map(c => (
-                  <option key={c.code} value={c.code}>{c.flag} {c.code} - {c.name}</option>
+                  <option key={c.code} value={c.code}>
+                    {c.flag} {c.code} — {c.name}
+                  </option>
                 ))}
               </select>
             </div>
-            <div>
-              <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '14px', color: '#4a5568' }}>
-                Goal Amount *
-              </label>
-              <input type="number" name="goalAmount" value={formData.goalAmount} onChange={handleChange}
-                className="input" placeholder="10000" min="1" step="0.01" required />
+            <div style={styles.field}>
+              <label style={styles.label}>Target / Goal Amount</label>
+              <input
+                name="goal_amount" type="number" min="1" value={form.goal_amount}
+                onChange={handleChange} required
+                placeholder="0.00" style={styles.input}
+              />
             </div>
           </div>
 
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', fontSize: '14px', color: '#4a5568' }}>
-              Deadline (Optional)
-            </label>
-            <input type="date" name="deadline" value={formData.deadline} onChange={handleChange}
-              className="input" min={new Date().toISOString().split('T')[0]} />
+          <div style={styles.field}>
+            <label style={styles.label}>Deadline <span style={styles.opt}>(optional)</span></label>
+            <input name="deadline" type="date" value={form.deadline} onChange={handleChange} style={styles.input}/>
           </div>
 
-          {/* Suggested Pledge Amounts */}
-          {selectedTemplate && selectedTemplate.suggestedPledges && (
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px', color: '#4a5568' }}>
-                Suggested Pledge Amounts
-              </label>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {selectedTemplate.suggestedPledges.map(amount => (
-                  <span key={amount} style={{
-                    padding: '8px 16px', background: '#f7fafc', borderRadius: '20px', fontSize: '14px',
-                    color: selectedTemplate.color, fontWeight: '600', border: `1px solid ${selectedTemplate.color}40`
-                  }}>{currentSymbol}{amount.toLocaleString()}</span>
-                ))}
-              </div>
-              <p style={{ fontSize: '12px', color: '#a0aec0', marginTop: '6px' }}>
-                These will be shown as quick options when members make pledges
-              </p>
-            </div>
-          )}
+          <div style={styles.btnRow}>
+            <button type="button" onClick={() => navigate("/dashboard")} style={styles.cancelBtn}>
+              Cancel
+            </button>
+            <button type="submit" disabled={loading} style={styles.submitBtn}>
+              {loading ? "Creating…" : "Create Group"}
+            </button>
+          </div>
 
-          <button type="submit" disabled={loading} className="btn btn-primary"
-            style={{ width: '100%', padding: '14px', fontSize: '16px', fontWeight: '600' }}>
-            {loading ? 'Creating...' : '🚀 Create Group'}
-          </button>
         </form>
-      </div>
-
-      <div style={{ textAlign: 'center', marginTop: '20px' }}>
-        <button onClick={() => navigate('/dashboard')} style={{
-          background: 'none', border: 'none', color: '#718096', cursor: 'pointer', fontSize: '14px'
-        }}>← Back to Dashboard</button>
       </div>
     </div>
   );
 }
 
-export default CreateGroup;
+const styles = {
+  page: { maxWidth: "640px", margin: "0 auto" },
+  card: { background: "#fff", borderRadius: "16px", padding: "28px 32px", boxShadow: "0 2px 16px rgba(27,45,79,0.07)" },
+  header: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" },
+  title: { fontSize: "20px", fontWeight: 700, color: "#1B2D4F", fontFamily: "'Segoe UI', sans-serif" },
+  closeBtn: { background: "transparent", border: "none", fontSize: "18px", color: "#8899AA", cursor: "pointer", padding: "4px" },
+  section: { marginBottom: "20px" },
+  sectionLabel: { fontSize: "12px", fontWeight: 600, color: "#8899AA", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "8px", fontFamily: "'Segoe UI', sans-serif" },
+  opt: { fontWeight: 400, textTransform: "none", color: "#AAB8C8" },
+  templateRow: { display: "flex", flexWrap: "wrap", gap: "8px" },
+  templateBtn: { background: "#F0F4F9", border: "1px solid #D8E3EE", borderRadius: "8px", padding: "6px 12px", fontSize: "12px", color: "#1B2D4F", cursor: "pointer", fontFamily: "'Segoe UI', sans-serif" },
+  error: { background: "rgba(220,53,69,0.08)", border: "1px solid rgba(220,53,69,0.3)", borderRadius: "8px", padding: "10px 14px", color: "#C0392B", fontSize: "13px", marginBottom: "16px", fontFamily: "'Segoe UI', sans-serif" },
+  form: { display: "flex", flexDirection: "column", gap: "16px" },
+  row: { display: "flex", gap: "12px" },
+  field: { flex: 1, display: "flex", flexDirection: "column", gap: "5px" },
+  label: { fontSize: "11px", fontWeight: 600, color: "#8899AA", textTransform: "uppercase", letterSpacing: "0.5px", fontFamily: "'Segoe UI', sans-serif" },
+  input: { background: "#F8FAFC", border: "1px solid #D8E3EE", borderRadius: "10px", padding: "10px 14px", fontSize: "14px", color: "#1B2D4F", outline: "none", fontFamily: "'Segoe UI', sans-serif", width: "100%" },
+  btnRow: { display: "flex", gap: "12px", justifyContent: "flex-end", marginTop: "4px" },
+  cancelBtn: { background: "transparent", border: "1px solid #D8E3EE", borderRadius: "10px", padding: "11px 24px", fontSize: "14px", color: "#5A6A7E", cursor: "pointer", fontFamily: "'Segoe UI', sans-serif" },
+  submitBtn: { background: "linear-gradient(135deg,#00C2CC,#4A7FC1)", color: "#fff", border: "none", borderRadius: "10px", padding: "11px 28px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: "'Segoe UI', sans-serif" },
+};

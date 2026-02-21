@@ -1,215 +1,79 @@
-// ============================================================
-// ENHANCED CURRENCY CONVERTER UTILITY
-// Features: IP-based detection, exchange rates, auto-conversion
-// Location: frontend/src/utils/currencyConverter.js
-// ============================================================
+/**
+ * currencyConverter.js
+ * Destination: src/utils/currencyConverter.js
+ *
+ * - CURRENCIES exported as array (used in dropdowns)
+ * - CURRENCY_DATA internal object (rates + formatting)
+ * - Emoji flags replaced with text codes [US] [UG] etc. for Windows compatibility
+ */
 
-// Comprehensive currency data
+// Internal data — rates are hardcoded (TODO: integrate live rate API)
 const CURRENCY_DATA = {
-  USD: { symbol: '$', name: 'US Dollar', flag: '[US]' },
-  UGX: { symbol: 'USh', name: 'Ugandan Shilling', flag: '[UG]' },
-  KES: { symbol: 'KSh', name: 'Kenyan Shilling', flag: '[KE]' },
-  TZS: { symbol: 'TSh', name: 'Tanzanian Shilling', flag: '[TZ]' },
-  RWF: { symbol: 'FRw', name: 'Rwandan Franc', flag: '[RW]' },
-  NGN: { symbol: '₦', name: 'Nigerian Naira', flag: '[NG]' },
-  GHS: { symbol: 'GH₵', name: 'Ghanaian Cedi', flag: '[GH]' },
-  ZAR: { symbol: 'R', name: 'South African Rand', flag: '[ZA]' },
-  EUR: { symbol: '€', name: 'Euro', flag: '[EU]' },
-  GBP: { symbol: '£', name: 'British Pound', flag: '[UK]' },
-  CAD: { symbol: 'CA$', name: 'Canadian Dollar', flag: '[CA]' },
-  AUD: { symbol: 'A$', name: 'Australian Dollar', flag: '[AU]' },
-  INR: { symbol: '₹', name: 'Indian Rupee', flag: '[IN]' },
-  CNY: { symbol: '¥', name: 'Chinese Yuan', flag: '[CN]' },
-  JPY: { symbol: '¥', name: 'Japanese Yen', flag: '[JP]' },
-  BRL: { symbol: 'R$', name: 'Brazilian Real', flag: '[BR]' },
-  ETB: { symbol: 'Br', name: 'Ethiopian Birr', flag: '[ET]' },
-  CDF: { symbol: 'FC', name: 'Congolese Franc', flag: '[CD]' },
-  SSP: { symbol: 'SSP', name: 'South Sudanese Pound', flag: '[SS]' },
-  BIF: { symbol: 'FBu', name: 'Burundian Franc', flag: '[BI]' },
+  USD: { code: "USD", name: "US Dollar",        flag: "[US]", symbol: "$",  rate: 1.000 },
+  UGX: { code: "UGX", name: "Ugandan Shilling", flag: "[UG]", symbol: "USh", rate: 3750  },
+  KES: { code: "KES", name: "Kenyan Shilling",  flag: "[KE]", symbol: "KSh", rate: 129   },
+  TZS: { code: "TZS", name: "Tanzanian Shilling",flag:"[TZ]", symbol: "TSh", rate: 2550  },
+  RWF: { code: "RWF", name: "Rwandan Franc",    flag: "[RW]", symbol: "RF",  rate: 1250  },
+  NGN: { code: "NGN", name: "Nigerian Naira",   flag: "[NG]", symbol: "₦",  rate: 1580  },
+  GHS: { code: "GHS", name: "Ghanaian Cedi",    flag: "[GH]", symbol: "₵",  rate: 15.2  },
+  ZAR: { code: "ZAR", name: "South African Rand",flag:"[ZA]", symbol: "R",  rate: 18.6  },
+  GBP: { code: "GBP", name: "British Pound",    flag: "[GB]", symbol: "£",  rate: 0.79  },
+  EUR: { code: "EUR", name: "Euro",              flag: "[EU]", symbol: "€",  rate: 0.92  },
+  CAD: { code: "CAD", name: "Canadian Dollar",  flag: "[CA]", symbol: "CA$", rate: 1.36 },
+  AUD: { code: "AUD", name: "Australian Dollar",flag: "[AU]", symbol: "A$",  rate: 1.53 },
+  INR: { code: "INR", name: "Indian Rupee",     flag: "[IN]", symbol: "₹",  rate: 83.1  },
+  JPY: { code: "JPY", name: "Japanese Yen",     flag: "[JP]", symbol: "¥",  rate: 149   },
+  CNY: { code: "CNY", name: "Chinese Yuan",     flag: "[CN]", symbol: "¥",  rate: 7.24  },
 };
 
-// Array format for dropdowns (used by CreateGroup.jsx and others)
-export const CURRENCIES = Object.entries(CURRENCY_DATA).map(([code, info]) => ({
-  code,
-  symbol: info.symbol,
-  name: info.name,
-  flag: info.flag,
-  label: `${info.flag} ${code} - ${info.name} (${info.symbol})`
-}));
-
-// Country to currency mapping
-const COUNTRY_CURRENCY_MAP = {
-  US: 'USD', UG: 'UGX', KE: 'KES', TZ: 'TZS', RW: 'RWF',
-  NG: 'NGN', GH: 'GHS', ZA: 'ZAR', GB: 'GBP', DE: 'EUR',
-  FR: 'EUR', IT: 'EUR', ES: 'EUR', NL: 'EUR', BE: 'EUR',
-  AT: 'EUR', IE: 'EUR', PT: 'EUR', FI: 'EUR', GR: 'EUR',
-  CA: 'CAD', AU: 'AUD', IN: 'INR', CN: 'CNY', JP: 'JPY',
-  BR: 'BRL', ET: 'ETB', CD: 'CDF', SS: 'SSP', BI: 'BIF',
+// Map country names → default currency code
+const COUNTRY_CURRENCY = {
+  "Uganda":         "UGX",
+  "Kenya":          "KES",
+  "Tanzania":       "TZS",
+  "Rwanda":         "RWF",
+  "Nigeria":        "NGN",
+  "Ghana":          "GHS",
+  "South Africa":   "ZAR",
+  "United Kingdom": "GBP",
+  "United States":  "USD",
+  "Canada":         "CAD",
+  "Australia":      "AUD",
+  "India":          "INR",
+  "Japan":          "JPY",
+  "China":          "CNY",
+  "Germany":        "EUR",
+  "France":         "EUR",
 };
 
-// Approximate exchange rates to USD (updated periodically)
-// In production, these would come from an API like exchangerate-api.com
-const EXCHANGE_RATES_TO_USD = {
-  USD: 1,
-  UGX: 3750,
-  KES: 155,
-  TZS: 2650,
-  RWF: 1350,
-  NGN: 1600,
-  GHS: 15.5,
-  ZAR: 18.5,
-  EUR: 0.92,
-  GBP: 0.79,
-  CAD: 1.36,
-  AUD: 1.55,
-  INR: 83.5,
-  CNY: 7.25,
-  JPY: 150,
-  BRL: 5.0,
-  ETB: 57,
-  CDF: 2800,
-  SSP: 1300,
-  BIF: 2900,
-};
+// ── Exported array for dropdowns ──────────────────────────────────
+export const CURRENCIES = Object.values(CURRENCY_DATA);
 
-/**
- * Get currency symbol for a given currency code
- */
-export const getCurrencySymbol = (code) => {
-  return CURRENCY_DATA[code]?.symbol || code;
-};
+// ── Get default currency from user's country ──────────────────────
+export function getCurrencyForCountry(country) {
+  return COUNTRY_CURRENCY[country] || "USD";
+}
 
-/**
- * Get full currency info
- */
-export const getCurrencyInfo = (code) => {
-  return CURRENCY_DATA[code] || { symbol: code, name: code, flag: '🌍' };
-};
+// ── Convert amount between currencies ────────────────────────────
+export function convertCurrency(amount, fromCode, toCode) {
+  const from = CURRENCY_DATA[fromCode];
+  const to   = CURRENCY_DATA[toCode];
+  if (!from || !to || isNaN(amount)) return 0;
+  // Convert to USD first, then to target
+  const usd = parseFloat(amount) / from.rate;
+  return Math.round(usd * to.rate * 100) / 100;
+}
 
-/**
- * Get all supported currencies as array
- */
-export const getAllCurrencies = () => {
-  return CURRENCIES;
-};
+// ── Format amount with currency symbol ───────────────────────────
+export function formatCurrency(amount, code) {
+  const c = CURRENCY_DATA[code];
+  if (!c) return `${amount}`;
+  return `${c.symbol}${Number(amount).toLocaleString()}`;
+}
 
-/**
- * Convert amount between currencies
- * @param {number} amount - Amount to convert
- * @param {string} fromCurrency - Source currency code
- * @param {string} toCurrency - Target currency code
- * @returns {{ converted: number, rate: number, display: string }}
- */
-export const convertCurrency = (amount, fromCurrency, toCurrency) => {
-  if (!amount || fromCurrency === toCurrency) {
-    return { converted: amount, rate: 1, display: '' };
-  }
+// ── Get single currency data ──────────────────────────────────────
+export function getCurrencyData(code) {
+  return CURRENCY_DATA[code] || null;
+}
 
-  const fromRate = EXCHANGE_RATES_TO_USD[fromCurrency] || 1;
-  const toRate = EXCHANGE_RATES_TO_USD[toCurrency] || 1;
-
-  // Convert: from -> USD -> to
-  const amountInUSD = amount / fromRate;
-  const converted = amountInUSD * toRate;
-  const rate = toRate / fromRate;
-
-  const toSymbol = getCurrencySymbol(toCurrency);
-  const display = `≈ ${toSymbol}${converted.toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })}`;
-
-  return { converted, rate, display };
-};
-
-/**
- * Detect user's country and default currency from IP
- * Uses free ipapi.co service (no API key needed, 1000 req/day)
- * Caches result in localStorage
- */
-export const detectUserCurrency = async () => {
-  // Check cache first
-  const cached = localStorage.getItem('webale_detected_currency');
-  if (cached) {
-    try {
-      const parsed = JSON.parse(cached);
-      // Cache for 24 hours
-      if (parsed.timestamp && Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
-        return parsed;
-      }
-    } catch (e) { /* ignore parse errors */ }
-  }
-
-  try {
-    const response = await fetch('https://ipapi.co/json/', { 
-      signal: AbortSignal.timeout(5000) // 5 second timeout
-    });
-    const data = await response.json();
-
-    const countryCode = data.country_code || data.country || 'US';
-    const currencyCode = COUNTRY_CURRENCY_MAP[countryCode] || 'USD';
-    const result = {
-      country: countryCode,
-      countryName: data.country_name || countryCode,
-      currency: currencyCode,
-      currencyInfo: getCurrencyInfo(currencyCode),
-      city: data.city || '',
-      timestamp: Date.now()
-    };
-
-    // Cache result
-    localStorage.setItem('webale_detected_currency', JSON.stringify(result));
-    return result;
-  } catch (err) {
-    console.log('Currency detection fallback to USD:', err.message);
-    // Fallback: check user profile for country
-    try {
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      if (user.country) {
-        const code = user.country.toUpperCase().substring(0, 2);
-        const currencyCode = COUNTRY_CURRENCY_MAP[code] || 'USD';
-        return {
-          country: code,
-          countryName: user.country,
-          currency: currencyCode,
-          currencyInfo: getCurrencyInfo(currencyCode),
-          city: '',
-          timestamp: Date.now()
-        };
-      }
-    } catch (e) { /* ignore */ }
-
-    return {
-      country: 'US',
-      countryName: 'United States',
-      currency: 'USD',
-      currencyInfo: getCurrencyInfo('USD'),
-      city: '',
-      timestamp: Date.now()
-    };
-  }
-};
-
-/**
- * Format amount with currency
- */
-export const formatCurrencyAmount = (amount, currencyCode) => {
-  const symbol = getCurrencySymbol(currencyCode);
-  const formatted = parseFloat(amount || 0).toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-  return `${symbol}${formatted}`;
-};
-
-export default {
-  getCurrencySymbol,
-  getCurrencyInfo,
-  getAllCurrencies,
-  convertCurrency,
-  detectUserCurrency,
-  formatCurrencyAmount,
-  CURRENCIES,
-  EXCHANGE_RATES_TO_USD,
-  COUNTRY_CURRENCY_MAP
-};
+export default CURRENCY_DATA;

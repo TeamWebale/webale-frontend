@@ -1,181 +1,296 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { COUNTRIES } from '../utils/countries';
+/**
+ * Register.jsx
+ * Destination: src/pages/Register.jsx
+ *
+ * - Close ✕ button (navigates back to login)
+ * - Country field required
+ * - Pending invite redirect after signup
+ * - Auto-accepts pending invite via POST /api/invitations/:token/accept
+ */
 
-const API_URL = 'https://webale-api.onrender.com/api';
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import WebaleLogo from "../components/WebaleLogo";
+import axios from "axios";
 
-function Register() {
+const API = "https://webale-api.onrender.com/api";
+
+const COUNTRIES = [
+  "Uganda","Kenya","Tanzania","Rwanda","Nigeria","Ghana","South Africa",
+  "United Kingdom","United States","Canada","Australia","India","Germany",
+  "France","Japan","China","Brazil","Mexico","Other"
+];
+
+export default function Register() {
+  const { register } = useAuth();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    firstName: '', lastName: '', email: '', password: '', confirmPassword: '', country: ''
+
+  const [form, setForm] = useState({
+    first_name: "", last_name: "", email: "",
+    password: "", confirm_password: "", country: "",
   });
-  const [error, setError] = useState('');
+  const [error,   setError]   = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setForm({ ...form, [e.target.name]: e.target.value });
+    setError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
-      setError('Please fill in all required fields'); return;
+    setError("");
+
+    if (form.password !== form.confirm_password) {
+      return setError("Passwords do not match.");
     }
-    if (formData.password !== formData.confirmPassword) { setError('Passwords do not match'); return; }
-    if (formData.password.length < 6) { setError('Password must be at least 6 characters'); return; }
-    if (!formData.country) { setError('Please select your country'); return; }
+    if (!form.country) {
+      return setError("Please select your country.");
+    }
 
     setLoading(true);
     try {
-      const response = await axios.post(`${API_URL}/auth/register`, {
-        firstName: formData.firstName, lastName: formData.lastName,
-        email: formData.email, password: formData.password, country: formData.country
-      }, { headers: { 'Content-Type': 'application/json' } });
+      const result = await register({
+        first_name: form.first_name,
+        last_name : form.last_name,
+        email     : form.email,
+        password  : form.password,
+        country   : form.country,
+      });
 
-      if (response.data.success) {
-        const { token, user } = response.data.data;
-        // Normalize user data to snake_case
-        const normalizedUser = {
-          id: user.id, email: user.email,
-          first_name: user.first_name || user.firstName || '',
-          last_name: user.last_name || user.lastName || '',
-          country: user.country || '',
-          avatar: user.avatar || user.avatarUrl || user.avatar_url || null,
-          created_at: user.created_at || user.createdAt || ''
-        };
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(normalizedUser));
-
-        // Check for pending invite - redirect back to invite page (user chooses to accept)
-        const pendingInvite = localStorage.getItem('pendingInvite');
-        if (pendingInvite) {
-          localStorage.removeItem('pendingInvite');
-          navigate(`/invite/${pendingInvite}`, { replace: true });
-          return;
-        }
-
-        navigate('/dashboard', { replace: true });
+      if (!result.success) {
+        setError(result.message || "Registration failed.");
+        setLoading(false);
+        return;
       }
+
+      // Auto-accept pending invite if present
+      const pendingInvite = localStorage.getItem("pendingInvite");
+      if (pendingInvite) {
+        try {
+          const token = localStorage.getItem("token");
+          await axios.post(
+            `${API}/invitations/${pendingInvite}/accept`,
+            {},
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          localStorage.removeItem("pendingInvite");
+          navigate(`/invite/${pendingInvite}`);
+          return;
+        } catch {
+          localStorage.removeItem("pendingInvite");
+        }
+      }
+
+      navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
-    } finally { setLoading(false); }
+      setError(err.response?.data?.message || err.message || "Registration failed.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: '20px' }}>
-      <div style={{ background: 'white', borderRadius: '20px', padding: '40px', width: '100%',
-        maxWidth: '480px', boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)', position: 'relative' }}>
+    <div style={styles.page}>
+      <div style={styles.card}>
 
-        {/* Close Button */}
-        <button onClick={() => navigate('/')} title="Close" style={{
-          position: 'absolute', top: '16px', right: '16px', width: '36px', height: '36px',
-          borderRadius: '50%', background: '#f7fafc', border: '1px solid #e2e8f0',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          cursor: 'pointer', fontSize: '18px', color: '#718096'
-        }}>✕</button>
+        {/* ✕ Close */}
+        <button onClick={() => navigate("/login")} style={styles.closeBtn} aria-label="Close">✕</button>
 
-        {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <Link to="/" style={{ textDecoration: 'none' }}>
-            <div style={{ width: '70px', height: '70px', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              margin: '0 auto 16px', boxShadow: '0 8px 20px rgba(102, 126, 234, 0.4)' }}>
-              <span style={{ color: 'white', fontSize: '36px', fontWeight: 'bold',
-                fontFamily: '"Lucida Calligraphy", "Lucida Handwriting", cursive, serif' }}>W</span>
-            </div>
-          </Link>
-          <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2d3748', marginBottom: '8px' }}>Create Account</h1>
-          <p style={{ color: '#718096', fontSize: '15px' }}>Join Webale and start fundraising</p>
+        {/* Brand */}
+        <div style={styles.brand}>
+          <WebaleLogo variant="full" size="md" theme="dark" />
         </div>
 
-        {/* Pending invite notice */}
-        {localStorage.getItem('pendingInvite') && (
-          <div style={{ padding: '12px 16px', background: '#ebf8ff', border: '1px solid #bee3f8',
-            borderRadius: '8px', marginBottom: '20px', color: '#2b6cb0', fontSize: '13px', textAlign: 'center' }}>
-            💌 Create your account to accept the group invitation!
-          </div>
-        )}
+        <p style={styles.subtitle}>Create your account</p>
 
-        {/* Dismissible Error */}
+        {/* Error */}
         {error && (
-          <div style={{ padding: '12px 16px', background: '#fed7d7', border: '1px solid #fc8181',
-            borderRadius: '8px', marginBottom: '20px', color: '#c53030', fontSize: '14px',
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>⚠️ {error}</span>
-            <button onClick={() => setError('')} style={{ background: 'none', border: 'none',
-              color: '#c53030', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold' }}>✕</button>
+          <div style={styles.error}>
+            <span>{error}</span>
+            <button onClick={() => setError("")} style={styles.errorClose}>✕</button>
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
-            <div>
-              <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: '#4a5568', fontSize: '13px' }}>
-                First Name <span style={{ color: '#e53e3e' }}>*</span>
-              </label>
-              <input type="text" name="firstName" value={formData.firstName} onChange={handleChange}
-                className="input" placeholder="John" required style={{ padding: '12px 14px', fontSize: '14px' }} />
+        {/* Form */}
+        <form onSubmit={handleSubmit} style={styles.form}>
+          <div style={styles.row}>
+            <div style={styles.field}>
+              <label style={styles.label}>First Name</label>
+              <input
+                name="first_name" value={form.first_name}
+                onChange={handleChange} required
+                placeholder="First name" style={styles.input}
+              />
             </div>
-            <div>
-              <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: '#4a5568', fontSize: '13px' }}>
-                Last Name <span style={{ color: '#e53e3e' }}>*</span>
-              </label>
-              <input type="text" name="lastName" value={formData.lastName} onChange={handleChange}
-                className="input" placeholder="Doe" required style={{ padding: '12px 14px', fontSize: '14px' }} />
+            <div style={styles.field}>
+              <label style={styles.label}>Last Name</label>
+              <input
+                name="last_name" value={form.last_name}
+                onChange={handleChange} required
+                placeholder="Last name" style={styles.input}
+              />
             </div>
           </div>
 
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: '#4a5568', fontSize: '13px' }}>
-              Email Address <span style={{ color: '#e53e3e' }}>*</span>
-            </label>
-            <input type="email" name="email" value={formData.email} onChange={handleChange}
-              className="input" placeholder="you@example.com" required style={{ padding: '12px 14px', fontSize: '14px' }} />
+          <div style={styles.field}>
+            <label style={styles.label}>Email</label>
+            <input
+              name="email" type="email" value={form.email}
+              onChange={handleChange} required
+              placeholder="you@example.com" style={styles.input}
+            />
           </div>
 
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: '#4a5568', fontSize: '13px' }}>
-              Country <span style={{ color: '#e53e3e' }}>*</span>
-            </label>
-            <select name="country" value={formData.country} onChange={handleChange}
-              className="input" required style={{ padding: '12px 14px', fontSize: '14px' }}>
-              <option value="">Select your country...</option>
-              {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.flag} {c.name}</option>)}
+          <div style={styles.field}>
+            <label style={styles.label}>Country <span style={styles.req}>*</span></label>
+            <select
+              name="country" value={form.country}
+              onChange={handleChange} required style={styles.input}
+            >
+              <option value="">Select your country…</option>
+              {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
 
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: '#4a5568', fontSize: '13px' }}>
-              Password <span style={{ color: '#e53e3e' }}>*</span>
-            </label>
-            <input type="password" name="password" value={formData.password} onChange={handleChange}
-              className="input" placeholder="••••••••" required minLength="6" style={{ padding: '12px 14px', fontSize: '14px' }} />
+          <div style={styles.field}>
+            <label style={styles.label}>Password</label>
+            <input
+              name="password" type="password" value={form.password}
+              onChange={handleChange} required
+              placeholder="Min. 8 characters" style={styles.input}
+            />
           </div>
 
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: '#4a5568', fontSize: '13px' }}>
-              Confirm Password <span style={{ color: '#e53e3e' }}>*</span>
-            </label>
-            <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange}
-              className="input" placeholder="••••••••" required style={{ padding: '12px 14px', fontSize: '14px' }} />
+          <div style={styles.field}>
+            <label style={styles.label}>Confirm Password</label>
+            <input
+              name="confirm_password" type="password" value={form.confirm_password}
+              onChange={handleChange} required
+              placeholder="Repeat password" style={styles.input}
+            />
           </div>
 
-          <button type="submit" className="btn btn-primary" disabled={loading}
-            style={{ width: '100%', padding: '14px', fontSize: '16px', fontWeight: '600' }}>
-            {loading ? 'Creating Account...' : 'Create Account'}
+          <button type="submit" disabled={loading} style={styles.btn}>
+            {loading ? "Creating account…" : "Create Account"}
           </button>
         </form>
 
-        <p style={{ textAlign: 'center', marginTop: '24px', color: '#718096', fontSize: '14px' }}>
-          Already have an account?{' '}
-          <Link to="/login" style={{ color: '#667eea', fontWeight: '600', textDecoration: 'none' }}>Sign In</Link>
+        <p style={styles.loginRow}>
+          Already have an account?{" "}
+          <Link to="/login" style={styles.loginLink}>Sign in</Link>
         </p>
+
+        <p style={styles.footer}>© 2026 Webale · webale.net</p>
       </div>
     </div>
   );
 }
 
-export default Register;
+const styles = {
+  page: {
+    minHeight     : "100vh",
+    background    : "#0D1B2E",
+    display       : "flex",
+    alignItems    : "center",
+    justifyContent: "center",
+    padding       : "24px 16px",
+  },
+  card: {
+    background   : "#0D1B2E",
+    border       : "1px solid rgba(255,255,255,0.08)",
+    borderRadius : "20px",
+    padding      : "44px 40px 32px",
+    width        : "100%",
+    maxWidth     : "460px",
+    display      : "flex",
+    flexDirection: "column",
+    alignItems   : "center",
+    boxShadow    : "0 8px 48px rgba(0,0,0,0.4)",
+    position     : "relative",
+  },
+  closeBtn: {
+    position  : "absolute",
+    top       : "16px",
+    right     : "16px",
+    background: "transparent",
+    border    : "none",
+    color     : "rgba(255,255,255,0.4)",
+    fontSize  : "18px",
+    cursor    : "pointer",
+    lineHeight: 1,
+    padding   : "4px",
+  },
+  brand: { marginBottom: "16px" },
+  subtitle: {
+    fontSize    : "14px",
+    color       : "rgba(255,255,255,0.45)",
+    marginBottom: "20px",
+  },
+  error: {
+    width         : "100%",
+    background    : "rgba(220,53,69,0.15)",
+    border        : "1px solid rgba(220,53,69,0.4)",
+    borderRadius  : "8px",
+    padding       : "10px 14px",
+    color         : "#ff8a8a",
+    fontSize      : "13px",
+    marginBottom  : "16px",
+    display       : "flex",
+    justifyContent: "space-between",
+    alignItems    : "center",
+    gap           : "8px",
+  },
+  errorClose: {
+    background: "transparent", border: "none",
+    color: "#ff8a8a", cursor: "pointer", fontSize: "14px", padding: "0",
+  },
+  form: {
+    width: "100%", display: "flex", flexDirection: "column", gap: "14px",
+  },
+  row: {
+    display: "flex", gap: "12px",
+  },
+  field: {
+    flex: 1, display: "flex", flexDirection: "column", gap: "5px",
+  },
+  label: {
+    fontSize: "11px", fontWeight: 500, color: "rgba(255,255,255,0.5)",
+    letterSpacing: "0.5px", textTransform: "uppercase",
+    fontFamily: "'Segoe UI', sans-serif",
+  },
+  req: { color: "#00C2CC" },
+  input: {
+    background  : "rgba(255,255,255,0.06)",
+    border      : "1px solid rgba(255,255,255,0.12)",
+    borderRadius: "10px",
+    padding     : "11px 14px",
+    fontSize    : "14px",
+    color       : "#FFFFFF",
+    outline     : "none",
+    fontFamily  : "'Segoe UI', sans-serif",
+    width       : "100%",
+  },
+  btn: {
+    marginTop   : "4px",
+    background  : "linear-gradient(135deg, #00C2CC 0%, #4A7FC1 100%)",
+    color       : "#FFFFFF",
+    border      : "none",
+    borderRadius: "10px",
+    padding     : "13px",
+    fontSize    : "15px",
+    fontWeight  : 600,
+    cursor      : "pointer",
+    fontFamily  : "'Segoe UI', sans-serif",
+  },
+  loginRow: {
+    marginTop: "18px", fontSize: "14px",
+    color: "rgba(255,255,255,0.4)", fontFamily: "'Segoe UI', sans-serif",
+  },
+  loginLink: { color: "#00C2CC", textDecoration: "none", fontWeight: 500 },
+  footer: {
+    marginTop: "24px", fontSize: "11px",
+    color: "rgba(255,255,255,0.2)", fontFamily: "'Segoe UI', sans-serif",
+  },
+};
