@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { groupAPI } from '../services/api';
 import { getCurrencySymbol } from '../utils/currencyConverter';
 import { formatTimeAgo } from '../utils/timeFormatter';
-import MainLayout from '../components/MainLayout';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -158,17 +157,15 @@ function Dashboard() {
   // ==================== LOADING STATE ====================
   if (loading) {
     return (
-      <MainLayout rightSidebar={<RightSidebar />}>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-          <div className="spinner"></div>
-        </div>
-      </MainLayout>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+        <div className="spinner"></div>
+      </div>
     );
   }
 
   // ==================== MAIN RENDER ====================
   return (
-    <MainLayout rightSidebar={<RightSidebar />} showProfileBanner={true}>
+    <div>
       
       {/* Welcome Header */}
       <div style={{
@@ -362,7 +359,7 @@ function Dashboard() {
           </div>
         )}
       </div>
-    </MainLayout>
+    </div>
   );
 }
 
