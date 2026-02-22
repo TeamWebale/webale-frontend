@@ -35,8 +35,8 @@ export default function WebaleLogo({
   const taglineColor = theme === "dark" ? "rgba(255,255,255,0.75)" : "#3A5070";
 
   // Scale text proportionally with icon height
-  const namePx    = Math.round(imgH * 0.44);
-  const taglinePx = Math.round(imgH * 0.27);
+  const namePx    = Math.round(imgH * 0.32);
+  const taglinePx = Math.round(imgH * 0.17);
 
   return (
     <div
