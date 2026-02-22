@@ -31,8 +31,8 @@ export default function WebaleLogo({
   const imgH   = typeof size === "number" ? size : (SIZE_MAP[size] ?? SIZE_MAP.md);
   const imgSrc = theme === "dark" ? W_WHITE : W_NAVY;
 
-  const nameColor    = theme === "dark" ? "#FFFFFF"                : "#0D1B2E";
-  const taglineColor = theme === "dark" ? "#00E5CC" : "#E6A817";
+  const nameColor    = theme === "dark" ? "#00E5CC" : "#00B4A0";
+  const taglineColor = theme === "dark" ? "#FFB800" : "#E6A817";
 
   // Scale text proportionally with icon height
   const namePx    = Math.round(imgH * 0.32);
@@ -57,7 +57,7 @@ export default function WebaleLogo({
       />
 
       {(variant === "full" || variant === "compact") && (
-        <div style={{ display: "flex", flexDirection: "column", lineHeight: 1, marginTop: Math.round(imgH * 0.22) }}>
+        <div style={{ display: "flex", flexDirection: "column", lineHeight: 1, marginTop: Math.round(imgH * 0.12) }}>
           <span
             style={{
               fontFamily   : "'Lucida Calligraphy','Palatino Linotype',Georgia,serif",
