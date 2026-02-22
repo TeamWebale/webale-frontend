@@ -35,8 +35,8 @@ export default function WebaleLogo({
   const taglineColor = theme === "dark" ? "rgba(255,255,255,0.75)" : "#3A5070";
 
   // Scale text proportionally with icon height
-  const namePx    = Math.round(imgH * 0.43);
-  const taglinePx = Math.round(imgH * 0.18);
+  const namePx    = Math.round(imgH * 0.32);
+  const taglinePx = Math.round(imgH * 0.13);
 
   return (
     <div
@@ -57,7 +57,7 @@ export default function WebaleLogo({
       />
 
       {(variant === "full" || variant === "compact") && (
-        <div style={{ display: "flex", flexDirection: "column", lineHeight: 1, marginTop: Math.round(imgH * 0.38) }}>
+        <div style={{ display: "flex", flexDirection: "column", lineHeight: 1, marginTop: Math.round(imgH * 0.50) }}>
           <span
             style={{
               fontFamily   : "'Lucida Calligraphy','Palatino Linotype',Georgia,serif",
