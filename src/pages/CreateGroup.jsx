@@ -67,7 +67,7 @@ export default function CreateGroup() {
         {
           name        : form.name,
           description : form.description,
-          goal_amount : parseFloat(form.goal_amount),
+          goal_amount : form.goal_amount ? parseFloat(form.goal_amount) : null,
           currency    : form.currency,
           deadline    : form.deadline || null,
         },
@@ -118,10 +118,10 @@ export default function CreateGroup() {
           </div>
 
           <div style={styles.field}>
-            <label style={styles.label}>Description</label>
+            <label style={styles.label}>Description <span style={styles.opt}>(optional)</span></label>
             <textarea
               name="description" value={form.description} onChange={handleChange}
-              placeholder="What is this group fundraising for?" required
+              placeholder="What is this group fundraising for? (optional)"
               style={{ ...styles.input, height: "90px", resize: "vertical" }}
             />
           </div>
@@ -138,11 +138,11 @@ export default function CreateGroup() {
               </select>
             </div>
             <div style={styles.field}>
-              <label style={styles.label}>Target / Goal Amount</label>
+              <label style={styles.label}>Target / Goal Amount <span style={styles.opt}>(optional)</span></label>
               <input
                 name="goal_amount" type="number" min="1" value={form.goal_amount}
-                onChange={handleChange} required
-                placeholder="0.00" style={styles.input}
+                onChange={handleChange}
+                placeholder="0.00 (optional)" style={styles.input}
               />
             </div>
           </div>
