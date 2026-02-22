@@ -72,22 +72,21 @@ export default function WebaleLogo({
             Webale!
           </span>
 
-          {variant === "full" && (
-            <div
-              style={{
-                fontFamily   : "'Segoe UI',sans-serif",
-                fontWeight   : 400,
-                fontSize     : taglinePx,
-                color        : taglineColor,
-                marginTop    : "3px",
-                letterSpacing: "0.3px",
-                lineHeight   : 1.4,
-              }}
-            >
-              <div>Private Group</div>
-              <div>Fundraising</div>
-            </div>
-          )}
+          {/* Both full and compact show the two-line tagline */}
+          <div
+            style={{
+              fontFamily   : "'Segoe UI',sans-serif",
+              fontWeight   : 400,
+              fontSize     : taglinePx,
+              color        : taglineColor,
+              marginTop    : "3px",
+              letterSpacing: "0.3px",
+              lineHeight   : 1.4,
+            }}
+          >
+            <div>Private Group</div>
+            <div>Fundraising</div>
+          </div>
         </div>
       )}
     </div>

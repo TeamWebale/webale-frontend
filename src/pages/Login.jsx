@@ -59,8 +59,8 @@ export default function Login() {
 const s = {
   page:{minHeight:"100vh",background:"#0D1B2E",display:"flex",alignItems:"center",justifyContent:"center",padding:"24px 16px"},
   card:{background:"#0D1B2E",borderRadius:"20px",border:"1px solid rgba(255,255,255,0.08)",padding:"44px 40px 32px",width:"100%",maxWidth:"400px",display:"flex",flexDirection:"column",alignItems:"center",boxShadow:"0 8px 48px rgba(0,0,0,0.4)"},
-  brand:{marginBottom:"24px"},
-  welcome:{fontSize:"14px",color:"rgba(255,255,255,0.45)",marginBottom:"24px"},
+  brand:{marginBottom:"12px"},
+  welcome:{fontSize:"14px",color:"#00E5CC",fontWeight:500,marginBottom:"24px"},
   error:{width:"100%",background:"rgba(220,53,69,0.15)",border:"1px solid rgba(220,53,69,0.4)",borderRadius:"8px",padding:"10px 14px",color:"#ff8a8a",fontSize:"13px",marginBottom:"16px",display:"flex",justifyContent:"space-between",alignItems:"center",gap:"8px"},
   errClose:{background:"transparent",border:"none",color:"#ff8a8a",cursor:"pointer",fontSize:"14px",padding:"0"},
   form:{width:"100%",display:"flex",flexDirection:"column",gap:"16px"},
