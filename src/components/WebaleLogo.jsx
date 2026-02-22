@@ -43,8 +43,8 @@ export default function WebaleLogo({
       className={className}
       style={{
         display       : "inline-flex",
-        alignItems    : "center",
-        gap           : "3px",
+        alignItems    : "flex-start",
+        gap           : "6px",
         userSelect    : "none",
         textDecoration: "none",
         ...style,
@@ -53,11 +53,11 @@ export default function WebaleLogo({
       <img
         src={imgSrc}
         alt="Webale W"
-        style={{ height: imgH, width: "auto", display: "block", flexShrink: 0 }}
+        style={{ height: imgH, width: "auto", display: "block", flexShrink: 0, marginTop: 0 }}
       />
 
       {(variant === "full" || variant === "compact") && (
-        <div style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
+        <div style={{ display: "flex", flexDirection: "column", lineHeight: 1, marginTop: Math.round(imgH * 0.38) }}>
           <span
             style={{
               fontFamily   : "'Lucida Calligraphy','Palatino Linotype',Georgia,serif",
@@ -79,7 +79,7 @@ export default function WebaleLogo({
               fontWeight   : 400,
               fontSize     : taglinePx,
               color        : taglineColor,
-              marginTop    : "3px",
+              marginTop    : "1px",
               letterSpacing: "0.3px",
               lineHeight   : 1.4,
             }}
