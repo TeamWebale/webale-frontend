@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { groupAPI, pledgeAPI, activityAPI, recurringPledgeAPI, auditAPI, subGoalsAPI, messagesAPI } from '../services/api';
 import { getCurrencySymbol, getAllCurrencies, convertCurrency, detectUserCurrency } from '../utils/currencyConverter';
 import { formatTimeAgo } from '../utils/timeFormatter';
-import MainLayout from '../components/MainLayout';
 import PaymentButton from '../components/PaymentButton';
 
 // ==================== MODAL COMPONENT ====================
@@ -137,9 +136,7 @@ function GroupDetails() {
 
   // Detect user's local currency on mount
   useEffect(() => {
-    detectUserCurrency().then(result => {
-      setDetectedCurrency(result.currency);
-    });
+    setDetectedCurrency(detectUserCurrency() || 'USD');
   }, []);
 
   useEffect(() => {
@@ -913,29 +910,25 @@ function GroupDetails() {
   // ==================== LOADING STATE ====================
   if (loading) {
     return (
-      <MainLayout>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-          <div className="spinner"></div>
-        </div>
-      </MainLayout>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+        <div className="spinner"></div>
+      </div>
     );
   }
 
   if (!group) {
     return (
-      <MainLayout>
-        <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-          <div style={{ fontSize: '64px', marginBottom: '16px' }}>😕</div>
-          <h2>Group Not Found</h2>
-          <button onClick={() => navigate('/dashboard')} className="btn btn-primary">← Back to Dashboard</button>
-        </div>
-      </MainLayout>
+      <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+        <div style={{ fontSize: '64px', marginBottom: '16px' }}>😕</div>
+        <h2>Group Not Found</h2>
+        <button onClick={() => navigate('/dashboard')} className="btn btn-primary">← Back to Dashboard</button>
+      </div>
     );
   }
 
   // ==================== MAIN RENDER ====================
   return (
-    <MainLayout rightSidebar={<RightSidebar />} showProfileBanner={true}>
+    <div>
 
       {/* Group Header */}
       <div style={{
@@ -2050,7 +2043,7 @@ function GroupDetails() {
         )}
       </Modal>
 
-    </MainLayout>
+    </div>
   );
 }
 
