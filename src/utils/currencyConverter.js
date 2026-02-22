@@ -82,3 +82,12 @@ export function getCurrencySymbol(code) {
 }
 
 export default CURRENCY_DATA;
+
+// ── Legacy aliases — keep old import names working ────────────────
+export function getAllCurrencies() {
+  return CURRENCIES;
+}
+
+export function getCurrencyByCode(code) {
+  return getCurrencyData(code);
+}
