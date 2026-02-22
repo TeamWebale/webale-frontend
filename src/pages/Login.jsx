@@ -29,7 +29,7 @@ export default function Login() {
     <div style={s.page}>
       <div style={s.card}>
         <div style={s.brand}><WebaleLogo variant="full" size="lg" theme="dark" /></div>
-        <p style={s.welcome}>Welcome back</p>
+        <p style={s.welcome}>(Teams, Targets, Tracking)</p>
         {error && (
           <div style={s.error}>
             <span>{error}</span>

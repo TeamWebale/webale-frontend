@@ -73,7 +73,7 @@ export default function WebaleLogo({
           </span>
 
           {variant === "full" && (
-            <span
+            <div
               style={{
                 fontFamily   : "'Segoe UI',sans-serif",
                 fontWeight   : 400,
@@ -81,11 +81,12 @@ export default function WebaleLogo({
                 color        : taglineColor,
                 marginTop    : "3px",
                 letterSpacing: "0.3px",
-                whiteSpace   : "nowrap",
+                lineHeight   : 1.4,
               }}
             >
-              Private Group Fundraising
-            </span>
+              <div>Private Group</div>
+              <div>Fundraising</div>
+            </div>
           )}
         </div>
       )}
