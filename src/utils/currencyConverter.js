@@ -91,3 +91,15 @@ export function getAllCurrencies() {
 export function getCurrencyByCode(code) {
   return getCurrencyData(code);
 }
+
+// ── detectUserCurrency — legacy alias used by GroupDetails ────────
+// Returns currency code for the logged-in user's country,
+// falling back to USD if country not set.
+export function detectUserCurrency() {
+  try {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    return getCurrencyForCountry(user?.country || '') || 'USD';
+  } catch {
+    return 'USD';
+  }
+}
