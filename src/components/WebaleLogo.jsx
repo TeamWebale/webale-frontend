@@ -57,7 +57,7 @@ export default function WebaleLogo({
       />
 
       {(variant === "full" || variant === "compact") && (
-        <div style={{ display: "flex", flexDirection: "column", lineHeight: 1, marginTop: Math.round(imgH * 0.12) }}>
+        <div style={{ display: "flex", flexDirection: "column", lineHeight: 1, marginTop: Math.round(imgH * 0.15) }}>
           <span
             style={{
               fontFamily   : "'Lucida Calligraphy','Palatino Linotype',Georgia,serif",
