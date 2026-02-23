@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { groupAPI, pledgeAPI, activityAPI, recurringPledgeAPI, auditAPI, subGoalsAPI, messagesAPI } from '../services/api';
 import { getCurrencySymbol, getAllCurrencies, convertCurrency, detectUserCurrency } from '../utils/currencyConverter';
 import { formatTimeAgo } from '../utils/timeFormatter';
+import { useRightSidebar } from '../components/MainLayout';
 import PaymentButton from '../components/PaymentButton';
 
 // ==================== MODAL COMPONENT ====================
@@ -70,6 +71,7 @@ const menuItemStyle = {
 function GroupDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const tabMenuRef = useRef(null);
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
   // Data states
@@ -100,6 +102,7 @@ function GroupDetails() {
   const [converterForm, setConverterForm] = useState({ amount: '', fromCurrency: 'USD', toCurrency: 'EUR' });
   const [showMyPledgesModal, setShowMyPledgesModal] = useState(false);
   const [showActionMenu, setShowActionMenu] = useState(false);
+  const [showTabMenu, setShowTabMenu] = useState(false);
   const [showRevisePledgeModal, setShowRevisePledgeModal] = useState(false);
   const [selectedPledge, setSelectedPledge] = useState(null);
   const [showPartPaymentModal, setShowPartPaymentModal] = useState(false);
@@ -129,6 +132,24 @@ function GroupDetails() {
   const isAdmin = group?.user_role === 'admin' || group?.role === 'admin';
   const currencySymbol = getCurrencySymbol(group?.currency || 'USD');
 
+  // Inject right sidebar into MainLayout
+  const { setRightSidebar } = useRightSidebar();
+  useEffect(() => {
+    if (group) setRightSidebar(<RightSidebar />);
+    return () => setRightSidebar(null);
+  }, [group, pledges, subGoals]);
+
+  // Close tab menu on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (tabMenuRef.current && !tabMenuRef.current.contains(e.target)) {
+        setShowTabMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
   // ==================== DATA LOADING ====================
   useEffect(() => {
     loadGroupData();
@@ -136,7 +157,9 @@ function GroupDetails() {
 
   // Detect user's local currency on mount
   useEffect(() => {
-    setDetectedCurrency(detectUserCurrency() || 'USD');
+    detectUserCurrency().then(result => {
+      setDetectedCurrency(result.currency);
+    });
   }, []);
 
   useEffect(() => {
@@ -910,25 +933,29 @@ function GroupDetails() {
   // ==================== LOADING STATE ====================
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-        <div className="spinner"></div>
-      </div>
+      <MainLayout>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+          <div className="spinner"></div>
+        </div>
+      </MainLayout>
     );
   }
 
   if (!group) {
     return (
-      <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-        <div style={{ fontSize: '64px', marginBottom: '16px' }}>😕</div>
-        <h2>Group Not Found</h2>
-        <button onClick={() => navigate('/dashboard')} className="btn btn-primary">← Back to Dashboard</button>
-      </div>
+      <MainLayout>
+        <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+          <div style={{ fontSize: '64px', marginBottom: '16px' }}>😕</div>
+          <h2>Group Not Found</h2>
+          <button onClick={() => navigate('/dashboard')} className="btn btn-primary">← Back to Dashboard</button>
+        </div>
+      </MainLayout>
     );
   }
 
   // ==================== MAIN RENDER ====================
   return (
-    <div>
+    <MainLayout rightSidebar={<RightSidebar />} showProfileBanner={true}>
 
       {/* Group Header */}
       <div style={{
@@ -1049,20 +1076,60 @@ function GroupDetails() {
         </div>
       </div>
 
-      {/* Tab Navigation */}
-      <div style={{ display: 'flex', borderBottom: '2px solid #e2e8f0', marginBottom: '16px', overflowX: 'auto' }}>
-        {tabs.filter(tab => tab.show).map(tab => (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
-            padding: '10px 16px', border: 'none', background: 'none',
-            borderBottom: activeTab === tab.id ? '3px solid #667eea' : '3px solid transparent',
-            color: activeTab === tab.id ? '#667eea' : '#718096',
-            fontWeight: '600', fontSize: '13px', cursor: 'pointer', whiteSpace: 'nowrap',
-            display: 'flex', alignItems: 'center', gap: '5px'
-          }}>
-            {tab.icon} {tab.label}
-          </button>
-        ))}
-      </div>
+      {/* Tab Navigation — Dropdown (mirrors Actions Menu style) */}
+      {(() => {
+        const visibleTabs = tabs.filter(t => t.show);
+        const activeTabObj = visibleTabs.find(t => t.id === activeTab) || visibleTabs[0];
+        return (
+          <div ref={tabMenuRef} style={{ position: 'relative', marginBottom: '16px' }}>
+            {/* Trigger button — always shows active tab */}
+            <button
+              onClick={() => setShowTabMenu(prev => !prev)}
+              style={{
+                width: '100%', padding: '12px 18px',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white', border: 'none', borderRadius: '10px',
+                fontSize: '14px', fontWeight: '600', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+              }}
+            >
+              {activeTabObj?.icon} {activeTabObj?.label} ▾
+            </button>
+
+            {/* Dropdown list */}
+            {showTabMenu && (
+              <div style={{
+                position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px',
+                background: 'white', borderRadius: '12px',
+                boxShadow: '0 10px 40px rgba(0,0,0,0.18)',
+                zIndex: 50, overflow: 'hidden',
+              }}>
+                {visibleTabs.map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => { setActiveTab(tab.id); setShowTabMenu(false); }}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '10px',
+                      width: '100%', padding: '13px 18px',
+                      background: activeTab === tab.id
+                        ? 'linear-gradient(135deg,#ede9fe,#ddd6fe)'
+                        : 'white',
+                      border: 'none',
+                      borderBottom: '1px solid #f0f0f0',
+                      fontSize: '14px', fontWeight: activeTab === tab.id ? '700' : '500',
+                      color: activeTab === tab.id ? '#5b21b6' : '#2d3748',
+                      cursor: 'pointer', textAlign: 'left',
+                    }}
+                  >
+                    {tab.icon} {tab.label}
+                    {activeTab === tab.id && <span style={{ marginLeft: 'auto', color: '#7c3aed' }}>✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Tab Content */}
       <div id="tab-content" style={{
@@ -2043,7 +2110,7 @@ function GroupDetails() {
         )}
       </Modal>
 
-    </div>
+    </MainLayout>
   );
 }
 

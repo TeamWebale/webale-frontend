@@ -1,12 +1,25 @@
 /**
- * MainLayout.jsx — Destination: src/components/MainLayout.jsx
- * Wraps all protected routes via React Router Outlet.
- * Top Navbar + profile banner. NO sidebar.
+ * MainLayout.jsx — src/components/MainLayout.jsx
+ *
+ * Structure:
+ *   [Navbar]
+ *   [Profile Banner]
+ *   [Left Sidebar] | [Main Content <Outlet/>] | [Right Sidebar (injected by page)]
+ *
+ * Pages inject right sidebar via: useRightSidebar().setRightSidebar(<JSX/>)
  */
-import { Outlet } from "react-router-dom";
+import { Outlet, NavLink, useNavigate, Link } from "react-router-dom";
+import { useState, useEffect, createContext, useContext } from "react";
 import Navbar from "./Navbar";
+import WebaleLogo from "./WebaleLogo";
 import { useAuth } from "../context/AuthContext";
+import { groupAPI } from "../services/api";
 
+// ── Right Sidebar Context ──────────────────────────────────────────
+export const RightSidebarContext = createContext({ setRightSidebar: () => {} });
+export function useRightSidebar() { return useContext(RightSidebarContext); }
+
+// ── Helpers ────────────────────────────────────────────────────────
 const COUNTRY_CODES = {
   "Uganda":"[UG]","United States":"[US]","United Kingdom":"[GB]",
   "Kenya":"[KE]","Tanzania":"[TZ]","Rwanda":"[RW]","Nigeria":"[NG]",
@@ -14,24 +27,121 @@ const COUNTRY_CODES = {
   "Germany":"[DE]","France":"[FR]","India":"[IN]","China":"[CN]",
   "Japan":"[JP]","Brazil":"[BR]","Mexico":"[MX]","European Union":"[EU]",
 };
-
-function getCountryCode(country) {
-  if (!country) return "";
-  if (/^\[[A-Z]{2,3}\]$/.test(country)) return country;
-  return COUNTRY_CODES[country] || `[${country.slice(0,2).toUpperCase()}]`;
+function getCountryCode(c) {
+  if (!c) return "";
+  if (/^\[[A-Z]{2,3}\]$/.test(c)) return c;
+  return COUNTRY_CODES[c] || `[${c.slice(0,2).toUpperCase()}]`;
 }
-
-function getDisplayAvatar(user) {
+function getAvatar(user) {
   if (user?.avatar_type === "emoji" && user?.avatar_url) return user.avatar_url;
   if (user?.avatarType  === "emoji" && user?.avatarUrl)  return user.avatarUrl;
-  const first = user?.first_name || user?.firstName || "";
-  const last  = user?.last_name  || user?.lastName  || "";
-  return (first[0] || "") + (last[0] || "");
+  return (user?.first_name?.[0] || user?.firstName?.[0] || "") +
+         (user?.last_name?.[0]  || user?.lastName?.[0]  || "");
 }
 
+// ── Left Sidebar ───────────────────────────────────────────────────
+function LeftSidebar() {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+  const [stats, setStats] = useState({ total: 0, admin: 0, member: 0 });
+
+  useEffect(() => {
+    groupAPI.getAll().then(res => {
+      const groups = res.data?.data?.groups || res.data?.groups || res.data || [];
+      const arr    = Array.isArray(groups) ? groups : [];
+      const admin  = arr.filter(g => g.user_role === "admin" || g.role === "admin").length;
+      setStats({ total: arr.length, admin, member: arr.length - admin });
+    }).catch(() => {});
+  }, []);
+
+  const handleLogout = () => {
+    if (logout) logout();
+    else { localStorage.removeItem("token"); localStorage.removeItem("user"); }
+    navigate("/login");
+  };
+
+  return (
+    <aside style={ls.wrap}>
+      {/* Logo */}
+      <Link to="/dashboard" style={{ textDecoration:"none", display:"block", marginBottom:"22px" }}>
+        <WebaleLogo variant="full" size="sm" theme="light" />
+      </Link>
+
+      {/* Nav links */}
+      <nav>
+        {[
+          ["/dashboard",    "📊", "Dashboard",   "#e0e7ff", "#4c51bf"],
+          ["/create-group", "➕", "Create Group", "#d1fae5", "#047857"],
+          ["/profile",      "👤", "Profile",      "#fce7f3", "#be185d"],
+        ].map(([to, icon, label, bg, color]) => (
+          <NavLink key={to} to={to} style={({ isActive }) => ({
+            display:"flex", alignItems:"center", gap:"10px",
+            padding:"11px 14px", borderRadius:"10px", textDecoration:"none",
+            fontSize:"14px", fontWeight:600, marginBottom:"6px",
+            background: isActive
+              ? "linear-gradient(135deg,#1B2D4F,#4A7FC1)"
+              : `linear-gradient(135deg,${bg},${bg})`,
+            color: isActive ? "#fff" : color,
+            transition:"all 0.15s",
+          })}>
+            <span>{icon}</span>{label}
+          </NavLink>
+        ))}
+      </nav>
+
+      {/* Quick Stats */}
+      <p style={ls.statsLabel}>Quick Stats</p>
+      {[
+        ["Total Groups",  stats.total,  "#667eea","#764ba2"],
+        ["Admin Groups",  stats.admin,  "#38b2ac","#319795"],
+        ["Member Groups", stats.member, "#48bb78","#38a169"],
+      ].map(([label, val, c1, c2]) => (
+        <div key={label} style={{
+          ...ls.statCard,
+          background:`linear-gradient(135deg,${c1},${c2})`,
+          marginBottom:"6px",
+        }}>
+          <span style={{fontSize:"12px",fontWeight:600}}>{label}</span>
+          <span style={{fontSize:"20px",fontWeight:700}}>{val}</span>
+        </div>
+      ))}
+
+      <div style={{ flex:1 }} />
+
+      <button onClick={handleLogout} style={ls.logout}>🚪 Logout</button>
+    </aside>
+  );
+}
+
+const ls = {
+  wrap:{
+    width:"220px", background:"white", borderRight:"1px solid #e2e8f0",
+    padding:"16px 14px", display:"flex", flexDirection:"column",
+    flexShrink:0, overflowY:"auto",
+  },
+  statsLabel:{
+    fontSize:"10px", fontWeight:700, color:"#a0aec0", letterSpacing:"1px",
+    textTransform:"uppercase", margin:"16px 0 8px",
+  },
+  statCard:{
+    display:"flex", alignItems:"center", justifyContent:"space-between",
+    padding:"10px 14px", borderRadius:"10px", color:"white",
+  },
+  logout:{
+    display:"flex", alignItems:"center", justifyContent:"center", gap:"8px",
+    width:"100%", marginTop:"16px", padding:"11px",
+    background:"linear-gradient(135deg,#fed7d7,#feb2b2)",
+    color:"#c53030", border:"none", borderRadius:"10px",
+    fontSize:"13px", fontWeight:600, cursor:"pointer",
+  },
+};
+
+// ── Main Layout ────────────────────────────────────────────────────
 export default function MainLayout() {
   const { user } = useAuth();
-  const avatar      = getDisplayAvatar(user);
+  const [rightSidebar, setRightSidebar] = useState(null);
+
+  const avatar      = getAvatar(user);
   const countryCode = getCountryCode(user?.country);
   const fullName    = `${user?.first_name||user?.firstName||""} ${user?.last_name||user?.lastName||""}`.trim();
   const memberSince = user?.created_at
@@ -40,41 +150,94 @@ export default function MainLayout() {
   const isEmoji = avatar && avatar.length <= 2 && /\p{Emoji}/u.test(avatar);
 
   return (
-    <div style={s.shell}>
-      <Navbar />
-      <div style={s.banner}>
-        <div style={s.bannerInner}>
-          <div style={s.avatarRing}>
-            <div style={s.avatar}>
+    <RightSidebarContext.Provider value={{ setRightSidebar }}>
+      <div style={ml.shell}>
+
+        {/* Top Navbar */}
+        <Navbar />
+
+        {/* Profile Banner */}
+        <div style={ml.banner}>
+          <div style={ml.avatarRing}>
+            <div style={ml.avatar}>
               {isEmoji
-                ? <span style={{fontSize:28}}>{avatar}</span>
-                : <span style={s.initials}>{avatar||"?"}</span>
-              }
+                ? <span style={{fontSize:26}}>{avatar}</span>
+                : <span style={ml.initials}>{avatar||"?"}</span>}
             </div>
           </div>
-          <div style={s.bannerText}>
-            <div style={s.bannerName}>
+          <div>
+            <div style={ml.bannerName}>
               {fullName}
-              {countryCode && <span style={s.badge}>{countryCode}</span>}
+              {countryCode && <span style={ml.badge}>{countryCode}</span>}
             </div>
-            {memberSince && <div style={s.meta}>🗓 Member since {memberSince}</div>}
+            {memberSince && <div style={ml.meta}>🗓 Member since {memberSince}</div>}
           </div>
         </div>
+
+        {/* Three-column body */}
+        <div style={ml.body}>
+
+          {/* Left Sidebar */}
+          <div className="sidebar-left">
+            <LeftSidebar />
+          </div>
+
+          {/* Main content */}
+          <main style={ml.main}>
+            <Outlet />
+          </main>
+
+          {/* Right Sidebar — injected by pages via useRightSidebar() */}
+          {rightSidebar && (
+            <div style={ml.rightSidebar} className="sidebar-right">
+              {rightSidebar}
+            </div>
+          )}
+
+        </div>
       </div>
-      <main style={s.main}><Outlet /></main>
-    </div>
+
+      <style>{`
+        .sidebar-left  { display: flex; flex-direction: column; }
+        .sidebar-right { display: flex; flex-direction: column; }
+        @media (max-width: 900px) {
+          .sidebar-left  { display: none !important; }
+          .sidebar-right { display: none !important; }
+        }
+      `}</style>
+    </RightSidebarContext.Provider>
   );
 }
-const s = {
-  shell:{minHeight:"100vh",background:"#F0F4F9",display:"flex",flexDirection:"column"},
-  banner:{background:"linear-gradient(135deg,#1B2D4F,#4A7FC1)",padding:"18px 24px"},
-  bannerInner:{maxWidth:"1200px",margin:"0 auto",display:"flex",alignItems:"center",gap:"16px"},
-  avatarRing:{width:"52px",height:"52px",borderRadius:"50%",border:"2px solid rgba(255,255,255,0.4)",padding:"2px",flexShrink:0},
-  avatar:{width:"100%",height:"100%",borderRadius:"50%",background:"rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"},
-  initials:{fontSize:"18px",fontWeight:700,color:"#FFFFFF",fontFamily:"'Segoe UI',sans-serif"},
-  bannerText:{display:"flex",flexDirection:"column",gap:"3px"},
-  bannerName:{fontSize:"18px",fontWeight:700,color:"#FFFFFF",fontFamily:"'Segoe UI',sans-serif",display:"flex",alignItems:"center",gap:"8px"},
-  badge:{fontSize:"12px",fontWeight:500,color:"rgba(255,255,255,0.7)",background:"rgba(255,255,255,0.12)",borderRadius:"4px",padding:"1px 6px",fontFamily:"'Segoe UI',sans-serif"},
-  meta:{fontSize:"12px",color:"rgba(255,255,255,0.6)",fontFamily:"'Segoe UI',sans-serif"},
-  main:{flex:1,maxWidth:"1200px",width:"100%",margin:"0 auto",padding:"24px 20px"},
+
+const ml = {
+  shell:{ minHeight:"100vh", background:"#F0F4F9", display:"flex", flexDirection:"column" },
+  banner:{
+    background:"linear-gradient(135deg,#1B2D4F,#4A7FC1)",
+    padding:"14px 24px", display:"flex", alignItems:"center", gap:"14px",
+  },
+  avatarRing:{
+    width:"48px", height:"48px", borderRadius:"50%",
+    border:"2px solid rgba(255,255,255,0.4)", padding:"2px", flexShrink:0,
+  },
+  avatar:{
+    width:"100%", height:"100%", borderRadius:"50%",
+    background:"rgba(255,255,255,0.15)", display:"flex",
+    alignItems:"center", justifyContent:"center", overflow:"hidden",
+  },
+  initials:{ fontSize:"17px", fontWeight:700, color:"#FFFFFF", fontFamily:"'Segoe UI',sans-serif" },
+  bannerName:{
+    fontSize:"17px", fontWeight:700, color:"#FFFFFF",
+    fontFamily:"'Segoe UI',sans-serif", display:"flex", alignItems:"center", gap:"8px",
+  },
+  badge:{
+    fontSize:"11px", fontWeight:500, color:"rgba(255,255,255,0.7)",
+    background:"rgba(255,255,255,0.12)", borderRadius:"4px", padding:"1px 6px",
+  },
+  meta:{ fontSize:"12px", color:"rgba(255,255,255,0.6)", fontFamily:"'Segoe UI',sans-serif" },
+  body:{ display:"flex", flex:1, minHeight:0 },
+  main:{ flex:1, padding:"20px", overflowY:"auto", minWidth:0 },
+  rightSidebar:{
+    width:"250px", padding:"16px", overflowY:"auto",
+    borderLeft:"1px solid #e2e8f0", background:"#F8FAFC", flexShrink:0,
+  },
 };
