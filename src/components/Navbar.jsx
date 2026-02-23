@@ -1,77 +1,259 @@
 /**
- * Navbar.jsx
- * Destination: src/components/Navbar.jsx
+ * Navbar.jsx — src/components/Navbar.jsx
+ *
+ * Desktop: Logo block (220px = left sidebar width) | nav links (center) | controls (250px = right sidebar width)
+ * Mobile:  W icon | "Webale!" | spacer | bell | dark hamburger button
  */
 import { useState, useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import WebaleLogo from "./WebaleLogo";
 import AuthContext from "../context/AuthContext";
 import NotificationBell from "./NotificationBell";
 
+const LANGUAGES = [
+  { code:"en", label:"🇬🇧 EN" },
+  { code:"fr", label:"🇫🇷 FR" },
+  { code:"sw", label:"🇰🇪 SW" },
+  { code:"lg", label:"🇺🇬 LG" },
+];
+
 export default function Navbar() {
   const auth     = useContext(AuthContext);
-  const logout   = auth?.logout;
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+  const [lang,     setLang]     = useState("en");
+  const [langOpen, setLangOpen] = useState(false);
 
   const handleLogout = () => {
-    if (logout) logout();
-    else { localStorage.removeItem('token'); localStorage.removeItem('user'); }
+    if (auth?.logout) auth.logout();
+    else { localStorage.removeItem("token"); localStorage.removeItem("user"); }
     navigate("/login");
     setMenuOpen(false);
   };
 
+  const currentLang = LANGUAGES.find(l => l.code === lang) || LANGUAGES[0];
+
   return (
-    <nav style={styles.nav}>
-      <div style={styles.inner}>
-        <Link to="/dashboard" style={{ textDecoration: "none" }}>
-          <span className="logo-desktop"><WebaleLogo variant="compact" size="sm" theme="light" /></span>
-          <span className="logo-mobile"><WebaleLogo variant="icon" size={30} theme="light" /></span>
-        </Link>
-        <div style={styles.links} className="nav-links-desktop">
-          <Link to="/dashboard"    style={styles.link}>Dashboard</Link>
-          <Link to="/create-group" style={styles.link}>New Group</Link>
-          <Link to="/profile"      style={styles.link}>Profile</Link>
+    <nav style={s.nav}>
+
+      {/* ══ DESKTOP ══════════════════════════════════════════════ */}
+      <div style={s.desktopBar} className="nav-desktop">
+
+        {/* Logo block — same width as left sidebar (220px) */}
+        <div style={s.logoBlock}>
+          <Link to="/dashboard" style={{ textDecoration:"none" }}>
+            <WebaleLogo variant="compact" size="sm" theme="light" />
+          </Link>
         </div>
-        <div style={styles.right}>
+
+        {/* Center links */}
+        <div style={s.links}>
+          {[
+            ["/dashboard",    "📊 Dashboard"],
+            ["/create-group", "➕ New Group"],
+            ["/profile",      "👤 Profile"],
+          ].map(([to, label]) => (
+            <NavLink key={to} to={to} style={({ isActive }) => ({
+              ...s.link,
+              color:       isActive ? "#1B2D4F" : "#5A6A7E",
+              fontWeight:  isActive ? 700 : 500,
+              borderBottom: isActive ? "2px solid #667eea" : "2px solid transparent",
+            })}>
+              {label}
+            </NavLink>
+          ))}
+        </div>
+
+        {/* Right controls — same width as right sidebar (250px) */}
+        <div style={s.rightBlock}>
+          {/* Language */}
+          <div style={{ position:"relative" }}>
+            <button onClick={() => setLangOpen(o => !o)} style={s.pill}>
+              {currentLang.label} ▾
+            </button>
+            {langOpen && (
+              <div style={s.langDrop}>
+                {LANGUAGES.map(l => (
+                  <button key={l.code}
+                    onClick={() => { setLang(l.code); setLangOpen(false); }}
+                    style={{ ...s.langItem, fontWeight: l.code === lang ? 700 : 400,
+                             background: l.code === lang ? "#f0f4ff" : "white" }}>
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Dark mode */}
+          <button onClick={() => setDarkMode(d => !d)} style={s.pill} title="Toggle theme">
+            {darkMode ? "☀️" : "🌙"}
+          </button>
+
           <NotificationBell />
-          <button onClick={handleLogout} style={styles.logoutBtn} className="nav-logout-desktop">🚪 Logout</button>
-          <button onClick={() => setMenuOpen(!menuOpen)} style={styles.hamburger} className="nav-hamburger" aria-label="Menu">
-            <span style={styles.bar}></span><span style={styles.bar}></span><span style={styles.bar}></span>
+
+          <button onClick={handleLogout} style={s.logoutBtn}>
+            🚪 Logout
           </button>
         </div>
       </div>
+
+      {/* ══ MOBILE ═══════════════════════════════════════════════ */}
+      <div style={s.mobileBar} className="nav-mobile">
+        <Link to="/dashboard" style={{ textDecoration:"none", display:"flex", alignItems:"center" }}>
+          <WebaleLogo variant="icon" size={32} theme="light" />
+        </Link>
+        <span style={s.mobileTitle}>Webale!</span>
+        <div style={{ flex:1 }} />
+        <NotificationBell />
+        <button
+          onClick={() => setMenuOpen(o => !o)}
+          style={s.hamburger}
+          aria-label="Menu"
+        >
+          {menuOpen ? "✕" : "☰"}
+        </button>
+      </div>
+
+      {/* Mobile dropdown */}
       {menuOpen && (
-        <div style={styles.mobileMenu}>
-          <Link to="/dashboard"    style={styles.mobileLink} onClick={() => setMenuOpen(false)}>📊 Dashboard</Link>
-          <Link to="/create-group" style={styles.mobileLink} onClick={() => setMenuOpen(false)}>➕ New Group</Link>
-          <Link to="/profile"      style={styles.mobileLink} onClick={() => setMenuOpen(false)}>👤 Profile</Link>
-          <button onClick={handleLogout} style={styles.mobileLogout}>🚪 Logout</button>
+        <div style={s.mobileMenu} className="nav-mobile">
+          {[
+            ["/dashboard",    "📊 Dashboard"],
+            ["/create-group", "➕ New Group"],
+            ["/profile",      "👤 Profile"],
+          ].map(([to, label]) => (
+            <Link key={to} to={to} style={s.mobileLink}
+              onClick={() => setMenuOpen(false)}>
+              {label}
+            </Link>
+          ))}
+          {/* Language row */}
+          <div style={{ display:"flex", gap:"8px", padding:"10px 0", borderBottom:"1px solid #f0f4f9", flexWrap:"wrap" }}>
+            {LANGUAGES.map(l => (
+              <button key={l.code} onClick={() => setLang(l.code)}
+                style={{
+                  padding:"6px 12px", borderRadius:"6px",
+                  border:"1px solid #e2e8f0", fontSize:"12px", fontWeight:600,
+                  background: l.code === lang ? "#667eea" : "white",
+                  color:      l.code === lang ? "white"   : "#4a5568",
+                  cursor:"pointer",
+                }}>
+                {l.label}
+              </button>
+            ))}
+          </div>
+          <button onClick={() => setDarkMode(d => !d)} style={s.mobileAction}>
+            {darkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
+          </button>
+          <button onClick={handleLogout} style={s.mobileLogout}>
+            🚪 Logout
+          </button>
         </div>
       )}
+
       <style>{`
-        .logo-mobile{display:none}.logo-desktop{display:inline-flex}
-        .nav-links-desktop{display:flex}.nav-logout-desktop{display:inline-flex}
-        .nav-hamburger{display:none!important}
-        @media(max-width:640px){
-          .logo-mobile{display:inline-flex}.logo-desktop{display:none}
-          .nav-links-desktop{display:none!important}.nav-logout-desktop{display:none!important}
-          .nav-hamburger{display:flex!important}
+        .nav-desktop { display: flex !important; }
+        .nav-mobile  { display: none !important; }
+        @media (max-width: 768px) {
+          .nav-desktop { display: none !important; }
+          .nav-mobile  { display: flex !important; }
         }
       `}</style>
     </nav>
   );
 }
-const styles = {
-  nav:{background:"#FFFFFF",borderBottom:"1px solid #E8EEF5",position:"sticky",top:0,zIndex:200,boxShadow:"0 1px 8px rgba(27,45,79,0.06)"},
-  inner:{maxWidth:"1200px",margin:"0 auto",padding:"0 20px",height:"58px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"16px"},
-  links:{display:"flex",gap:"24px",alignItems:"center"},
-  link:{fontSize:"14px",color:"#5A6A7E",fontWeight:500,textDecoration:"none",fontFamily:"'Segoe UI',sans-serif"},
-  right:{display:"flex",alignItems:"center",gap:"12px"},
-  logoutBtn:{background:"transparent",border:"1px solid #D0DCE8",borderRadius:"8px",padding:"6px 14px",fontSize:"13px",fontWeight:500,color:"#5A6A7E",cursor:"pointer",fontFamily:"'Segoe UI',sans-serif"},
-  hamburger:{background:"transparent",border:"none",cursor:"pointer",padding:"4px",display:"flex",flexDirection:"column",gap:"5px",alignItems:"center",justifyContent:"center"},
-  bar:{display:"block",width:"20px",height:"2px",background:"#1B2D4F",borderRadius:"2px"},
-  mobileMenu:{background:"#FFFFFF",borderTop:"1px solid #E8EEF5",padding:"12px 20px 16px",display:"flex",flexDirection:"column",gap:"2px"},
-  mobileLink:{fontSize:"15px",color:"#1B2D4F",fontWeight:500,textDecoration:"none",padding:"10px 0",borderBottom:"1px solid #F0F4F9",fontFamily:"'Segoe UI',sans-serif"},
-  mobileLogout:{marginTop:"8px",background:"transparent",border:"1px solid #D0DCE8",borderRadius:"8px",padding:"10px 0",fontSize:"14px",fontWeight:500,color:"#5A6A7E",cursor:"pointer",fontFamily:"'Segoe UI',sans-serif",textAlign:"left"},
+
+const s = {
+  nav:{
+    background:"#FFFFFF", borderBottom:"1px solid #E8EEF5",
+    position:"sticky", top:0, zIndex:200,
+    boxShadow:"0 1px 8px rgba(27,45,79,0.08)",
+  },
+  // Desktop
+  desktopBar:{
+    display:"flex", alignItems:"center", height:"58px",
+    paddingLeft:"14px", paddingRight:"16px",
+  },
+  logoBlock:{
+    width:"220px", flexShrink:0,
+    display:"flex", alignItems:"center",
+  },
+  links:{
+    flex:1, display:"flex", justifyContent:"center",
+    alignItems:"center", gap:"28px",
+  },
+  link:{
+    fontSize:"14px", textDecoration:"none",
+    fontFamily:"'Segoe UI',sans-serif",
+    paddingBottom:"4px", transition:"all 0.15s",
+    whiteSpace:"nowrap",
+  },
+  rightBlock:{
+    width:"250px", flexShrink:0,
+    display:"flex", alignItems:"center",
+    justifyContent:"flex-end", gap:"8px",
+  },
+  pill:{
+    background:"#F0F4F9", border:"1px solid #E2E8F0", borderRadius:"8px",
+    padding:"5px 10px", fontSize:"12px", fontWeight:600,
+    color:"#4A5568", cursor:"pointer", whiteSpace:"nowrap",
+  },
+  langDrop:{
+    position:"absolute", top:"calc(100% + 6px)", right:0,
+    background:"white", borderRadius:"10px", minWidth:"110px",
+    boxShadow:"0 8px 24px rgba(0,0,0,0.12)", zIndex:300, overflow:"hidden",
+    border:"1px solid #e2e8f0",
+  },
+  langItem:{
+    display:"block", width:"100%", padding:"9px 14px",
+    border:"none", borderBottom:"1px solid #f0f4f9",
+    fontSize:"13px", color:"#2d3748", cursor:"pointer", textAlign:"left",
+  },
+  logoutBtn:{
+    background:"transparent", border:"1px solid #D0DCE8",
+    borderRadius:"8px", padding:"6px 14px", fontSize:"13px",
+    fontWeight:500, color:"#5A6A7E", cursor:"pointer",
+    fontFamily:"'Segoe UI',sans-serif", whiteSpace:"nowrap",
+  },
+  // Mobile
+  mobileBar:{
+    height:"58px", display:"flex", alignItems:"center",
+    gap:"10px", paddingLeft:"12px", paddingRight:"12px",
+    width:"100%",
+  },
+  mobileTitle:{
+    fontSize:"18px", fontWeight:700, color:"#1B2D4F",
+    fontFamily:"'Lucida Calligraphy','Palatino Linotype',serif",
+    fontStyle:"italic", marginLeft:"4px",
+  },
+  hamburger:{
+    background:"#1B2D4F", border:"none", borderRadius:"8px",
+    width:"40px", height:"40px", display:"flex",
+    alignItems:"center", justifyContent:"center",
+    fontSize:"22px", color:"white", cursor:"pointer",
+    flexShrink:0, boxShadow:"0 2px 8px rgba(27,45,79,0.3)",
+  },
+  mobileMenu:{
+    background:"#fff", borderTop:"1px solid #E8EEF5",
+    padding:"12px 20px 16px", flexDirection:"column", gap:"0",
+  },
+  mobileLink:{
+    fontSize:"15px", color:"#1B2D4F", fontWeight:500,
+    textDecoration:"none", padding:"11px 0",
+    borderBottom:"1px solid #F0F4F9", display:"block",
+  },
+  mobileAction:{
+    width:"100%", textAlign:"left", background:"none",
+    border:"none", borderBottom:"1px solid #F0F4F9",
+    padding:"11px 0", fontSize:"14px", color:"#4a5568",
+    fontWeight:500, cursor:"pointer",
+  },
+  mobileLogout:{
+    marginTop:"10px", width:"100%", textAlign:"center",
+    background:"#fff5f5", border:"1px solid #fed7d7",
+    borderRadius:"8px", padding:"11px 0", fontSize:"14px",
+    fontWeight:600, color:"#c53030", cursor:"pointer",
+  },
 };

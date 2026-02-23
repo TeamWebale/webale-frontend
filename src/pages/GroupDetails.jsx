@@ -1038,35 +1038,67 @@ function GroupDetails() {
           <span style={{ color: '#48bb78', fontWeight: '600', fontSize: '14px' }}>
             💰 {currencySymbol}{formatAmount(group.pledged_amount || 0)} pledged
           </span>
-          <span style={{ color: '#a0aec0', fontSize: '13px' }}>{pledgedPercent}%</span>
+          <span style={{ color: '#2d3748', fontSize: '13px', fontWeight: '700' }}>{pledgedPercent}%</span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
           <span style={{ color: '#667eea', fontWeight: '600', fontSize: '14px' }}>
             💵 {currencySymbol}{formatAmount(group.current_amount || 0)} received
           </span>
-          <span style={{ color: '#a0aec0', fontSize: '13px' }}>{receivedPercent}%</span>
+          <span style={{ color: '#2d3748', fontSize: '13px', fontWeight: '700' }}>{receivedPercent}%</span>
         </div>
-        {/* Progress bars with color */}
+        {/* Progress bars with quarterly roadmarks */}
         <div style={{ marginBottom: '4px' }}>
-          <div style={{ height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden', marginBottom: '4px' }}>
-            <div style={{
-              height: '100%', width: `${Math.min(pledgedPercent, 100)}%`,
-              background: 'linear-gradient(90deg, #48bb78, #38b2ac)', borderRadius: '4px',
-              transition: 'width 0.5s ease'
-            }} />
+          {/* Pledged bar */}
+          <div style={{ position: 'relative', marginBottom: '12px' }}>
+            <div style={{ height: '10px', background: '#e2e8f0', borderRadius: '5px', overflow: 'visible', position: 'relative' }}>
+              <div style={{
+                height: '100%', width: `${Math.min(pledgedPercent, 100)}%`,
+                background: 'linear-gradient(90deg, #48bb78, #38b2ac)', borderRadius: '5px',
+                transition: 'width 0.5s ease'
+              }} />
+              {/* Q1/Q2/Q3 markers at 25/50/75% */}
+              {[25, 50, 75].map(q => (
+                <div key={q} style={{
+                  position: 'absolute', top: '-4px', left: `${q}%`,
+                  transform: 'translateX(-50%)',
+                  width: '2px', height: '18px',
+                  background: '#94a3b8', borderRadius: '1px',
+                }} />
+              ))}
+            </div>
+            {/* Quarter labels */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '3px', paddingRight: '0' }}>
+              {['Q1','Q2','Q3','Q4'].map((q, i) => (
+                <span key={q} style={{ fontSize: '9px', color: '#94a3b8', fontWeight: '600', letterSpacing: '0.3px',
+                  position: 'absolute', left: `${i === 3 ? 100 : (i+1)*25}%`,
+                  transform: i === 3 ? 'translateX(-100%)' : 'translateX(-50%)',
+                }}>{q}</span>
+              ))}
+            </div>
           </div>
-          <div style={{ height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
-            <div style={{
-              height: '100%', width: `${Math.min(receivedPercent, 100)}%`,
-              background: 'linear-gradient(90deg, #667eea, #764ba2)', borderRadius: '4px',
-              transition: 'width 0.5s ease'
-            }} />
+          {/* Received bar */}
+          <div style={{ position: 'relative', marginBottom: '8px', marginTop: '8px' }}>
+            <div style={{ height: '10px', background: '#e2e8f0', borderRadius: '5px', overflow: 'visible', position: 'relative' }}>
+              <div style={{
+                height: '100%', width: `${Math.min(receivedPercent, 100)}%`,
+                background: 'linear-gradient(90deg, #667eea, #764ba2)', borderRadius: '5px',
+                transition: 'width 0.5s ease'
+              }} />
+              {[25, 50, 75].map(q => (
+                <div key={q} style={{
+                  position: 'absolute', top: '-4px', left: `${q}%`,
+                  transform: 'translateX(-50%)',
+                  width: '2px', height: '18px',
+                  background: '#94a3b8', borderRadius: '1px',
+                }} />
+              ))}
+            </div>
           </div>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#718096', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
-          <span>🎯 Target/Goal: {currencySymbol}{formatAmount(group.goal_amount)}</span>
-          <span>👥 {members.length || 0} members</span>
-          <span>📅 {group.deadline ? new Date(group.deadline).toLocaleDateString() : 'No deadline'}</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#1a202c', fontWeight: '600', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
+          <span style={{color:'#2d3748'}}>🎯 Target/Goal: {currencySymbol}{formatAmount(group.goal_amount)}</span>
+          <span style={{color:'#2d3748'}}>👥 {members.length || 0} members</span>
+          <span style={{color:'#2d3748'}}>📅 {group.deadline ? new Date(group.deadline).toLocaleDateString() : 'No deadline'}</span>
         </div>
       </div>
 
@@ -1087,7 +1119,7 @@ function GroupDetails() {
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
               }}
             >
-              {activeTabObj?.icon} {activeTabObj?.label} ▾
+              ☰ Sections Menu — {activeTabObj?.icon} {activeTabObj?.label} ▾
             </button>
 
             {/* Dropdown list */}
