@@ -698,7 +698,7 @@ function GroupDetails() {
         y += 4;
 
         const tableData = pledges.map(p => [
-          p.is_anonymous ? 'John Doe' : `${p.first_name || ''} ${p.last_name || ''}`,
+          p.is_anonymous ? 'John Doe' : (p.donor_name?.trim() || (p.donor_name?.trim() || `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Unknown').trim() || 'Unknown'),
           p.email || '-',
           `${currencySymbol}${formatAmount(p.amount)}`,
           `${currencySymbol}${formatAmount(p.amount_paid || 0)}`,
@@ -797,6 +797,7 @@ function GroupDetails() {
       await pledgeAPI.create(id, {
         amount: parseFloat(offlineDonationForm.amount),
         isAnonymous: isAnon,
+        donorName: isAnon ? null : (offlineDonationForm.donorName?.trim() || null),
         fulfillmentDate: isPledge ? (offlineDonationForm.fulfillmentDate || null) : null,
         reminderFrequency: 'none',
         currency: group?.currency || 'USD'
@@ -854,7 +855,7 @@ function GroupDetails() {
               <div key={pledge.id} style={{ padding: '10px', background: '#f7fafc', borderRadius: '8px', fontSize: '13px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ fontWeight: '600', color: '#2d3748' }}>
-                    {pledge.is_anonymous ? 'John Doe' : pledge.first_name}
+                    {pledge.is_anonymous ? 'John Doe' : (pledge.donor_name?.trim() || pledge.first_name || 'Unknown')}
                   </span>
                   <span style={{ color: '#48bb78', fontWeight: '600' }}>
                     {currencySymbol}{formatAmount(pledge.amount)}
@@ -1176,7 +1177,7 @@ function GroupDetails() {
                     display: 'flex', justifyContent: 'space-between', padding: '10px',
                     background: '#f7fafc', borderRadius: '8px', marginBottom: '6px', fontSize: '13px'
                   }}>
-                    <span>{pledge.is_anonymous ? 'John Doe' : `${pledge.first_name} ${pledge.last_name}`}</span>
+                    <span>{pledge.is_anonymous ? 'John Doe' : (pledge.donor_name?.trim() || `${pledge.first_name || ''} ${pledge.last_name || ''}`.trim() || 'Unknown')}</span>
                     <span style={{ fontWeight: '600', color: '#48bb78' }}>{currencySymbol}{formatAmount(pledge.amount)}</span>
                   </div>
                 ))}
@@ -1226,11 +1227,11 @@ function GroupDetails() {
                           color: 'white', display: 'flex', alignItems: 'center',
                           justifyContent: 'center', fontWeight: 'bold', fontSize: '14px'
                         }}>
-                          {pledge.is_anonymous ? '?' : (pledge.first_name?.charAt(0) || '?')}
+                          {pledge.is_anonymous ? '?' : (pledge.donor_name?.charAt(0) || pledge.first_name?.charAt(0) || '?')}
                         </div>
                         <div>
                           <p style={{ fontWeight: '600', color: '#2d3748', margin: 0, fontSize: '13px' }}>
-                            {pledge.is_anonymous ? 'John Doe' : `${pledge.first_name} ${pledge.last_name}`}
+                            {pledge.is_anonymous ? 'John Doe' : (pledge.donor_name?.trim() || `${pledge.first_name || ''} ${pledge.last_name || ''}`.trim() || 'Unknown')}
                             {isMyPledge && <span style={{ color: '#667eea', fontSize: '11px' }}> (you)</span>}
                           </p>
                           <p style={{ fontSize: '11px', color: '#a0aec0', margin: 0 }}>{formatTimeAgo(pledge.created_at)}</p>
