@@ -72,7 +72,7 @@ const s = {
   errClose:{background:"transparent",border:"none",color:"#ff8a8a",cursor:"pointer",fontSize:"14px",padding:"0"},
   form:{width:"100%",display:"flex",flexDirection:"column",gap:"16px"},
   field:{display:"flex",flexDirection:"column",gap:"6px"},
-  label:{fontSize:"11px",fontWeight:500,color:"rgba(255,255,255,0.55)",letterSpacing:"0.5px",textTransform:"uppercase",fontFamily:"'Segoe UI',sans-serif"},
+  label:{fontSize:"12px",fontWeight:500,color:"rgba(255,255,255,0.55)",letterSpacing:"0.3px",fontFamily:"'Segoe UI',sans-serif"},
   input:{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:"10px",padding:"11px 14px",fontSize:"15px",color:"#FFFFFF",outline:"none",fontFamily:"'Segoe UI',sans-serif"},
   forgot:{fontSize:"13px",color:"#00C2CC",textDecoration:"none"},
   btn:{marginTop:"4px",background:"linear-gradient(135deg,#00C2CC,#4A7FC1)",color:"#FFF",border:"none",borderRadius:"10px",padding:"13px",fontSize:"15px",fontWeight:600,cursor:"pointer",fontFamily:"'Segoe UI',sans-serif"},
