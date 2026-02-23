@@ -21,11 +21,7 @@ function authHeaders() {
 
 const EMOJI_AVATARS = ["😊","😎","🦁","🐯","🦊","🐺","🐻","🦝","🦄","🐙","🦋","🌟","🔥","💎","🎯","🚀"];
 
-const COUNTRIES = [
-  "Uganda","Kenya","Tanzania","Rwanda","Nigeria","Ghana","South Africa",
-  "United Kingdom","United States","Canada","Australia","India","Germany",
-  "France","Japan","China","Brazil","Mexico","Other"
-];
+import { COUNTRIES } from '../constants/countries';
 
 export default function Profile() {
   const { user, updateUser } = useAuth();
