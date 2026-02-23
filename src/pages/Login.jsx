@@ -51,7 +51,14 @@ export default function Login() {
           <button type="submit" disabled={loading} style={s.btn}>{loading?"Signing in…":"Sign In"}</button>
         </form>
         <p style={s.reg}>Don't have an account? <Link to="/register" style={s.regLink}>Create one</Link></p>
-        <p style={s.footer}>© 2026 Webale · webale.net</p>
+        <div style={{ marginTop:"28px", textAlign:"center", fontFamily:"'Segoe UI',sans-serif" }}>
+          <p style={{ margin:"0 0 4px", fontSize:"12px", fontWeight:600, color:"#00E5CC", letterSpacing:"0.2px" }}>
+            © Copyright 2026 Landfolks Aitech (U) Ltd
+          </p>
+          <p style={{ margin:0, fontSize:"12px", fontWeight:600, color:"#FFB800", letterSpacing:"0.2px" }}>
+            theteam@webale.net
+          </p>
+        </div>
       </div>
     </div>
   );
