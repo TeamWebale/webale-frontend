@@ -933,29 +933,25 @@ function GroupDetails() {
   // ==================== LOADING STATE ====================
   if (loading) {
     return (
-      <MainLayout>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-          <div className="spinner"></div>
-        </div>
-      </MainLayout>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+        <div className="spinner"></div>
+      </div>
     );
   }
 
   if (!group) {
     return (
-      <MainLayout>
-        <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-          <div style={{ fontSize: '64px', marginBottom: '16px' }}>😕</div>
-          <h2>Group Not Found</h2>
-          <button onClick={() => navigate('/dashboard')} className="btn btn-primary">← Back to Dashboard</button>
-        </div>
-      </MainLayout>
+      <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+        <div style={{ fontSize: '64px', marginBottom: '16px' }}>😕</div>
+        <h2>Group Not Found</h2>
+        <button onClick={() => navigate('/dashboard')} className="btn btn-primary">← Back to Dashboard</button>
+      </div>
     );
   }
 
   // ==================== MAIN RENDER ====================
   return (
-    <MainLayout rightSidebar={<RightSidebar />} showProfileBanner={true}>
+    <div>
 
       {/* Group Header */}
       <div style={{
@@ -2110,7 +2106,7 @@ function GroupDetails() {
         )}
       </Modal>
 
-    </MainLayout>
+    </div>
   );
 }
 

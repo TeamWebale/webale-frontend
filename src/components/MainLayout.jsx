@@ -3,15 +3,14 @@
  *
  * Structure:
  *   [Navbar]
- *   [Profile Banner]
- *   [Left Sidebar] | [Main Content <Outlet/>] | [Right Sidebar (injected by page)]
+ *   [Left Sidebar] | [Profile Banner + Main Content] | [Right Sidebar]
  *
+ * Profile banner sits INSIDE the main column, above the Outlet content.
  * Pages inject right sidebar via: useRightSidebar().setRightSidebar(<JSX/>)
  */
-import { Outlet, NavLink, useNavigate, Link } from "react-router-dom";
+import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useState, useEffect, createContext, useContext } from "react";
 import Navbar from "./Navbar";
-import WebaleLogo from "./WebaleLogo";
 import { useAuth } from "../context/AuthContext";
 import { groupAPI } from "../services/api";
 
@@ -19,19 +18,23 @@ import { groupAPI } from "../services/api";
 export const RightSidebarContext = createContext({ setRightSidebar: () => {} });
 export function useRightSidebar() { return useContext(RightSidebarContext); }
 
-// ── Helpers ────────────────────────────────────────────────────────
-const COUNTRY_CODES = {
-  "Uganda":"[UG]","United States":"[US]","United Kingdom":"[GB]",
-  "Kenya":"[KE]","Tanzania":"[TZ]","Rwanda":"[RW]","Nigeria":"[NG]",
-  "Ghana":"[GH]","South Africa":"[ZA]","Canada":"[CA]","Australia":"[AU]",
-  "Germany":"[DE]","France":"[FR]","India":"[IN]","China":"[CN]",
-  "Japan":"[JP]","Brazil":"[BR]","Mexico":"[MX]","European Union":"[EU]",
+// ── Flag emoji map ─────────────────────────────────────────────────
+const FLAG = {
+  "Uganda":"🇺🇬","United States":"🇺🇸","United Kingdom":"🇬🇧",
+  "Kenya":"🇰🇪","Tanzania":"🇹🇿","Rwanda":"🇷🇼","Nigeria":"🇳🇬",
+  "Ghana":"🇬🇭","South Africa":"🇿🇦","Canada":"🇨🇦","Australia":"🇦🇺",
+  "Germany":"🇩🇪","France":"🇫🇷","India":"🇮🇳","China":"🇨🇳",
+  "Japan":"🇯🇵","Brazil":"🇧🇷","Mexico":"🇲🇽","European Union":"🇪🇺",
+  "United Arab Emirates":"🇦🇪","Singapore":"🇸🇬","Netherlands":"🇳🇱",
+  "Sweden":"🇸🇪","Norway":"🇳🇴","Ethiopia":"🇪🇹","Egypt":"🇪🇬",
+  "Morocco":"🇲🇦","Zambia":"🇿🇲","Zimbabwe":"🇿🇼","Cameroon":"🇨🇲",
+  "Senegal":"🇸🇳","Ivory Coast":"🇨🇮","Angola":"🇦🇴","Mozambique":"🇲🇿",
 };
-function getCountryCode(c) {
-  if (!c) return "";
-  if (/^\[[A-Z]{2,3}\]$/.test(c)) return c;
-  return COUNTRY_CODES[c] || `[${c.slice(0,2).toUpperCase()}]`;
+function getFlag(country) {
+  if (!country) return "";
+  return FLAG[country] || "🌍";
 }
+
 function getAvatar(user) {
   if (user?.avatar_type === "emoji" && user?.avatar_url) return user.avatar_url;
   if (user?.avatarType  === "emoji" && user?.avatarUrl)  return user.avatarUrl;
@@ -62,13 +65,7 @@ function LeftSidebar() {
 
   return (
     <aside style={ls.wrap}>
-      {/* Logo */}
-      <Link to="/dashboard" style={{ textDecoration:"none", display:"block", marginBottom:"22px" }}>
-        <WebaleLogo variant="full" size="sm" theme="light" />
-      </Link>
-
-      {/* Nav links */}
-      <nav>
+      <nav style={{ marginBottom: "8px" }}>
         {[
           ["/dashboard",    "📊", "Dashboard",   "#e0e7ff", "#4c51bf"],
           ["/create-group", "➕", "Create Group", "#d1fae5", "#047857"],
@@ -89,7 +86,6 @@ function LeftSidebar() {
         ))}
       </nav>
 
-      {/* Quick Stats */}
       <p style={ls.statsLabel}>Quick Stats</p>
       {[
         ["Total Groups",  stats.total,  "#667eea","#764ba2"],
@@ -107,7 +103,6 @@ function LeftSidebar() {
       ))}
 
       <div style={{ flex:1 }} />
-
       <button onClick={handleLogout} style={ls.logout}>🚪 Logout</button>
     </aside>
   );
@@ -142,7 +137,7 @@ export default function MainLayout() {
   const [rightSidebar, setRightSidebar] = useState(null);
 
   const avatar      = getAvatar(user);
-  const countryCode = getCountryCode(user?.country);
+  const flag        = getFlag(user?.country);
   const fullName    = `${user?.first_name||user?.firstName||""} ${user?.last_name||user?.lastName||""}`.trim();
   const memberSince = user?.created_at
     ? new Date(user.created_at).toLocaleDateString("en-US",{month:"long",year:"numeric"})
@@ -156,36 +151,41 @@ export default function MainLayout() {
         {/* Top Navbar */}
         <Navbar />
 
-        {/* Profile Banner */}
-        <div style={ml.banner}>
-          <div style={ml.avatarRing}>
-            <div style={ml.avatar}>
-              {isEmoji
-                ? <span style={{fontSize:26}}>{avatar}</span>
-                : <span style={ml.initials}>{avatar||"?"}</span>}
-            </div>
-          </div>
-          <div>
-            <div style={ml.bannerName}>
-              {fullName}
-              {countryCode && <span style={ml.badge}>{countryCode}</span>}
-            </div>
-            {memberSince && <div style={ml.meta}>🗓 Member since {memberSince}</div>}
-          </div>
-        </div>
-
-        {/* Three-column body */}
+        {/* Three-column body — profile banner is INSIDE main column */}
         <div style={ml.body}>
 
-          {/* Left Sidebar */}
+          {/* Left Sidebar — no logo, no profile */}
           <div className="sidebar-left">
             <LeftSidebar />
           </div>
 
-          {/* Main content */}
-          <main style={ml.main}>
-            <Outlet />
-          </main>
+          {/* Main column: profile banner + page content */}
+          <div style={ml.mainCol}>
+
+            {/* Profile Banner */}
+            <div style={ml.banner}>
+              <div style={ml.avatarRing}>
+                <div style={ml.avatar}>
+                  {isEmoji
+                    ? <span style={{fontSize:26}}>{avatar}</span>
+                    : <span style={ml.initials}>{avatar||"?"}</span>}
+                </div>
+              </div>
+              <div>
+                <div style={ml.bannerName}>
+                  {fullName}
+                  {flag && <span style={ml.flag}>{flag}</span>}
+                </div>
+                {memberSince && <div style={ml.meta}>🗓 Member since {memberSince}</div>}
+              </div>
+            </div>
+
+            {/* Page content */}
+            <main style={ml.main}>
+              <Outlet />
+            </main>
+
+          </div>
 
           {/* Right Sidebar — injected by pages via useRightSidebar() */}
           {rightSidebar && (
@@ -211,6 +211,8 @@ export default function MainLayout() {
 
 const ml = {
   shell:{ minHeight:"100vh", background:"#F0F4F9", display:"flex", flexDirection:"column" },
+  body:{ display:"flex", flex:1, minHeight:0 },
+  mainCol:{ flex:1, display:"flex", flexDirection:"column", minWidth:0 },
   banner:{
     background:"linear-gradient(135deg,#1B2D4F,#4A7FC1)",
     padding:"14px 24px", display:"flex", alignItems:"center", gap:"14px",
@@ -229,13 +231,9 @@ const ml = {
     fontSize:"17px", fontWeight:700, color:"#FFFFFF",
     fontFamily:"'Segoe UI',sans-serif", display:"flex", alignItems:"center", gap:"8px",
   },
-  badge:{
-    fontSize:"11px", fontWeight:500, color:"rgba(255,255,255,0.7)",
-    background:"rgba(255,255,255,0.12)", borderRadius:"4px", padding:"1px 6px",
-  },
-  meta:{ fontSize:"12px", color:"rgba(255,255,255,0.6)", fontFamily:"'Segoe UI',sans-serif" },
-  body:{ display:"flex", flex:1, minHeight:0 },
-  main:{ flex:1, padding:"20px", overflowY:"auto", minWidth:0 },
+  flag:{ fontSize:"22px", lineHeight:1 },
+  meta:{ fontSize:"12px", color:"rgba(255,255,255,0.7)", fontFamily:"'Segoe UI',sans-serif", marginTop:"2px" },
+  main:{ flex:1, padding:"20px", overflowY:"auto" },
   rightSidebar:{
     width:"250px", padding:"16px", overflowY:"auto",
     borderLeft:"1px solid #e2e8f0", background:"#F8FAFC", flexShrink:0,
