@@ -157,9 +157,7 @@ function GroupDetails() {
 
   // Detect user's local currency on mount
   useEffect(() => {
-    detectUserCurrency().then(result => {
-      setDetectedCurrency(result.currency);
-    });
+    setDetectedCurrency(detectUserCurrency() || 'USD');
   }, []);
 
   useEffect(() => {
