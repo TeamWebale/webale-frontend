@@ -60,7 +60,7 @@ export default function Profile() {
     try {
       const res = await axios.put(
         `${API}/auth/profile`,
-        { first_name: firstName, last_name: lastName, country, bio, phone },
+        { firstName, lastName, country, bio, phone },
         { headers: authHeaders() }
       );
       const updated = res.data?.data?.user || res.data?.user || {};
@@ -81,7 +81,7 @@ export default function Profile() {
     try {
       await axios.put(
         `${API}/auth/profile`,
-        { avatar_url: selectedEmoji, avatar_type: "emoji" },
+        { avatarUrl: selectedEmoji, avatarType: "emoji" },
         { headers: authHeaders() }
       );
       updateUser({ avatar_url: selectedEmoji, avatarUrl: selectedEmoji, avatar_type: "emoji", avatarType: "emoji" });
