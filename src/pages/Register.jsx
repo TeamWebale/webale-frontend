@@ -51,11 +51,11 @@ export default function Register() {
     setLoading(true);
     try {
       await authAPI.register({
-        first_name: form.firstName,
-        last_name:  form.lastName,
-        email:      form.email,
-        country:    form.country,
-        password:   form.password,
+        firstName: form.firstName,
+        lastName:  form.lastName,
+        email:     form.email,
+        country:   form.country,
+        password:  form.password,
       });
       navigate("/login?registered=1");
     } catch (err) {
