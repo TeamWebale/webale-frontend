@@ -6,14 +6,19 @@ const AuthContext = createContext(null);
 // Normalize user fields to snake_case regardless of what backend returns
 function normalizeUser(u) {
   if (!u) return u;
+  const first = u.first_name || u.firstName || u.first || "";
+  const last  = u.last_name  || u.lastName  || u.last  || "";
   return {
     ...u,
-    first_name:   u.first_name   || u.firstName   || "",
-    last_name:    u.last_name    || u.lastName     || "",
-    avatar_url:   u.avatar_url   || u.avatarUrl    || "",
-    avatar_type:  u.avatar_type  || u.avatarType   || "",
-    created_at:   u.created_at   || u.createdAt    || "",
-    last_active:  u.last_active  || u.lastActive   || "",
+    first_name:  first,
+    last_name:   last,
+    // Keep camelCase copies too so any component can read either
+    firstName:   first,
+    lastName:    last,
+    avatar_url:  u.avatar_url  || u.avatarUrl  || "",
+    avatar_type: u.avatar_type || u.avatarType || "",
+    created_at:  u.created_at  || u.createdAt  || "",
+    last_active: u.last_active || u.lastActive || "",
   };
 }
 
@@ -42,9 +47,15 @@ export function AuthProvider({ children }) {
         });
         
         if (response.data.success) {
-          const userData = normalizeUser(response.data.data.user);
-          setUser(userData);
-          localStorage.setItem('user', JSON.stringify(userData));
+          // Merge /me response with existing stored user — keeps fields even if /me omits them
+          const existing = normalizeUser(JSON.parse(storedUser));
+          const fresh    = response.data.data?.user || response.data.data || {};
+          const merged   = normalizeUser({ ...existing, ...fresh });
+          // Only update if we actually got meaningful data back
+          if (merged.first_name || merged.email) {
+            setUser(merged);
+            localStorage.setItem('user', JSON.stringify(merged));
+          }
         }
       } catch (error) {
         console.error('Auth check failed:', error);
