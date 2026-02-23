@@ -1494,7 +1494,11 @@ function GroupDetails() {
               Estimated Equivalent
             </p>
             <p style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#2d3748' }}>
-              {convertCurrency(parseFloat(pledgeForm.amount), pledgeForm.currency, group?.currency || 'USD').display}
+              {(() => {
+                const result = convertCurrency(parseFloat(pledgeForm.amount), pledgeForm.currency, group?.currency || 'USD');
+                const sym = getCurrencySymbol(group?.currency || 'USD');
+                return `${sym}${Number(result).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})} ${group?.currency || 'USD'}`;
+              })()}
             </p>
             <p style={{ margin: '4px 0 0', fontSize: '10px', color: '#718096' }}>
               in group currency ({group?.currency || 'USD'}) &bull; Rates are approximate
@@ -1517,10 +1521,11 @@ function GroupDetails() {
           </select>
         </FormField>
         <FormField label="">
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px' }}>
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer', fontSize: '13px', lineHeight: '1.5' }}>
             <input type="checkbox" checked={pledgeForm.isAnonymous}
-              onChange={e => setPledgeForm({ ...pledgeForm, isAnonymous: e.target.checked })} />
-            Make this pledge anonymous (shown as "John Doe" on activity boards)
+              onChange={e => setPledgeForm({ ...pledgeForm, isAnonymous: e.target.checked })}
+              style={{ marginTop: '3px', flexShrink: 0, width: '16px', height: '16px', cursor: 'pointer' }} />
+            <span>Make this pledge anonymous (shown as "John Doe" on activity boards)</span>
           </label>
         </FormField>
         <button onClick={submitPledge} disabled={formLoading} style={{ ...btnPrimary, opacity: formLoading ? 0.7 : 1 }}>
@@ -1565,7 +1570,11 @@ function GroupDetails() {
               Estimated Equivalent
             </p>
             <p style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#2d3748' }}>
-              {convertCurrency(parseFloat(revisePledgeForm.amount), revisePledgeForm.currency, group?.currency || 'USD').display}
+              {(() => {
+                const result = convertCurrency(parseFloat(revisePledgeForm.amount), revisePledgeForm.currency, group?.currency || 'USD');
+                const sym = getCurrencySymbol(group?.currency || 'USD');
+                return `${sym}${Number(result).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})} ${group?.currency || 'USD'}`;
+              })()}
             </p>
             <p style={{ margin: '4px 0 0', fontSize: '10px', color: '#718096' }}>
               in group currency ({group?.currency || 'USD'}) &bull; Rates are approximate
@@ -1588,10 +1597,11 @@ function GroupDetails() {
           </select>
         </FormField>
         <FormField label="">
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px' }}>
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer', fontSize: '13px', lineHeight: '1.5' }}>
             <input type="checkbox" checked={revisePledgeForm.isAnonymous}
-              onChange={e => setRevisePledgeForm({ ...revisePledgeForm, isAnonymous: e.target.checked })} />
-            Make this pledge anonymous
+              onChange={e => setRevisePledgeForm({ ...revisePledgeForm, isAnonymous: e.target.checked })}
+              style={{ marginTop: '3px', flexShrink: 0, width: '16px', height: '16px', cursor: 'pointer' }} />
+            <span>Make this pledge anonymous</span>
           </label>
         </FormField>
         <FormField label="Notes (optional)">
@@ -2129,7 +2139,11 @@ function GroupDetails() {
               {getCurrencySymbol(converterForm.fromCurrency)} {parseFloat(converterForm.amount).toLocaleString()} {converterForm.fromCurrency} =
             </p>
             <p style={{ margin: 0, fontSize: '28px', fontWeight: '700' }}>
-              {convertCurrency(parseFloat(converterForm.amount), converterForm.fromCurrency, converterForm.toCurrency).display}
+              {(() => {
+                const result = convertCurrency(parseFloat(converterForm.amount), converterForm.fromCurrency, converterForm.toCurrency);
+                const sym = getCurrencySymbol(converterForm.toCurrency);
+                return `${sym}${Number(result).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})} ${converterForm.toCurrency}`;
+              })()}
             </p>
             <p style={{ margin: '8px 0 0', fontSize: '11px', opacity: 0.7 }}>Rates are approximate</p>
           </div>
