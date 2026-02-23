@@ -3,6 +3,21 @@ import axios from 'axios';
 
 const AuthContext = createContext(null);
 
+// Normalize user fields to snake_case regardless of what backend returns
+function normalizeUser(u) {
+  if (!u) return u;
+  return {
+    ...u,
+    first_name:   u.first_name   || u.firstName   || "",
+    last_name:    u.last_name    || u.lastName     || "",
+    avatar_url:   u.avatar_url   || u.avatarUrl    || "",
+    avatar_type:  u.avatar_type  || u.avatarType   || "",
+    created_at:   u.created_at   || u.createdAt    || "",
+    last_active:  u.last_active  || u.lastActive   || "",
+  };
+}
+
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -17,31 +32,26 @@ export function AuthProvider({ children }) {
     const storedUser = localStorage.getItem('user');
 
     if (token && storedUser) {
-      // Immediately restore user from localStorage so app feels instant
-      setUser(JSON.parse(storedUser));
-      setIsAuthenticated(true);
-
-      // Background verify — use AbortController so unmount doesn't throw
-      const controller = new AbortController();
       try {
+        setUser(normalizeUser(JSON.parse(storedUser)));
+        setIsAuthenticated(true);
+        
+        // Optionally verify token with backend
         const response = await axios.get('https://webale-api.onrender.com/api/auth/me', {
-          headers: { 'Authorization': `Bearer ${token}` },
-          signal: controller.signal,
+          headers: { 'Authorization': `Bearer ${token}` }
         });
+        
         if (response.data.success) {
-          const userData = response.data.data.user;
+          const userData = normalizeUser(response.data.data.user);
           setUser(userData);
           localStorage.setItem('user', JSON.stringify(userData));
         }
       } catch (error) {
-        if (axios.isCancel(error) || error.code === 'ERR_CANCELED') {
-          // Request aborted on unmount — not an error, ignore silently
-          return;
-        }
+        console.error('Auth check failed:', error);
+        // Token might be invalid, clear storage
         if (error.response?.status === 401) {
           logout();
         }
-        // Any other network error: stay logged in from localStorage
       }
     }
     setLoading(false);
@@ -57,9 +67,10 @@ export function AuthProvider({ children }) {
 
     if (response.data.success) {
       const { token, user } = response.data.data;
+      const normalized = normalizeUser(user);
       localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      setUser(user);
+      localStorage.setItem('user', JSON.stringify(normalized));
+      setUser(normalized);
       setIsAuthenticated(true);
       return { success: true };
     }
@@ -73,9 +84,10 @@ export function AuthProvider({ children }) {
 
     if (response.data.success) {
       const { token, user } = response.data.data;
+      const normalized = normalizeUser(user);
       localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      setUser(user);
+      localStorage.setItem('user', JSON.stringify(normalized));
+      setUser(normalized);
       setIsAuthenticated(true);
       return { success: true };
     }
