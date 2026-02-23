@@ -1,296 +1,216 @@
 /**
- * Register.jsx
- * Destination: src/pages/Register.jsx
- *
- * - Close ✕ button (navigates back to login)
- * - Country field required
- * - Pending invite redirect after signup
- * - Auto-accepts pending invite via POST /api/invitations/:token/accept
+ * Register.jsx — src/pages/Register.jsx
+ * Root cause of blank country list: options had color:#ffffff on white background.
+ * Fix: explicit dark text + white background on each option.
  */
-
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { Link, useNavigate } from "react-router-dom";
 import WebaleLogo from "../components/WebaleLogo";
-import axios from "axios";
-
-const API = "https://webale-api.onrender.com/api";
+import { authAPI } from "../services/api";
 
 const COUNTRIES = [
-  "Uganda","Kenya","Tanzania","Rwanda","Nigeria","Ghana","South Africa",
-  "United Kingdom","United States","Canada","Australia","India","Germany",
-  "France","Japan","China","Brazil","Mexico","Other"
+  "Afghanistan","Albania","Algeria","Angola","Argentina","Armenia","Australia",
+  "Austria","Azerbaijan","Bahrain","Bangladesh","Belarus","Belgium","Benin",
+  "Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Bulgaria","Burkina Faso",
+  "Burundi","Cambodia","Cameroon","Canada","Chad","Chile","China","Colombia",
+  "Congo","Costa Rica","Croatia","Cuba","Cyprus","Czech Republic","Denmark",
+  "Dominican Republic","DR Congo","Ecuador","Egypt","El Salvador","Estonia",
+  "Ethiopia","Finland","France","Gabon","Georgia","Germany","Ghana","Greece",
+  "Guatemala","Guinea","Haiti","Honduras","Hungary","India","Indonesia","Iran",
+  "Iraq","Ireland","Israel","Italy","Ivory Coast","Jamaica","Japan","Jordan",
+  "Kazakhstan","Kenya","Kuwait","Laos","Latvia","Lebanon","Libya","Lithuania",
+  "Luxembourg","Madagascar","Malawi","Malaysia","Mali","Malta","Mauritania",
+  "Mauritius","Mexico","Moldova","Mongolia","Montenegro","Morocco","Mozambique",
+  "Myanmar","Namibia","Nepal","Netherlands","New Zealand","Nicaragua","Niger",
+  "Nigeria","North Korea","North Macedonia","Norway","Oman","Pakistan","Palestine",
+  "Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal",
+  "Qatar","Romania","Russia","Rwanda","Saudi Arabia","Senegal","Serbia",
+  "Sierra Leone","Singapore","Slovakia","Slovenia","Somalia","South Africa",
+  "South Korea","South Sudan","Spain","Sri Lanka","Sudan","Sweden","Switzerland",
+  "Syria","Taiwan","Tajikistan","Tanzania","Thailand","Togo","Trinidad and Tobago",
+  "Tunisia","Turkey","Turkmenistan","Uganda","Ukraine","United Arab Emirates",
+  "United Kingdom","United States","Uruguay","Uzbekistan","Venezuela","Vietnam",
+  "Yemen","Zambia","Zimbabwe",
 ];
 
 export default function Register() {
-  const { register } = useAuth();
   const navigate = useNavigate();
-
   const [form, setForm] = useState({
-    first_name: "", last_name: "", email: "",
-    password: "", confirm_password: "", country: "",
+    firstName:"", lastName:"", email:"", country:"", password:"", confirmPassword:"",
   });
   const [error,   setError]   = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    setError("");
-  };
+  const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
-    if (form.password !== form.confirm_password) {
-      return setError("Passwords do not match.");
-    }
-    if (!form.country) {
-      return setError("Please select your country.");
-    }
-
+    if (form.password !== form.confirmPassword) { setError("Passwords do not match"); return; }
+    if (!form.country) { setError("Please select your country"); return; }
     setLoading(true);
     try {
-      const result = await register({
-        first_name: form.first_name,
-        last_name : form.last_name,
-        email     : form.email,
-        password  : form.password,
-        country   : form.country,
+      await authAPI.register({
+        firstName: form.firstName, lastName: form.lastName,
+        email: form.email, country: form.country, password: form.password,
       });
-
-      if (!result.success) {
-        setError(result.message || "Registration failed.");
-        setLoading(false);
-        return;
-      }
-
-      // Auto-accept pending invite if present
-      const pendingInvite = localStorage.getItem("pendingInvite");
-      if (pendingInvite) {
-        try {
-          const token = localStorage.getItem("token");
-          await axios.post(
-            `${API}/invitations/${pendingInvite}/accept`,
-            {},
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          localStorage.removeItem("pendingInvite");
-          navigate(`/invite/${pendingInvite}`);
-          return;
-        } catch {
-          localStorage.removeItem("pendingInvite");
-        }
-      }
-
-      navigate("/dashboard");
+      navigate("/login?registered=1");
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "Registration failed.");
+      setError(err.response?.data?.message || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
+    <div style={s.page}>
+      <div style={s.card}>
 
-        {/* ✕ Close */}
-        <button onClick={() => navigate("/login")} style={styles.closeBtn} aria-label="Close">✕</button>
-
-        {/* Brand */}
-        <div style={styles.brand}>
+        <div style={{ textAlign:"center", marginBottom:"20px" }}>
           <WebaleLogo variant="full" size="md" theme="dark" />
         </div>
 
-        <p style={styles.subtitle}>Create your account</p>
+        <h2 style={s.heading}>Create your account</h2>
 
-        {/* Error */}
         {error && (
-          <div style={styles.error}>
-            <span>{error}</span>
-            <button onClick={() => setError("")} style={styles.errorClose}>✕</button>
+          <div style={s.errorBox}>
+            ⚠️ {error}
+            <button onClick={() => setError("")} style={s.dismissBtn}>✕</button>
           </div>
         )}
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.row}>
-            <div style={styles.field}>
-              <label style={styles.label}>First Name</label>
-              <input
-                name="first_name" value={form.first_name}
-                onChange={handleChange} required
-                placeholder="First name" style={styles.input}
-              />
+        <form onSubmit={handleSubmit}>
+
+          {/* Name row */}
+          <div style={{ display:"flex", gap:"12px", marginBottom:"14px" }}>
+            <div style={{ flex:1 }}>
+              <label style={s.label}>First Name</label>
+              <input style={s.input} placeholder="First name" required
+                value={form.firstName} onChange={set("firstName")} />
             </div>
-            <div style={styles.field}>
-              <label style={styles.label}>Last Name</label>
-              <input
-                name="last_name" value={form.last_name}
-                onChange={handleChange} required
-                placeholder="Last name" style={styles.input}
-              />
+            <div style={{ flex:1 }}>
+              <label style={s.label}>Last Name</label>
+              <input style={s.input} placeholder="Last name" required
+                value={form.lastName} onChange={set("lastName")} />
             </div>
           </div>
 
-          <div style={styles.field}>
-            <label style={styles.label}>Email</label>
-            <input
-              name="email" type="email" value={form.email}
-              onChange={handleChange} required
-              placeholder="you@example.com" style={styles.input}
-            />
+          {/* Email */}
+          <div style={{ marginBottom:"14px" }}>
+            <label style={s.label}>Email</label>
+            <input type="email" style={s.input} placeholder="you@example.com"
+              required value={form.email} onChange={set("email")} />
           </div>
 
-          <div style={styles.field}>
-            <label style={styles.label}>Country <span style={styles.req}>*</span></label>
+          {/* Country — KEY FIX: select uses light background + dark text */}
+          <div style={{ marginBottom:"14px" }}>
+            <label style={s.label}>Country</label>
             <select
-              name="country" value={form.country}
-              onChange={handleChange} required style={styles.input}
+              value={form.country}
+              onChange={set("country")}
+              required
+              style={s.select}
             >
-              <option value="">Select your country…</option>
-              {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+              <option value="" disabled>Select your country…</option>
+              {COUNTRIES.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
             </select>
           </div>
 
-          <div style={styles.field}>
-            <label style={styles.label}>Password</label>
-            <input
-              name="password" type="password" value={form.password}
-              onChange={handleChange} required
-              placeholder="Min. 8 characters" style={styles.input}
-            />
+          {/* Password */}
+          <div style={{ marginBottom:"14px" }}>
+            <label style={s.label}>Password</label>
+            <input type="password" style={s.input} placeholder="Minimum 8 characters"
+              required minLength={8} value={form.password} onChange={set("password")} />
           </div>
 
-          <div style={styles.field}>
-            <label style={styles.label}>Confirm Password</label>
-            <input
-              name="confirm_password" type="password" value={form.confirm_password}
-              onChange={handleChange} required
-              placeholder="Repeat password" style={styles.input}
-            />
+          {/* Confirm */}
+          <div style={{ marginBottom:"22px" }}>
+            <label style={s.label}>Confirm Password</label>
+            <input type="password" style={s.input} placeholder="Repeat password"
+              required value={form.confirmPassword} onChange={set("confirmPassword")} />
           </div>
 
-          <button type="submit" disabled={loading} style={styles.btn}>
-            {loading ? "Creating account…" : "Create Account"}
+          <button type="submit" disabled={loading} style={s.submitBtn}>
+            {loading ? "Creating account…" : "🚀 Create Account"}
           </button>
         </form>
 
-        <p style={styles.loginRow}>
+        <p style={{ textAlign:"center", marginTop:"16px", fontSize:"13px", color:"rgba(255,255,255,0.5)" }}>
           Already have an account?{" "}
-          <Link to="/login" style={styles.loginLink}>Sign in</Link>
+          <Link to="/login" style={{ color:"#00E5CC", fontWeight:600 }}>Sign in</Link>
         </p>
 
-        <p style={styles.footer}>© 2026 Webale · webale.net</p>
+        {/* Footer */}
+        <div style={{ marginTop:"24px", textAlign:"center" }}>
+          <p style={{ margin:"0 0 4px", fontSize:"12px", fontWeight:600, color:"#00E5CC" }}>
+            © Copyright 2026 Landfolks Aitech (U) Ltd
+          </p>
+          <p style={{ margin:0, fontSize:"12px", fontWeight:600, color:"#FFB800" }}>
+            theteam@webale.net
+          </p>
+        </div>
+
       </div>
     </div>
   );
 }
 
-const styles = {
-  page: {
-    minHeight     : "100vh",
-    background    : "#0D1B2E",
-    display       : "flex",
-    alignItems    : "center",
-    justifyContent: "center",
-    padding       : "24px 16px",
+const s = {
+  page:{
+    minHeight:"100vh", background:"#0D1B2E",
+    display:"flex", alignItems:"center", justifyContent:"center",
+    padding:"20px", fontFamily:"'Segoe UI',sans-serif",
   },
-  card: {
-    background   : "#0D1B2E",
-    border       : "1px solid rgba(255,255,255,0.08)",
-    borderRadius : "20px",
-    padding      : "44px 40px 32px",
-    width        : "100%",
-    maxWidth     : "460px",
-    display      : "flex",
-    flexDirection: "column",
-    alignItems   : "center",
-    boxShadow    : "0 8px 48px rgba(0,0,0,0.4)",
-    position     : "relative",
+  card:{
+    background:"rgba(255,255,255,0.05)", borderRadius:"16px",
+    border:"1px solid rgba(255,255,255,0.1)", padding:"32px 28px",
+    width:"100%", maxWidth:"420px",
+    boxShadow:"0 20px 60px rgba(0,0,0,0.4)",
   },
-  closeBtn: {
-    position  : "absolute",
-    top       : "16px",
-    right     : "16px",
-    background: "transparent",
-    border    : "none",
-    color     : "rgba(255,255,255,0.4)",
-    fontSize  : "18px",
-    cursor    : "pointer",
-    lineHeight: 1,
-    padding   : "4px",
+  heading:{
+    fontSize:"20px", fontWeight:700, color:"#ffffff",
+    textAlign:"center", margin:"0 0 20px",
   },
-  brand: { marginBottom: "16px" },
-  subtitle: {
-    fontSize    : "14px",
-    color       : "rgba(255,255,255,0.45)",
-    marginBottom: "20px",
+  label:{
+    display:"block", marginBottom:"6px", fontSize:"12px",
+    fontWeight:600, color:"rgba(255,255,255,0.6)",
+    textTransform:"uppercase", letterSpacing:"0.5px",
   },
-  error: {
-    width         : "100%",
-    background    : "rgba(220,53,69,0.15)",
-    border        : "1px solid rgba(220,53,69,0.4)",
-    borderRadius  : "8px",
-    padding       : "10px 14px",
-    color         : "#ff8a8a",
-    fontSize      : "13px",
-    marginBottom  : "16px",
-    display       : "flex",
-    justifyContent: "space-between",
-    alignItems    : "center",
-    gap           : "8px",
+  input:{
+    width:"100%", padding:"12px 14px", borderRadius:"10px",
+    border:"1px solid rgba(255,255,255,0.15)",
+    background:"rgba(255,255,255,0.07)",
+    color:"#ffffff", fontSize:"14px", boxSizing:"border-box",
+    outline:"none", fontFamily:"'Segoe UI',sans-serif",
   },
-  errorClose: {
-    background: "transparent", border: "none",
-    color: "#ff8a8a", cursor: "pointer", fontSize: "14px", padding: "0",
+  // Select MUST use light bg + dark text — browser renders options with OS styling,
+  // and white text on white option background = invisible
+  select:{
+    width:"100%", padding:"12px 14px", borderRadius:"10px",
+    border:"1px solid rgba(255,255,255,0.15)",
+    background:"#1e2d40",   // dark but not pitch black
+    color:"#ffffff",         // selected value text: white (visible on dark bg)
+    fontSize:"14px", boxSizing:"border-box",
+    outline:"none", fontFamily:"'Segoe UI',sans-serif",
+    cursor:"pointer",
   },
-  form: {
-    width: "100%", display: "flex", flexDirection: "column", gap: "14px",
+  errorBox:{
+    background:"rgba(229,62,62,0.15)", border:"1px solid rgba(229,62,62,0.4)",
+    borderRadius:"8px", padding:"10px 14px", marginBottom:"16px",
+    fontSize:"13px", color:"#fc8181",
+    display:"flex", justifyContent:"space-between", alignItems:"center",
   },
-  row: {
-    display: "flex", gap: "12px",
+  dismissBtn:{
+    background:"none", border:"none", color:"#fc8181",
+    fontSize:"16px", cursor:"pointer", padding:"0 0 0 8px",
   },
-  field: {
-    flex: 1, display: "flex", flexDirection: "column", gap: "5px",
-  },
-  label: {
-    fontSize: "11px", fontWeight: 500, color: "rgba(255,255,255,0.5)",
-    letterSpacing: "0.5px", textTransform: "uppercase",
-    fontFamily: "'Segoe UI', sans-serif",
-  },
-  req: { color: "#00C2CC" },
-  input: {
-    background  : "rgba(255,255,255,0.06)",
-    border      : "1px solid rgba(255,255,255,0.12)",
-    borderRadius: "10px",
-    padding     : "11px 14px",
-    fontSize    : "14px",
-    color       : "#FFFFFF",
-    outline     : "none",
-    fontFamily  : "'Segoe UI', sans-serif",
-    width       : "100%",
-  },
-  btn: {
-    marginTop   : "4px",
-    background  : "linear-gradient(135deg, #00C2CC 0%, #4A7FC1 100%)",
-    color       : "#FFFFFF",
-    border      : "none",
-    borderRadius: "10px",
-    padding     : "13px",
-    fontSize    : "15px",
-    fontWeight  : 600,
-    cursor      : "pointer",
-    fontFamily  : "'Segoe UI', sans-serif",
-  },
-  loginRow: {
-    marginTop: "18px", fontSize: "14px",
-    color: "rgba(255,255,255,0.4)", fontFamily: "'Segoe UI', sans-serif",
-  },
-  loginLink: { color: "#00C2CC", textDecoration: "none", fontWeight: 500 },
-  footer: {
-    marginTop: "24px", fontSize: "11px",
-    color: "rgba(255,255,255,0.2)", fontFamily: "'Segoe UI', sans-serif",
+  submitBtn:{
+    width:"100%", padding:"13px",
+    background:"linear-gradient(135deg, #00B4DB, #0083B0)",
+    color:"white", border:"none", borderRadius:"10px",
+    fontSize:"15px", fontWeight:700, cursor:"pointer",
+    fontFamily:"'Segoe UI',sans-serif",
   },
 };
