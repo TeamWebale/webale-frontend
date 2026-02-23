@@ -20,19 +20,83 @@ export function useRightSidebar() { return useContext(RightSidebarContext); }
 
 // ── Flag emoji map ─────────────────────────────────────────────────
 const FLAG = {
-  "Uganda":"🇺🇬","United States":"🇺🇸","United Kingdom":"🇬🇧",
-  "Kenya":"🇰🇪","Tanzania":"🇹🇿","Rwanda":"🇷🇼","Nigeria":"🇳🇬",
-  "Ghana":"🇬🇭","South Africa":"🇿🇦","Canada":"🇨🇦","Australia":"🇦🇺",
-  "Germany":"🇩🇪","France":"🇫🇷","India":"🇮🇳","China":"🇨🇳",
-  "Japan":"🇯🇵","Brazil":"🇧🇷","Mexico":"🇲🇽","European Union":"🇪🇺",
-  "United Arab Emirates":"🇦🇪","Singapore":"🇸🇬","Netherlands":"🇳🇱",
-  "Sweden":"🇸🇪","Norway":"🇳🇴","Ethiopia":"🇪🇹","Egypt":"🇪🇬",
-  "Morocco":"🇲🇦","Zambia":"🇿🇲","Zimbabwe":"🇿🇼","Cameroon":"🇨🇲",
-  "Senegal":"🇸🇳","Ivory Coast":"🇨🇮","Angola":"🇦🇴","Mozambique":"🇲🇿",
+  // Full country names
+  "Afghanistan":"🇦🇫","Albania":"🇦🇱","Algeria":"🇩🇿","Angola":"🇦🇴",
+  "Argentina":"🇦🇷","Armenia":"🇦🇲","Australia":"🇦🇺","Austria":"🇦🇹",
+  "Azerbaijan":"🇦🇿","Bahrain":"🇧🇭","Bangladesh":"🇧🇩","Belarus":"🇧🇾",
+  "Belgium":"🇧🇪","Benin":"🇧🇯","Bolivia":"🇧🇴","Bosnia and Herzegovina":"🇧🇦",
+  "Botswana":"🇧🇼","Brazil":"🇧🇷","Bulgaria":"🇧🇬","Burkina Faso":"🇧🇫",
+  "Burundi":"🇧🇮","Cambodia":"🇰🇭","Cameroon":"🇨🇲","Canada":"🇨🇦",
+  "Chad":"🇹🇩","Chile":"🇨🇱","China":"🇨🇳","Colombia":"🇨🇴",
+  "Congo":"🇨🇬","Costa Rica":"🇨🇷","Croatia":"🇭🇷","Cuba":"🇨🇺",
+  "Cyprus":"🇨🇾","Czech Republic":"🇨🇿","Denmark":"🇩🇰",
+  "Dominican Republic":"🇩🇴","DR Congo":"🇨🇩","Ecuador":"🇪🇨",
+  "Egypt":"🇪🇬","El Salvador":"🇸🇻","Estonia":"🇪🇪","Ethiopia":"🇪🇹",
+  "Finland":"🇫🇮","France":"🇫🇷","Gabon":"🇬🇦","Georgia":"🇬🇪",
+  "Germany":"🇩🇪","Ghana":"🇬🇭","Greece":"🇬🇷","Guatemala":"🇬🇹",
+  "Guinea":"🇬🇳","Haiti":"🇭🇹","Honduras":"🇭🇳","Hungary":"🇭🇺",
+  "India":"🇮🇳","Indonesia":"🇮🇩","Iran":"🇮🇷","Iraq":"🇮🇶",
+  "Ireland":"🇮🇪","Israel":"🇮🇱","Italy":"🇮🇹","Ivory Coast":"🇨🇮",
+  "Jamaica":"🇯🇲","Japan":"🇯🇵","Jordan":"🇯🇴","Kazakhstan":"🇰🇿",
+  "Kenya":"🇰🇪","Kuwait":"🇰🇼","Laos":"🇱🇦","Latvia":"🇱🇻",
+  "Lebanon":"🇱🇧","Libya":"🇱🇾","Lithuania":"🇱🇹","Luxembourg":"🇱🇺",
+  "Madagascar":"🇲🇬","Malawi":"🇲🇼","Malaysia":"🇲🇾","Mali":"🇲🇱",
+  "Malta":"🇲🇹","Mauritania":"🇲🇷","Mauritius":"🇲🇺","Mexico":"🇲🇽",
+  "Moldova":"🇲🇩","Mongolia":"🇲🇳","Montenegro":"🇲🇪","Morocco":"🇲🇦",
+  "Mozambique":"🇲🇿","Myanmar":"🇲🇲","Namibia":"🇳🇦","Nepal":"🇳🇵",
+  "Netherlands":"🇳🇱","New Zealand":"🇳🇿","Nicaragua":"🇳🇮","Niger":"🇳🇪",
+  "Nigeria":"🇳🇬","North Korea":"🇰🇵","North Macedonia":"🇲🇰","Norway":"🇳🇴",
+  "Oman":"🇴🇲","Pakistan":"🇵🇰","Palestine":"🇵🇸","Panama":"🇵🇦",
+  "Papua New Guinea":"🇵🇬","Paraguay":"🇵🇾","Peru":"🇵🇪","Philippines":"🇵🇭",
+  "Poland":"🇵🇱","Portugal":"🇵🇹","Qatar":"🇶🇦","Romania":"🇷🇴",
+  "Russia":"🇷🇺","Rwanda":"🇷🇼","Saudi Arabia":"🇸🇦","Senegal":"🇸🇳",
+  "Serbia":"🇷🇸","Sierra Leone":"🇸🇱","Singapore":"🇸🇬","Slovakia":"🇸🇰",
+  "Slovenia":"🇸🇮","Somalia":"🇸🇴","South Africa":"🇿🇦","South Korea":"🇰🇷",
+  "South Sudan":"🇸🇸","Spain":"🇪🇸","Sri Lanka":"🇱🇰","Sudan":"🇸🇩",
+  "Sweden":"🇸🇪","Switzerland":"🇨🇭","Syria":"🇸🇾","Taiwan":"🇹🇼",
+  "Tajikistan":"🇹🇯","Tanzania":"🇹🇿","Thailand":"🇹🇭","Togo":"🇹🇬",
+  "Trinidad and Tobago":"🇹🇹","Tunisia":"🇹🇳","Turkey":"🇹🇷",
+  "Turkmenistan":"🇹🇲","Uganda":"🇺🇬","Ukraine":"🇺🇦",
+  "United Arab Emirates":"🇦🇪","United Kingdom":"🇬🇧","United States":"🇺🇸",
+  "Uruguay":"🇺🇾","Uzbekistan":"🇺🇿","Venezuela":"🇻🇪","Vietnam":"🇻🇳",
+  "Yemen":"🇾🇪","Zambia":"🇿🇲","Zimbabwe":"🇿🇼",
+  // ISO 2-letter codes (for users stored with country codes)
+  "AF":"🇦🇫","AL":"🇦🇱","DZ":"🇩🇿","AO":"🇦🇴","AR":"🇦🇷","AM":"🇦🇲",
+  "AU":"🇦🇺","AT":"🇦🇹","AZ":"🇦🇿","BH":"🇧🇭","BD":"🇧🇩","BY":"🇧🇾",
+  "BE":"🇧🇪","BJ":"🇧🇯","BO":"🇧🇴","BA":"🇧🇦","BW":"🇧🇼","BR":"🇧🇷",
+  "BG":"🇧🇬","BF":"🇧🇫","BI":"🇧🇮","KH":"🇰🇭","CM":"🇨🇲","CA":"🇨🇦",
+  "TD":"🇹🇩","CL":"🇨🇱","CN":"🇨🇳","CO":"🇨🇴","CG":"🇨🇬","CR":"🇨🇷",
+  "HR":"🇭🇷","CU":"🇨🇺","CY":"🇨🇾","CZ":"🇨🇿","DK":"🇩🇰","DO":"🇩🇴",
+  "CD":"🇨🇩","EC":"🇪🇨","EG":"🇪🇬","SV":"🇸🇻","EE":"🇪🇪","ET":"🇪🇹",
+  "FI":"🇫🇮","FR":"🇫🇷","GA":"🇬🇦","GE":"🇬🇪","DE":"🇩🇪","GH":"🇬🇭",
+  "GR":"🇬🇷","GT":"🇬🇹","GN":"🇬🇳","HT":"🇭🇹","HN":"🇭🇳","HU":"🇭🇺",
+  "IN":"🇮🇳","ID":"🇮🇩","IR":"🇮🇷","IQ":"🇮🇶","IE":"🇮🇪","IL":"🇮🇱",
+  "IT":"🇮🇹","CI":"🇨🇮","JM":"🇯🇲","JP":"🇯🇵","JO":"🇯🇴","KZ":"🇰🇿",
+  "KE":"🇰🇪","KW":"🇰🇼","LA":"🇱🇦","LV":"🇱🇻","LB":"🇱🇧","LY":"🇱🇾",
+  "LT":"🇱🇹","LU":"🇱🇺","MG":"🇲🇬","MW":"🇲🇼","MY":"🇲🇾","ML":"🇲🇱",
+  "MT":"🇲🇹","MR":"🇲🇷","MU":"🇲🇺","MX":"🇲🇽","MD":"🇲🇩","MN":"🇲🇳",
+  "ME":"🇲🇪","MA":"🇲🇦","MZ":"🇲🇿","MM":"🇲🇲","NA":"🇳🇦","NP":"🇳🇵",
+  "NL":"🇳🇱","NZ":"🇳🇿","NI":"🇳🇮","NE":"🇳🇪","NG":"🇳🇬","KP":"🇰🇵",
+  "MK":"🇲🇰","NO":"🇳🇴","OM":"🇴🇲","PK":"🇵🇰","PS":"🇵🇸","PA":"🇵🇦",
+  "PG":"🇵🇬","PY":"🇵🇾","PE":"🇵🇪","PH":"🇵🇭","PL":"🇵🇱","PT":"🇵🇹",
+  "QA":"🇶🇦","RO":"🇷🇴","RU":"🇷🇺","RW":"🇷🇼","SA":"🇸🇦","SN":"🇸🇳",
+  "RS":"🇷🇸","SL":"🇸🇱","SG":"🇸🇬","SK":"🇸🇰","SI":"🇸🇮","SO":"🇸🇴",
+  "ZA":"🇿🇦","KR":"🇰🇷","SS":"🇸🇸","ES":"🇪🇸","LK":"🇱🇰","SD":"🇸🇩",
+  "SE":"🇸🇪","CH":"🇨🇭","SY":"🇸🇾","TW":"🇹🇼","TJ":"🇹🇯","TZ":"🇹🇿",
+  "TH":"🇹🇭","TG":"🇹🇬","TT":"🇹🇹","TN":"🇹🇳","TR":"🇹🇷","TM":"🇹🇲",
+  "UG":"🇺🇬","UA":"🇺🇦","AE":"🇦🇪","GB":"🇬🇧","US":"🇺🇸","UY":"🇺🇾",
+  "UZ":"🇺🇿","VE":"🇻🇪","VN":"🇻🇳","YE":"🇾🇪","ZM":"🇿🇲","ZW":"🇿🇼",
 };
 function getFlag(country) {
   if (!country) return "";
-  return FLAG[country] || "🌍";
+  // Direct match (full name or ISO code)
+  if (FLAG[country]) return FLAG[country];
+  // Strip brackets e.g. [UG] -> UG
+  const stripped = country.replace(/^\[|\]$/g, "");
+  if (FLAG[stripped]) return FLAG[stripped];
+  // Try uppercase 2-letter
+  const upper = country.toUpperCase().replace(/^\[|\]$/g, "");
+  return FLAG[upper] || "";
 }
 
 function getAvatar(user) {
@@ -138,7 +202,9 @@ export default function MainLayout() {
 
   const avatar      = getAvatar(user);
   const flag        = getFlag(user?.country);
-  const fullName    = `${user?.first_name||user?.firstName||""} ${user?.last_name||user?.lastName||""}`.trim();
+  const firstName   = user?.first_name || user?.firstName || "";
+  const lastName    = user?.last_name  || user?.lastName  || "";
+  const fullName    = [firstName, lastName].filter(Boolean).join(" ");
   const memberSince = user?.created_at
     ? new Date(user.created_at).toLocaleDateString("en-US",{month:"long",year:"numeric"})
     : "";
