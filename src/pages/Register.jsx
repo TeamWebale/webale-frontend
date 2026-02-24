@@ -151,7 +151,7 @@ export default function Register() {
           </div>
 
           {/* 6-digit OTP boxes */}
-          <div style={{ display:"flex", gap:"10px", justifyContent:"center", marginBottom:"20px" }}
+          <div style={{ display:"flex", gap:"8px", justifyContent:"center", marginBottom:"20px", flexWrap:"nowrap" }}
                onPaste={handleOtpPaste}>
             {otp.map((digit, i) => (
               <input
@@ -164,8 +164,8 @@ export default function Register() {
                 onChange={e => handleOtpChange(i, e.target.value)}
                 onKeyDown={e => handleOtpKeyDown(i, e)}
                 style={{
-                  width:"46px", height:"56px", textAlign:"center",
-                  fontSize:"24px", fontWeight:700,
+                  width:"42px", height:"52px", textAlign:"center",
+                  fontSize:"22px", fontWeight:700,
                   background: digit ? "rgba(0,229,204,0.15)" : "rgba(255,255,255,0.07)",
                   border: digit ? "2px solid #00E5CC" : "2px solid rgba(255,255,255,0.15)",
                   borderRadius:"10px", color:"#ffffff", outline:"none",
@@ -329,9 +329,9 @@ const s = {
     textAlign:"center", margin:"0 0 20px",
   },
   label:{
-    display:"block", marginBottom:"6px", fontSize:"12px",
+    display:"block", marginBottom:"6px", fontSize:"13px",
     fontWeight:600, color:"rgba(255,255,255,0.6)",
-    textTransform:"uppercase", letterSpacing:"0.5px",
+    letterSpacing:"0.2px",
   },
   input:{
     width:"100%", padding:"12px 14px", borderRadius:"10px",

@@ -9,6 +9,7 @@ function Dashboard() {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [recentActivity, setRecentActivity] = useState([]);
+  const [showGroupMenu, setShowGroupMenu] = useState(false);
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
@@ -181,6 +182,68 @@ function Dashboard() {
         <p style={{ margin: 0, opacity: 0.9, fontSize: '14px' }}>
           Here's what's happening with your fundraising groups.
         </p>
+      </div>
+
+      {/* Quick Actions Card — My Groups dropdown + Begin Fundraising */}
+      <div style={{
+        background: 'white', borderRadius: '12px', padding: '14px 16px',
+        marginBottom: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+        display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap'
+      }}>
+        {/* My Groups dropdown */}
+        <div style={{ position: 'relative', flex: 1, minWidth: '160px' }}>
+          <button
+            onClick={() => setShowGroupMenu(m => !m)}
+            style={{
+              width: '100%', padding: '10px 14px',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white', border: 'none', borderRadius: '8px',
+              fontSize: '14px', fontWeight: '600', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px',
+            }}
+          >
+            <span>☰ My Groups</span>
+            <span style={{ fontSize: '12px', opacity: 0.8 }}>
+              {groups[0] ? groups[0].name : 'No groups yet'} ▾
+            </span>
+          </button>
+          {showGroupMenu && groups.length > 0 && (
+            <div style={{
+              position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0,
+              background: 'white', borderRadius: '10px', zIndex: 100,
+              boxShadow: '0 8px 24px rgba(0,0,0,0.15)', border: '1px solid #e2e8f0',
+              overflow: 'hidden',
+            }}>
+              {groups.map(g => (
+                <button key={g.id}
+                  onClick={() => { navigate(`/groups/${g.id}`); setShowGroupMenu(false); }}
+                  style={{
+                    display: 'block', width: '100%', textAlign: 'left',
+                    padding: '10px 14px', background: 'none',
+                    border: 'none', borderBottom: '1px solid #f0f4f9',
+                    fontSize: '13px', color: '#2d3748', cursor: 'pointer', fontWeight: 500,
+                  }}
+                >
+                  📁 {g.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Begin Fundraising button */}
+        <button
+          onClick={() => navigate('/create-group')}
+          style={{
+            flex: 1, minWidth: '160px', padding: '10px 14px',
+            background: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
+            color: 'white', border: 'none', borderRadius: '8px',
+            fontSize: '14px', fontWeight: '600', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+          }}
+        >
+          🚀 Begin Fundraising
+        </button>
       </div>
 
       {/* Stats Cards */}

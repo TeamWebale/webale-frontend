@@ -82,6 +82,7 @@ export default function WebaleLogo({
               marginTop    : "1px",
               letterSpacing: "0.3px",
               lineHeight   : 1.4,
+              textAlign    : "left",
             }}
           >
             <div>Private Group</div>
