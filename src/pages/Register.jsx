@@ -1,40 +1,59 @@
 /**
  * Register.jsx — src/pages/Register.jsx
- * Root cause of blank country list: options had color:#ffffff on white background.
- * Fix: explicit dark text + white background on each option.
+ *
+ * Flow:
+ *   Step 1 — Fill registration form → submit → backend creates user + sends OTP email
+ *   Step 2 — OTP entry screen → verify → backend issues JWT → user logged in
  */
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import WebaleLogo from "../components/WebaleLogo";
-import { authAPI } from "../services/api";
 import { COUNTRIES } from '../constants/countries';
+import { useAuth } from '../context/AuthContext';
 
+const API = "https://webale-api.onrender.com/api";
 
 export default function Register() {
-  const navigate = useNavigate();
+  const navigate  = useNavigate();
+  const { login } = useAuth();
+
+  // ── Step 1: registration form ──────────────────────────────────
   const [form, setForm] = useState({
     firstName:"", lastName:"", email:"", country:"", password:"", confirmPassword:"",
   });
   const [error,   setError]   = useState("");
   const [loading, setLoading] = useState(false);
 
+  // ── Step 2: OTP verification ───────────────────────────────────
+  const [step,       setStep]       = useState(1);          // 1 = form, 2 = OTP
+  const [otp,        setOtp]        = useState(["","","","","",""]);
+  const [otpError,   setOtpError]   = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [resending,  setResending]  = useState(false);
+  const [resendMsg,  setResendMsg]  = useState("");
+  const inputRefs = useRef([]);
+
   const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
 
+  // ── Submit registration form ───────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     if (form.password !== form.confirmPassword) { setError("Passwords do not match"); return; }
     if (!form.country) { setError("Please select your country"); return; }
+    if (form.password.length < 8) { setError("Password must be at least 8 characters"); return; }
     setLoading(true);
     try {
-      await authAPI.register({
+      await axios.post(`${API}/auth/register`, {
         firstName: form.firstName,
         lastName:  form.lastName,
         email:     form.email,
         country:   form.country,
         password:  form.password,
       });
-      navigate("/login?registered=1");
+      // Backend sends OTP — move to step 2
+      setStep(2);
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed. Please try again.");
     } finally {
@@ -42,10 +61,180 @@ export default function Register() {
     }
   };
 
+  // ── OTP input handling ─────────────────────────────────────────
+  const handleOtpChange = (index, value) => {
+    if (!/^\d*$/.test(value)) return;
+    const newOtp = [...otp];
+    newOtp[index] = value.slice(-1);
+    setOtp(newOtp);
+    if (value && index < 5) inputRefs.current[index + 1]?.focus();
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e) => {
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (pasted.length === 6) {
+      setOtp(pasted.split(""));
+      inputRefs.current[5]?.focus();
+    }
+  };
+
+  // ── Verify OTP ─────────────────────────────────────────────────
+  const handleVerify = async () => {
+    const code = otp.join("");
+    if (code.length < 6) { setOtpError("Please enter all 6 digits"); return; }
+    setOtpError("");
+    setOtpLoading(true);
+    try {
+      const res = await axios.post(`${API}/auth/verify-otp`, {
+        email: form.email,
+        otp:   code,
+      });
+      if (res.data.success) {
+        // Store token + user, update AuthContext
+        const { token, user } = res.data.data;
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+        navigate("/dashboard");
+      }
+    } catch (err) {
+      setOtpError(err.response?.data?.message || "Invalid code. Please try again.");
+      setOtp(["","","","","",""]);
+      inputRefs.current[0]?.focus();
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  // ── Resend OTP ─────────────────────────────────────────────────
+  const handleResend = async () => {
+    setResending(true);
+    setResendMsg("");
+    setOtpError("");
+    try {
+      await axios.post(`${API}/auth/send-otp`, { email: form.email });
+      setResendMsg("A new code has been sent to your email.");
+      setOtp(["","","","","",""]);
+      inputRefs.current[0]?.focus();
+    } catch (err) {
+      setResendMsg("Failed to resend. Please try again.");
+    } finally {
+      setResending(false);
+    }
+  };
+
+  // ════════════════════════════════════════════════════════════════
+  // STEP 2 — OTP screen
+  // ════════════════════════════════════════════════════════════════
+  if (step === 2) {
+    return (
+      <div style={s.page}>
+        <div style={s.card}>
+          <div style={{ textAlign:"center", marginBottom:"20px" }}>
+            <WebaleLogo variant="full" size="md" theme="dark" />
+          </div>
+
+          <div style={{ textAlign:"center", marginBottom:"24px" }}>
+            <div style={{ fontSize:"48px", marginBottom:"8px" }}>📧</div>
+            <h2 style={s.heading}>Check your email</h2>
+            <p style={{ color:"rgba(255,255,255,0.55)", fontSize:"14px", margin:"8px 0 0" }}>
+              We sent a 6-digit code to
+            </p>
+            <p style={{ color:"#00E5CC", fontWeight:700, fontSize:"15px", margin:"4px 0 0" }}>
+              {form.email}
+            </p>
+          </div>
+
+          {/* 6-digit OTP boxes */}
+          <div style={{ display:"flex", gap:"10px", justifyContent:"center", marginBottom:"20px" }}
+               onPaste={handleOtpPaste}>
+            {otp.map((digit, i) => (
+              <input
+                key={i}
+                ref={el => inputRefs.current[i] = el}
+                type="text"
+                inputMode="numeric"
+                maxLength={1}
+                value={digit}
+                onChange={e => handleOtpChange(i, e.target.value)}
+                onKeyDown={e => handleOtpKeyDown(i, e)}
+                style={{
+                  width:"46px", height:"56px", textAlign:"center",
+                  fontSize:"24px", fontWeight:700,
+                  background: digit ? "rgba(0,229,204,0.15)" : "rgba(255,255,255,0.07)",
+                  border: digit ? "2px solid #00E5CC" : "2px solid rgba(255,255,255,0.15)",
+                  borderRadius:"10px", color:"#ffffff", outline:"none",
+                  transition:"all 0.15s",
+                }}
+              />
+            ))}
+          </div>
+
+          {otpError && (
+            <div style={{ ...s.errorBox, marginBottom:"16px" }}>⚠️ {otpError}</div>
+          )}
+          {resendMsg && (
+            <div style={{ background:"rgba(0,229,204,0.1)", border:"1px solid rgba(0,229,204,0.3)",
+              borderRadius:"8px", padding:"10px 14px", marginBottom:"16px",
+              fontSize:"13px", color:"#00E5CC", textAlign:"center" }}>
+              {resendMsg}
+            </div>
+          )}
+
+          <button
+            onClick={handleVerify}
+            disabled={otpLoading || otp.join("").length < 6}
+            style={{ ...s.submitBtn, opacity: otp.join("").length < 6 ? 0.6 : 1 }}
+          >
+            {otpLoading ? "Verifying…" : "✅ Verify Email"}
+          </button>
+
+          <div style={{ textAlign:"center", marginTop:"16px" }}>
+            <p style={{ color:"rgba(255,255,255,0.4)", fontSize:"13px", margin:"0 0 8px" }}>
+              Didn't receive the code?
+            </p>
+            <button onClick={handleResend} disabled={resending}
+              style={{ background:"none", border:"none", color:"#FFB800",
+                fontWeight:600, fontSize:"13px", cursor:"pointer" }}>
+              {resending ? "Sending…" : "🔄 Resend code"}
+            </button>
+          </div>
+
+          <p style={{ textAlign:"center", marginTop:"16px", fontSize:"12px",
+            color:"rgba(255,255,255,0.3)" }}>
+            Wrong email?{" "}
+            <button onClick={() => setStep(1)}
+              style={{ background:"none", border:"none", color:"#00E5CC",
+                fontWeight:600, fontSize:"12px", cursor:"pointer" }}>
+              Go back
+            </button>
+          </p>
+
+          {/* Footer */}
+          <div style={{ marginTop:"24px", textAlign:"center" }}>
+            <p style={{ margin:"0 0 4px", fontSize:"12px", fontWeight:600, color:"#00E5CC" }}>
+              © Copyright 2026 Landfolks Aitech (U) Ltd
+            </p>
+            <p style={{ margin:0, fontSize:"12px", fontWeight:600, color:"#FFB800" }}>
+              theteam@webale.net
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // STEP 1 — Registration form
+  // ════════════════════════════════════════════════════════════════
   return (
     <div style={s.page}>
       <div style={s.card}>
-
         <div style={{ textAlign:"center", marginBottom:"20px" }}>
           <WebaleLogo variant="full" size="md" theme="dark" />
         </div>
@@ -60,8 +249,6 @@ export default function Register() {
         )}
 
         <form onSubmit={handleSubmit}>
-
-          {/* Name row */}
           <div style={{ display:"flex", gap:"12px", marginBottom:"14px" }}>
             <div style={{ flex:1 }}>
               <label style={s.label}>First Name</label>
@@ -75,37 +262,26 @@ export default function Register() {
             </div>
           </div>
 
-          {/* Email */}
           <div style={{ marginBottom:"14px" }}>
             <label style={s.label}>Email</label>
             <input type="email" style={s.input} placeholder="you@example.com"
               required value={form.email} onChange={set("email")} />
           </div>
 
-          {/* Country — KEY FIX: select uses light background + dark text */}
           <div style={{ marginBottom:"14px" }}>
             <label style={s.label}>Country</label>
-            <select
-              value={form.country}
-              onChange={set("country")}
-              required
-              style={s.select}
-            >
+            <select value={form.country} onChange={set("country")} required style={s.select}>
               <option value="" disabled>Select your country…</option>
-              {COUNTRIES.map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
+              {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
 
-          {/* Password */}
           <div style={{ marginBottom:"14px" }}>
             <label style={s.label}>Password</label>
             <input type="password" style={s.input} placeholder="Minimum 8 characters"
               required minLength={8} value={form.password} onChange={set("password")} />
           </div>
 
-          {/* Confirm */}
           <div style={{ marginBottom:"22px" }}>
             <label style={s.label}>Confirm Password</label>
             <input type="password" style={s.input} placeholder="Repeat password"
@@ -117,12 +293,12 @@ export default function Register() {
           </button>
         </form>
 
-        <p style={{ textAlign:"center", marginTop:"16px", fontSize:"13px", color:"rgba(255,255,255,0.5)" }}>
+        <p style={{ textAlign:"center", marginTop:"16px", fontSize:"13px",
+          color:"rgba(255,255,255,0.5)" }}>
           Already have an account?{" "}
           <Link to="/login" style={{ color:"#00E5CC", fontWeight:600 }}>Sign in</Link>
         </p>
 
-        {/* Footer */}
         <div style={{ marginTop:"24px", textAlign:"center" }}>
           <p style={{ margin:"0 0 4px", fontSize:"12px", fontWeight:600, color:"#00E5CC" }}>
             © Copyright 2026 Landfolks Aitech (U) Ltd
@@ -131,7 +307,6 @@ export default function Register() {
             theteam@webale.net
           </p>
         </div>
-
       </div>
     </div>
   );
@@ -165,16 +340,12 @@ const s = {
     color:"#ffffff", fontSize:"14px", boxSizing:"border-box",
     outline:"none", fontFamily:"'Segoe UI',sans-serif",
   },
-  // Select MUST use light bg + dark text — browser renders options with OS styling,
-  // and white text on white option background = invisible
   select:{
     width:"100%", padding:"12px 14px", borderRadius:"10px",
     border:"1px solid rgba(255,255,255,0.15)",
-    background:"#1e2d40",   // dark but not pitch black
-    color:"#ffffff",         // selected value text: white (visible on dark bg)
+    background:"#1e2d40", color:"#ffffff",
     fontSize:"14px", boxSizing:"border-box",
-    outline:"none", fontFamily:"'Segoe UI',sans-serif",
-    cursor:"pointer",
+    outline:"none", fontFamily:"'Segoe UI',sans-serif", cursor:"pointer",
   },
   errorBox:{
     background:"rgba(229,62,62,0.15)", border:"1px solid rgba(229,62,62,0.4)",
