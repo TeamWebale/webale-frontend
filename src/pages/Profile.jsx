@@ -147,6 +147,39 @@ export default function Profile() {
             {/* Avatar picker */}
             <div style={styles.section}>
               <h3 style={styles.sectionTitle}>Avatar</h3>
+
+              {/* Current avatar display with pencil */}
+              <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px" }}>
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <div style={{
+                    width: "72px", height: "72px", borderRadius: "50%",
+                    background: "linear-gradient(135deg,#667eea,#764ba2)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: "38px", boxShadow: "0 4px 12px rgba(102,126,234,0.3)"
+                  }}>
+                    {selectedEmoji || user?.avatar_url || "😊"}
+                  </div>
+                  {/* Pencil badge */}
+                  <div style={{
+                    position: "absolute", bottom: "0", right: "0",
+                    width: "22px", height: "22px", borderRadius: "50%",
+                    background: "#667eea", border: "2px solid white",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: "11px", cursor: "pointer"
+                  }} title="Click an emoji below to change your avatar">
+                    ✏️
+                  </div>
+                </div>
+                <div>
+                  <p style={{ margin: "0 0 2px", fontSize: "13px", fontWeight: 600, color: "#1B2D4F" }}>
+                    Your avatar
+                  </p>
+                  <p style={{ margin: 0, fontSize: "12px", color: "#8899AA" }}>
+                    Pick an emoji below to change it
+                  </p>
+                </div>
+              </div>
+
               <div style={styles.emojiGrid}>
                 {EMOJI_AVATARS.map(e => (
                   <button
@@ -158,7 +191,7 @@ export default function Profile() {
                   </button>
                 ))}
               </div>
-              {selectedEmoji && (
+              {selectedEmoji && selectedEmoji !== (user?.avatar_url) && (
                 <button
                   onClick={handleAvatarSave}
                   disabled={avatarSaving}

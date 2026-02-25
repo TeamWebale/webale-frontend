@@ -1,105 +1,246 @@
 /**
- * currencyConverter.js
- * Destination: src/utils/currencyConverter.js
- *
- * - CURRENCIES exported as array (used in dropdowns)
- * - CURRENCY_DATA internal object (rates + formatting)
- * - Emoji flags replaced with text codes [US] [UG] etc. for Windows compatibility
+ * currencyConverter.js — src/utils/currencyConverter.js
+ * Single source of truth for all currencies across the app.
+ * 160+ currencies, alphabetical by currency code.
+ * Country names abbreviated. Flags as text codes for Windows compatibility.
  */
 
-// Internal data — rates are hardcoded (TODO: integrate live rate API)
 const CURRENCY_DATA = {
-  USD: { code: "USD", name: "US Dollar",        flag: "[US]", symbol: "$",  rate: 1.000 },
-  UGX: { code: "UGX", name: "Ugandan Shilling", flag: "[UG]", symbol: "USh", rate: 3750  },
-  KES: { code: "KES", name: "Kenyan Shilling",  flag: "[KE]", symbol: "KSh", rate: 129   },
-  TZS: { code: "TZS", name: "Tanzanian Shilling",flag:"[TZ]", symbol: "TSh", rate: 2550  },
-  RWF: { code: "RWF", name: "Rwandan Franc",    flag: "[RW]", symbol: "RF",  rate: 1250  },
-  NGN: { code: "NGN", name: "Nigerian Naira",   flag: "[NG]", symbol: "₦",  rate: 1580  },
-  GHS: { code: "GHS", name: "Ghanaian Cedi",    flag: "[GH]", symbol: "₵",  rate: 15.2  },
-  ZAR: { code: "ZAR", name: "South African Rand",flag:"[ZA]", symbol: "R",  rate: 18.6  },
-  GBP: { code: "GBP", name: "British Pound",    flag: "[GB]", symbol: "£",  rate: 0.79  },
-  EUR: { code: "EUR", name: "Euro",              flag: "[EU]", symbol: "€",  rate: 0.92  },
-  CAD: { code: "CAD", name: "Canadian Dollar",  flag: "[CA]", symbol: "CA$", rate: 1.36 },
-  AUD: { code: "AUD", name: "Australian Dollar",flag: "[AU]", symbol: "A$",  rate: 1.53 },
-  INR: { code: "INR", name: "Indian Rupee",     flag: "[IN]", symbol: "₹",  rate: 83.1  },
-  JPY: { code: "JPY", name: "Japanese Yen",     flag: "[JP]", symbol: "¥",  rate: 149   },
-  CNY: { code: "CNY", name: "Chinese Yuan",     flag: "[CN]", symbol: "¥",  rate: 7.24  },
+  AED: { code: "AED", name: "UAE Dirham",         flag: "[AE]", symbol: "د.إ", rate: 3.67  },
+  AFN: { code: "AFN", name: "Afghan Afghani",      flag: "[AF]", symbol: "؋",   rate: 89.0  },
+  ALL: { code: "ALL", name: "Albanian Lek",         flag: "[AL]", symbol: "L",   rate: 99.0  },
+  AMD: { code: "AMD", name: "Armenian Dram",        flag: "[AM]", symbol: "֏",   rate: 402   },
+  ANG: { code: "ANG", name: "NL Antillean Guilder", flag: "[AN]", symbol: "ƒ",   rate: 1.79  },
+  AOA: { code: "AOA", name: "Angolan Kwanza",       flag: "[AO]", symbol: "Kz",  rate: 830   },
+  ARS: { code: "ARS", name: "Argentine Peso",       flag: "[AR]", symbol: "$",   rate: 870   },
+  AUD: { code: "AUD", name: "Australian Dollar",    flag: "[AU]", symbol: "A$",  rate: 1.53  },
+  AWG: { code: "AWG", name: "Aruban Florin",        flag: "[AW]", symbol: "ƒ",   rate: 1.79  },
+  AZN: { code: "AZN", name: "Azerbaijani Manat",   flag: "[AZ]", symbol: "₼",   rate: 1.70  },
+  BAM: { code: "BAM", name: "Bosnia Marka",         flag: "[BA]", symbol: "KM",  rate: 1.80  },
+  BBD: { code: "BBD", name: "Barbadian Dollar",     flag: "[BB]", symbol: "$",   rate: 2.00  },
+  BDT: { code: "BDT", name: "Bangladeshi Taka",     flag: "[BD]", symbol: "৳",   rate: 110   },
+  BGN: { code: "BGN", name: "Bulgarian Lev",        flag: "[BG]", symbol: "лв",  rate: 1.80  },
+  BHD: { code: "BHD", name: "Bahraini Dinar",       flag: "[BH]", symbol: "BD",  rate: 0.376 },
+  BIF: { code: "BIF", name: "Burundian Franc",      flag: "[BI]", symbol: "Fr",  rate: 2850  },
+  BMD: { code: "BMD", name: "Bermudian Dollar",     flag: "[BM]", symbol: "$",   rate: 1.00  },
+  BND: { code: "BND", name: "Brunei Dollar",        flag: "[BN]", symbol: "$",   rate: 1.34  },
+  BOB: { code: "BOB", name: "Bolivian Boliviano",   flag: "[BO]", symbol: "Bs",  rate: 6.91  },
+  BRL: { code: "BRL", name: "Brazilian Real",       flag: "[BR]", symbol: "R$",  rate: 4.97  },
+  BSD: { code: "BSD", name: "Bahamian Dollar",      flag: "[BS]", symbol: "$",   rate: 1.00  },
+  BTN: { code: "BTN", name: "Bhutanese Ngultrum",   flag: "[BT]", symbol: "Nu",  rate: 83.1  },
+  BWP: { code: "BWP", name: "Botswana Pula",        flag: "[BW]", symbol: "P",   rate: 13.6  },
+  BYN: { code: "BYN", name: "Belarusian Ruble",     flag: "[BY]", symbol: "Br",  rate: 3.27  },
+  BZD: { code: "BZD", name: "Belize Dollar",        flag: "[BZ]", symbol: "$",   rate: 2.00  },
+  CAD: { code: "CAD", name: "Canadian Dollar",      flag: "[CA]", symbol: "CA$", rate: 1.36  },
+  CDF: { code: "CDF", name: "Congolese Franc",      flag: "[CD]", symbol: "Fr",  rate: 2750  },
+  CHF: { code: "CHF", name: "Swiss Franc",          flag: "[CH]", symbol: "CHF", rate: 0.90  },
+  CLP: { code: "CLP", name: "Chilean Peso",         flag: "[CL]", symbol: "$",   rate: 920   },
+  CNY: { code: "CNY", name: "Chinese Yuan",         flag: "[CN]", symbol: "¥",   rate: 7.24  },
+  COP: { code: "COP", name: "Colombian Peso",       flag: "[CO]", symbol: "$",   rate: 3950  },
+  CRC: { code: "CRC", name: "Costa Rican Colón",    flag: "[CR]", symbol: "₡",   rate: 515   },
+  CUP: { code: "CUP", name: "Cuban Peso",           flag: "[CU]", symbol: "$",   rate: 24.0  },
+  CVE: { code: "CVE", name: "Cape Verdean Escudo",  flag: "[CV]", symbol: "$",   rate: 101   },
+  CZK: { code: "CZK", name: "Czech Koruna",         flag: "[CZ]", symbol: "Kč",  rate: 23.0  },
+  DJF: { code: "DJF", name: "Djiboutian Franc",     flag: "[DJ]", symbol: "Fr",  rate: 178   },
+  DKK: { code: "DKK", name: "Danish Krone",         flag: "[DK]", symbol: "kr",  rate: 6.87  },
+  DOP: { code: "DOP", name: "Dominican Peso",       flag: "[DO]", symbol: "$",   rate: 58.5  },
+  DZD: { code: "DZD", name: "Algerian Dinar",       flag: "[DZ]", symbol: "دج",  rate: 134   },
+  EGP: { code: "EGP", name: "Egyptian Pound",       flag: "[EG]", symbol: "£",   rate: 30.9  },
+  ERN: { code: "ERN", name: "Eritrean Nakfa",        flag: "[ER]", symbol: "Nfk", rate: 15.0  },
+  ETB: { code: "ETB", name: "Ethiopian Birr",       flag: "[ET]", symbol: "Br",  rate: 56.5  },
+  EUR: { code: "EUR", name: "Euro",                 flag: "[EU]", symbol: "€",   rate: 0.92  },
+  FJD: { code: "FJD", name: "Fijian Dollar",        flag: "[FJ]", symbol: "$",   rate: 2.24  },
+  FKP: { code: "FKP", name: "Falkland Islands Pound",flag:"[FK]", symbol: "£",   rate: 0.79  },
+  GBP: { code: "GBP", name: "British Pound",        flag: "[GB]", symbol: "£",   rate: 0.79  },
+  GEL: { code: "GEL", name: "Georgian Lari",        flag: "[GE]", symbol: "₾",   rate: 2.65  },
+  GHS: { code: "GHS", name: "Ghanaian Cedi",        flag: "[GH]", symbol: "₵",   rate: 15.2  },
+  GMD: { code: "GMD", name: "Gambian Dalasi",       flag: "[GM]", symbol: "D",   rate: 67.0  },
+  GNF: { code: "GNF", name: "Guinean Franc",        flag: "[GN]", symbol: "Fr",  rate: 8600  },
+  GTQ: { code: "GTQ", name: "Guatemalan Quetzal",   flag: "[GT]", symbol: "Q",   rate: 7.80  },
+  GYD: { code: "GYD", name: "Guyanese Dollar",      flag: "[GY]", symbol: "$",   rate: 209   },
+  HKD: { code: "HKD", name: "HK Dollar",            flag: "[HK]", symbol: "HK$", rate: 7.82  },
+  HNL: { code: "HNL", name: "Honduran Lempira",     flag: "[HN]", symbol: "L",   rate: 24.7  },
+  HRK: { code: "HRK", name: "Croatian Kuna",        flag: "[HR]", symbol: "kn",  rate: 6.93  },
+  HTG: { code: "HTG", name: "Haitian Gourde",       flag: "[HT]", symbol: "G",   rate: 132   },
+  HUF: { code: "HUF", name: "Hungarian Forint",     flag: "[HU]", symbol: "Ft",  rate: 357   },
+  IDR: { code: "IDR", name: "Indonesian Rupiah",    flag: "[ID]", symbol: "Rp",  rate: 15650 },
+  ILS: { code: "ILS", name: "Israeli Shekel",       flag: "[IL]", symbol: "₪",   rate: 3.65  },
+  INR: { code: "INR", name: "Indian Rupee",         flag: "[IN]", symbol: "₹",   rate: 83.1  },
+  IQD: { code: "IQD", name: "Iraqi Dinar",          flag: "[IQ]", symbol: "ع.د", rate: 1309  },
+  IRR: { code: "IRR", name: "Iranian Rial",         flag: "[IR]", symbol: "﷼",   rate: 42000 },
+  ISK: { code: "ISK", name: "Icelandic Króna",      flag: "[IS]", symbol: "kr",  rate: 138   },
+  JMD: { code: "JMD", name: "Jamaican Dollar",      flag: "[JM]", symbol: "$",   rate: 156   },
+  JOD: { code: "JOD", name: "Jordanian Dinar",      flag: "[JO]", symbol: "JD",  rate: 0.709 },
+  JPY: { code: "JPY", name: "Japanese Yen",         flag: "[JP]", symbol: "¥",   rate: 149   },
+  KES: { code: "KES", name: "Kenyan Shilling",      flag: "[KE]", symbol: "KSh", rate: 129   },
+  KGS: { code: "KGS", name: "Kyrgyzstani Som",      flag: "[KG]", symbol: "с",   rate: 89.5  },
+  KHR: { code: "KHR", name: "Cambodian Riel",       flag: "[KH]", symbol: "៛",   rate: 4090  },
+  KMF: { code: "KMF", name: "Comorian Franc",       flag: "[KM]", symbol: "Fr",  rate: 452   },
+  KRW: { code: "KRW", name: "S. Korean Won",        flag: "[KR]", symbol: "₩",   rate: 1325  },
+  KWD: { code: "KWD", name: "Kuwaiti Dinar",        flag: "[KW]", symbol: "KD",  rate: 0.308 },
+  KYD: { code: "KYD", name: "Cayman Islands Dollar",flag: "[KY]", symbol: "$",   rate: 0.833 },
+  KZT: { code: "KZT", name: "Kazakhstani Tenge",    flag: "[KZ]", symbol: "₸",   rate: 450   },
+  LAK: { code: "LAK", name: "Lao Kip",              flag: "[LA]", symbol: "₭",   rate: 20900 },
+  LBP: { code: "LBP", name: "Lebanese Pound",       flag: "[LB]", symbol: "ل.ل", rate: 89500 },
+  LKR: { code: "LKR", name: "Sri Lankan Rupee",     flag: "[LK]", symbol: "₨",   rate: 310   },
+  LRD: { code: "LRD", name: "Liberian Dollar",      flag: "[LR]", symbol: "$",   rate: 190   },
+  LSL: { code: "LSL", name: "Lesotho Loti",         flag: "[LS]", symbol: "L",   rate: 18.6  },
+  LYD: { code: "LYD", name: "Libyan Dinar",         flag: "[LY]", symbol: "ل.د", rate: 4.81  },
+  MAD: { code: "MAD", name: "Moroccan Dirham",      flag: "[MA]", symbol: "د.م.", rate: 10.0  },
+  MDL: { code: "MDL", name: "Moldovan Leu",         flag: "[MD]", symbol: "L",   rate: 17.7  },
+  MGA: { code: "MGA", name: "Malagasy Ariary",      flag: "[MG]", symbol: "Ar",  rate: 4550  },
+  MKD: { code: "MKD", name: "Macedonian Denar",     flag: "[MK]", symbol: "ден", rate: 56.7  },
+  MMK: { code: "MMK", name: "Myanmar Kyat",         flag: "[MM]", symbol: "K",   rate: 2100  },
+  MNT: { code: "MNT", name: "Mongolian Tögrög",     flag: "[MN]", symbol: "₮",   rate: 3400  },
+  MOP: { code: "MOP", name: "Macanese Pataca",      flag: "[MO]", symbol: "P",   rate: 8.06  },
+  MRU: { code: "MRU", name: "Mauritanian Ouguiya",  flag: "[MR]", symbol: "UM",  rate: 39.8  },
+  MUR: { code: "MUR", name: "Mauritian Rupee",      flag: "[MU]", symbol: "₨",   rate: 45.5  },
+  MVR: { code: "MVR", name: "Maldivian Rufiyaa",    flag: "[MV]", symbol: "Rf",  rate: 15.4  },
+  MWK: { code: "MWK", name: "Malawian Kwacha",      flag: "[MW]", symbol: "MK",  rate: 1700  },
+  MXN: { code: "MXN", name: "Mexican Peso",         flag: "[MX]", symbol: "$",   rate: 17.1  },
+  MYR: { code: "MYR", name: "Malaysian Ringgit",    flag: "[MY]", symbol: "RM",  rate: 4.47  },
+  MZN: { code: "MZN", name: "Mozambican Metical",   flag: "[MZ]", symbol: "MT",  rate: 63.8  },
+  NAD: { code: "NAD", name: "Namibian Dollar",      flag: "[NA]", symbol: "$",   rate: 18.6  },
+  NGN: { code: "NGN", name: "Nigerian Naira",       flag: "[NG]", symbol: "₦",   rate: 1580  },
+  NIO: { code: "NIO", name: "Nicaraguan Córdoba",   flag: "[NI]", symbol: "C$",  rate: 36.6  },
+  NOK: { code: "NOK", name: "Norwegian Krone",      flag: "[NO]", symbol: "kr",  rate: 10.5  },
+  NPR: { code: "NPR", name: "Nepalese Rupee",       flag: "[NP]", symbol: "₨",   rate: 133   },
+  NZD: { code: "NZD", name: "NZ Dollar",            flag: "[NZ]", symbol: "NZ$", rate: 1.63  },
+  OMR: { code: "OMR", name: "Omani Rial",           flag: "[OM]", symbol: "ر.ع.",rate: 0.385 },
+  PAB: { code: "PAB", name: "Panamanian Balboa",    flag: "[PA]", symbol: "B/.", rate: 1.00  },
+  PEN: { code: "PEN", name: "Peruvian Sol",         flag: "[PE]", symbol: "S/.", rate: 3.72  },
+  PGK: { code: "PGK", name: "PNG Kina",             flag: "[PG]", symbol: "K",   rate: 3.73  },
+  PHP: { code: "PHP", name: "Philippine Peso",      flag: "[PH]", symbol: "₱",   rate: 55.7  },
+  PKR: { code: "PKR", name: "Pakistani Rupee",      flag: "[PK]", symbol: "₨",   rate: 278   },
+  PLN: { code: "PLN", name: "Polish Zloty",         flag: "[PL]", symbol: "zł",  rate: 3.97  },
+  PYG: { code: "PYG", name: "Paraguayan Guaraní",   flag: "[PY]", symbol: "₲",   rate: 7300  },
+  QAR: { code: "QAR", name: "Qatari Riyal",         flag: "[QA]", symbol: "ر.ق", rate: 3.64  },
+  RON: { code: "RON", name: "Romanian Leu",         flag: "[RO]", symbol: "lei", rate: 4.57  },
+  RSD: { code: "RSD", name: "Serbian Dinar",        flag: "[RS]", symbol: "din", rate: 108   },
+  RUB: { code: "RUB", name: "Russian Ruble",        flag: "[RU]", symbol: "₽",   rate: 90.0  },
+  RWF: { code: "RWF", name: "Rwandan Franc",        flag: "[RW]", symbol: "RF",  rate: 1250  },
+  SAR: { code: "SAR", name: "Saudi Riyal",          flag: "[SA]", symbol: "ر.س", rate: 3.75  },
+  SBD: { code: "SBD", name: "Solomon Islands Dollar",flag:"[SB]", symbol: "$",   rate: 8.40  },
+  SCR: { code: "SCR", name: "Seychellois Rupee",    flag: "[SC]", symbol: "₨",   rate: 13.6  },
+  SDG: { code: "SDG", name: "Sudanese Pound",       flag: "[SD]", symbol: "£",   rate: 601   },
+  SEK: { code: "SEK", name: "Swedish Krona",        flag: "[SE]", symbol: "kr",  rate: 10.4  },
+  SGD: { code: "SGD", name: "Singapore Dollar",     flag: "[SG]", symbol: "S$",  rate: 1.34  },
+  SHP: { code: "SHP", name: "St Helena Pound",      flag: "[SH]", symbol: "£",   rate: 0.79  },
+  SLL: { code: "SLL", name: "Sierra Leonean Leone",  flag: "[SL]", symbol: "Le",  rate: 20900 },
+  SOS: { code: "SOS", name: "Somali Shilling",      flag: "[SO]", symbol: "Sh",  rate: 571   },
+  SRD: { code: "SRD", name: "Surinamese Dollar",    flag: "[SR]", symbol: "$",   rate: 36.5  },
+  SSP: { code: "SSP", name: "S. Sudanese Pound",    flag: "[SS]", symbol: "£",   rate: 1300  },
+  STN: { code: "STN", name: "São Tomé Dobra",       flag: "[ST]", symbol: "Db",  rate: 22.7  },
+  SVC: { code: "SVC", name: "Salvadoran Colón",     flag: "[SV]", symbol: "₡",   rate: 8.75  },
+  SYP: { code: "SYP", name: "Syrian Pound",         flag: "[SY]", symbol: "£",   rate: 13000 },
+  SZL: { code: "SZL", name: "Swazi Lilangeni",      flag: "[SZ]", symbol: "L",   rate: 18.6  },
+  THB: { code: "THB", name: "Thai Baht",            flag: "[TH]", symbol: "฿",   rate: 35.1  },
+  TJS: { code: "TJS", name: "Tajikistani Somoni",   flag: "[TJ]", symbol: "SM",  rate: 10.9  },
+  TMT: { code: "TMT", name: "Turkmenistani Manat",  flag: "[TM]", symbol: "T",   rate: 3.50  },
+  TND: { code: "TND", name: "Tunisian Dinar",       flag: "[TN]", symbol: "د.ت", rate: 3.10  },
+  TOP: { code: "TOP", name: "Tongan Paʻanga",       flag: "[TO]", symbol: "T$",  rate: 2.36  },
+  TRY: { code: "TRY", name: "Turkish Lira",         flag: "[TR]", symbol: "₺",   rate: 30.5  },
+  TTD: { code: "TTD", name: "T&T Dollar",           flag: "[TT]", symbol: "$",   rate: 6.78  },
+  TWD: { code: "TWD", name: "Taiwan Dollar",        flag: "[TW]", symbol: "NT$", rate: 31.5  },
+  TZS: { code: "TZS", name: "Tanzanian Shilling",   flag: "[TZ]", symbol: "TSh", rate: 2550  },
+  UAH: { code: "UAH", name: "Ukrainian Hryvnia",    flag: "[UA]", symbol: "₴",   rate: 37.5  },
+  UGX: { code: "UGX", name: "Ugandan Shilling",     flag: "[UG]", symbol: "USh", rate: 3750  },
+  USD: { code: "USD", name: "US Dollar",            flag: "[US]", symbol: "$",   rate: 1.000 },
+  UYU: { code: "UYU", name: "Uruguayan Peso",       flag: "[UY]", symbol: "$",   rate: 38.7  },
+  UZS: { code: "UZS", name: "Uzbekistani Som",      flag: "[UZ]", symbol: "So'm",rate: 12300 },
+  VES: { code: "VES", name: "Venezuelan Bolívar",   flag: "[VE]", symbol: "Bs",  rate: 35.6  },
+  VND: { code: "VND", name: "Vietnamese Dong",      flag: "[VN]", symbol: "₫",   rate: 24300 },
+  VUV: { code: "VUV", name: "Vanuatu Vatu",         flag: "[VU]", symbol: "Vt",  rate: 119   },
+  WST: { code: "WST", name: "Samoan Tala",          flag: "[WS]", symbol: "T",   rate: 2.74  },
+  XAF: { code: "XAF", name: "CFA Franc BEAC",       flag: "[CF]", symbol: "Fr",  rate: 605   },
+  XCD: { code: "XCD", name: "E. Caribbean Dollar",  flag: "[XC]", symbol: "$",   rate: 2.70  },
+  XOF: { code: "XOF", name: "CFA Franc BCEAO",      flag: "[XO]", symbol: "Fr",  rate: 605   },
+  XPF: { code: "XPF", name: "CFP Franc",            flag: "[XP]", symbol: "Fr",  rate: 110   },
+  YER: { code: "YER", name: "Yemeni Rial",          flag: "[YE]", symbol: "﷼",   rate: 250   },
+  ZAR: { code: "ZAR", name: "S. African Rand",      flag: "[ZA]", symbol: "R",   rate: 18.6  },
+  ZMW: { code: "ZMW", name: "Zambian Kwacha",       flag: "[ZM]", symbol: "ZK",  rate: 26.5  },
+  ZWL: { code: "ZWL", name: "Zimbabwean Dollar",    flag: "[ZW]", symbol: "$",   rate: 322   },
 };
 
-// Map country names → default currency code
-const COUNTRY_CURRENCY = {
-  "Uganda":         "UGX",
-  "Kenya":          "KES",
-  "Tanzania":       "TZS",
-  "Rwanda":         "RWF",
-  "Nigeria":        "NGN",
-  "Ghana":          "GHS",
-  "South Africa":   "ZAR",
-  "United Kingdom": "GBP",
-  "United States":  "USD",
-  "Canada":         "CAD",
-  "Australia":      "AUD",
-  "India":          "INR",
-  "Japan":          "JPY",
-  "China":          "CNY",
-  "Germany":        "EUR",
-  "France":         "EUR",
+// Alphabetical array for dropdowns
+export const CURRENCIES = Object.values(CURRENCY_DATA).sort((a, b) => a.code.localeCompare(b.code));
+
+// Map country name → currency code
+const COUNTRY_CURRENCY_MAP = {
+  "Afghanistan": "AFN", "Albania": "ALL", "Algeria": "DZD", "Angola": "AOA",
+  "Argentina": "ARS", "Armenia": "AMD", "Australia": "AUD", "Austria": "EUR",
+  "Azerbaijan": "AZN", "Bahrain": "BHD", "Bangladesh": "BDT", "Barbados": "BBD",
+  "Belarus": "BYN", "Belgium": "EUR", "Belize": "BZD", "Benin": "XOF",
+  "Bhutan": "BTN", "Bolivia": "BOB", "Bosnia and Herzegovina": "BAM",
+  "Botswana": "BWP", "Brazil": "BRL", "Brunei": "BND", "Bulgaria": "BGN",
+  "Burkina Faso": "XOF", "Burundi": "BIF", "Cambodia": "KHR", "Cameroon": "XAF",
+  "Canada": "CAD", "Cape Verde": "CVE", "Central African Republic": "XAF",
+  "Chad": "XAF", "Chile": "CLP", "China": "CNY", "Colombia": "COP",
+  "Comoros": "KMF", "Congo": "XAF", "Costa Rica": "CRC", "Croatia": "HRK",
+  "Cuba": "CUP", "Cyprus": "EUR", "Czech Republic": "CZK", "Denmark": "DKK",
+  "Djibouti": "DJF", "Dominican Republic": "DOP", "DR Congo": "CDF",
+  "Ecuador": "USD", "Egypt": "EGP", "El Salvador": "SVC", "Eritrea": "ERN",
+  "Estonia": "EUR", "Eswatini": "SZL", "Ethiopia": "ETB", "Fiji": "FJD",
+  "Finland": "EUR", "France": "EUR", "Gabon": "XAF", "Gambia": "GMD",
+  "Georgia": "GEL", "Germany": "EUR", "Ghana": "GHS", "Greece": "EUR",
+  "Guatemala": "GTQ", "Guinea": "GNF", "Guyana": "GYD", "Haiti": "HTG",
+  "Honduras": "HNL", "Hong Kong": "HKD", "Hungary": "HUF", "Iceland": "ISK",
+  "India": "INR", "Indonesia": "IDR", "Iran": "IRR", "Iraq": "IQD",
+  "Ireland": "EUR", "Israel": "ILS", "Italy": "EUR", "Jamaica": "JMD",
+  "Japan": "JPY", "Jordan": "JOD", "Kazakhstan": "KZT", "Kenya": "KES",
+  "Kuwait": "KWD", "Kyrgyzstan": "KGS", "Laos": "LAK", "Latvia": "EUR",
+  "Lebanon": "LBP", "Lesotho": "LSL", "Liberia": "LRD", "Libya": "LYD",
+  "Lithuania": "EUR", "Luxembourg": "EUR", "Macau": "MOP", "Madagascar": "MGA",
+  "Malawi": "MWK", "Malaysia": "MYR", "Maldives": "MVR", "Mali": "XOF",
+  "Malta": "EUR", "Mauritania": "MRU", "Mauritius": "MUR", "Mexico": "MXN",
+  "Moldova": "MDL", "Mongolia": "MNT", "Montenegro": "EUR", "Morocco": "MAD",
+  "Mozambique": "MZN", "Myanmar": "MMK", "Namibia": "NAD", "Nepal": "NPR",
+  "Netherlands": "EUR", "New Zealand": "NZD", "Nicaragua": "NIO", "Niger": "XOF",
+  "Nigeria": "NGN", "North Korea": "KPW", "North Macedonia": "MKD", "Norway": "NOK",
+  "Oman": "OMR", "Pakistan": "PKR", "Panama": "PAB", "Papua New Guinea": "PGK",
+  "Paraguay": "PYG", "Peru": "PEN", "Philippines": "PHP", "Poland": "PLN",
+  "Portugal": "EUR", "Qatar": "QAR", "Romania": "RON", "Russia": "RUB",
+  "Rwanda": "RWF", "Saudi Arabia": "SAR", "Senegal": "XOF", "Serbia": "RSD",
+  "Sierra Leone": "SLL", "Singapore": "SGD", "Slovakia": "EUR", "Slovenia": "EUR",
+  "Solomon Islands": "SBD", "Somalia": "SOS", "South Africa": "ZAR",
+  "South Korea": "KRW", "South Sudan": "SSP", "Spain": "EUR", "Sri Lanka": "LKR",
+  "Sudan": "SDG", "Suriname": "SRD", "Sweden": "SEK", "Switzerland": "CHF",
+  "Syria": "SYP", "Taiwan": "TWD", "Tajikistan": "TJS", "Tanzania": "TZS",
+  "Thailand": "THB", "Togo": "XOF", "Trinidad and Tobago": "TTD", "Tunisia": "TND",
+  "Turkey": "TRY", "Turkmenistan": "TMT", "Uganda": "UGX", "Ukraine": "UAH",
+  "United Arab Emirates": "AED", "United Kingdom": "GBP", "United States": "USD",
+  "Uruguay": "UYU", "Uzbekistan": "UZS", "Venezuela": "VES", "Vietnam": "VND",
+  "Yemen": "YER", "Zambia": "ZMW", "Zimbabwe": "ZWL",
 };
 
-// ── Exported array for dropdowns ──────────────────────────────────
-export const CURRENCIES = Object.values(CURRENCY_DATA);
-
-// ── Get default currency from user's country ──────────────────────
 export function getCurrencyForCountry(country) {
-  return COUNTRY_CURRENCY[country] || "USD";
+  return COUNTRY_CURRENCY_MAP[country] || "USD";
 }
 
-// ── Convert amount between currencies ────────────────────────────
 export function convertCurrency(amount, fromCode, toCode) {
   const from = CURRENCY_DATA[fromCode];
   const to   = CURRENCY_DATA[toCode];
-  if (!from || !to || isNaN(amount)) return 0;
-  // Convert to USD first, then to target
-  const usd = parseFloat(amount) / from.rate;
-  return Math.round(usd * to.rate * 100) / 100;
+  if (!from || !to) return amount;
+  return (amount / from.rate) * to.rate;
 }
 
-// ── Format amount with currency symbol ───────────────────────────
 export function formatCurrency(amount, code) {
   const c = CURRENCY_DATA[code];
-  if (!c) return `${amount}`;
-  return `${c.symbol}${Number(amount).toLocaleString()}`;
+  if (!c) return `$${parseFloat(amount).toFixed(2)}`;
+  return `${c.symbol}${parseFloat(amount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-// ── Get single currency data ──────────────────────────────────────
 export function getCurrencyData(code) {
   return CURRENCY_DATA[code] || null;
 }
 
-// ── Backward-compatible alias used by Dashboard / GroupDetails ────
 export function getCurrencySymbol(code) {
   return CURRENCY_DATA[code]?.symbol || "$";
 }
 
+// Legacy aliases
+export function getCurrencyByCode(code) { return getCurrencyData(code); }
+export function getAllCurrencies() { return CURRENCIES; }
+export function detectUserCurrency(country) { return getCurrencyForCountry(country); }
+
 export default CURRENCY_DATA;
-
-// ── Legacy aliases — keep old import names working ────────────────
-export function getAllCurrencies() {
-  return CURRENCIES;
-}
-
-export function getCurrencyByCode(code) {
-  return getCurrencyData(code);
-}
-
-// ── detectUserCurrency — legacy alias used by GroupDetails ────────
-// Returns currency code for the logged-in user's country,
-// falling back to USD if country not set.
-export function detectUserCurrency() {
-  try {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    return getCurrencyForCountry(user?.country || '') || 'USD';
-  } catch {
-    return 'USD';
-  }
-}

@@ -239,7 +239,7 @@ function Dashboard() {
             background: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
             color: 'white', border: 'none', borderRadius: '8px',
             fontSize: '14px', fontWeight: '600', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+            display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '6px',
           }}
         >
           🚀 Start Fundraising
