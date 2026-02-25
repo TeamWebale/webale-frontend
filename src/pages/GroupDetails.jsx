@@ -261,7 +261,7 @@ function GroupDetails() {
 
   const submitPledge = async () => {
     if (!pledgeForm.amount || parseFloat(pledgeForm.amount) <= 0) {
-      alert('Please enter a valid amount');
+      alert('Please enter the amount you wish to pledge.');
       return;
     }
     setFormLoading(true);
@@ -308,7 +308,7 @@ function GroupDetails() {
 
   const handlePartPayment = async () => {
     if (!partPaymentForm.amount || parseFloat(partPaymentForm.amount) <= 0) {
-      alert('Please enter a valid amount');
+      alert('Please enter the amount you wish to pledge.');
       return;
     }
     setFormLoading(true);
@@ -343,7 +343,7 @@ function GroupDetails() {
 
   const submitRevisePledge = async () => {
     if (!revisePledgeForm.amount || parseFloat(revisePledgeForm.amount) <= 0) {
-      alert('Please enter a valid amount');
+      alert('Please enter the amount you wish to pledge.');
       return;
     }
     setFormLoading(true);
@@ -499,7 +499,7 @@ function GroupDetails() {
 
   const submitRecurring = async () => {
     if (!recurringForm.amount || parseFloat(recurringForm.amount) <= 0) {
-      alert('Please enter a valid amount'); return;
+      alert('Please enter the amount you wish to pledge.'); return;
     }
     setFormLoading(true);
     try {
@@ -786,7 +786,7 @@ function GroupDetails() {
 
   const handleOfflineDonation = async () => {
     if (!offlineDonationForm.amount || parseFloat(offlineDonationForm.amount) <= 0) {
-      alert('Please enter a valid amount'); return;
+      alert('Please enter the amount you wish to pledge.'); return;
     }
     setFormLoading(true);
     try {
@@ -883,19 +883,47 @@ function GroupDetails() {
         boxShadow: '0 4px 12px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0'
       }}>
         <h3 style={{ margin: '0 0 12px', fontSize: '15px', color: '#2d3748', fontWeight: '700' }}>Milestones</h3>
-        {subGoals.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '20px' }}>
-            <div style={{ fontSize: '48px', marginBottom: '8px' }}>🎯</div>
-            <p style={{ color: '#a0aec0', fontSize: '13px', margin: '0 0 12px' }}>No sub-goals yet</p>
-            {isAdmin && (
-              <button onClick={handleCreateSubGoal} className="btn btn-primary"
-                style={{ width: '100%', padding: '10px', fontSize: '13px' }}>
-                Create First Sub-Goal
-              </button>
-            )}
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {/* Pledge % milestones */}
+        {(() => {
+          const pPct = parseFloat(pledgedPercent);
+          const rPct = parseFloat(receivedPercent);
+          const badges = [];
+          [[25,'🥉','25%'],[50,'🥈','50%'],[75,'🥇','75%'],[100,'🏆','100%']].forEach(([thr, icon, label]) => {
+            const pledgeHit = pPct >= thr;
+            const recvHit   = rPct >= thr;
+            if (pledgeHit || recvHit) {
+              badges.push(
+                <div key={thr} style={{
+                  display:'flex', alignItems:'center', gap:'10px',
+                  padding:'10px 12px', borderRadius:'10px', marginBottom:'8px',
+                  background: recvHit ? 'linear-gradient(135deg,#48bb78,#38a169)' : 'linear-gradient(135deg,#667eea,#764ba2)',
+                  color:'white'
+                }}>
+                  <span style={{fontSize:'22px'}}>{icon}</span>
+                  <div>
+                    <p style={{margin:0,fontWeight:700,fontSize:'13px'}}>
+                      {label} {recvHit ? 'Received' : 'Pledged'}!
+                    </p>
+                    <p style={{margin:0,fontSize:'11px',opacity:0.85}}>
+                      {recvHit ? `${rPct}% of goal received` : `${pPct}% of goal pledged`}
+                    </p>
+                  </div>
+                </div>
+              );
+            }
+          });
+          return badges.length > 0 ? (
+            <div>{badges}</div>
+          ) : (
+            <div style={{textAlign:'center',padding:'16px'}}>
+              <div style={{fontSize:'36px',marginBottom:'6px'}}>🎯</div>
+              <p style={{color:'#a0aec0',fontSize:'13px',margin:0}}>Milestones will appear as the group hits 25%, 50%, 75% and 100% of its goal</p>
+            </div>
+          );
+        })()}
+        {/* Sub-goals */}
+        {subGoals.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop:'12px' }}>
             {subGoals.map(goal => (
               <div key={goal.id} style={{ padding: '12px', background: '#f7fafc', borderRadius: '8px' }}>
                 <p style={{ fontWeight: '600', margin: '0 0 4px', fontSize: '13px' }}>{goal.name}</p>
@@ -912,6 +940,12 @@ function GroupDetails() {
               </div>
             ))}
           </div>
+        )}
+        {isAdmin && (
+          <button onClick={handleCreateSubGoal} className="btn btn-primary"
+            style={{ width: '100%', padding: '10px', fontSize: '13px', marginTop:'12px' }}>
+            + Add Sub-Goal
+          </button>
         )}
       </div>
       <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }`}</style>

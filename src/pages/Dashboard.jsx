@@ -235,14 +235,14 @@ function Dashboard() {
         <button
           onClick={() => navigate('/create-group')}
           style={{
-            flex: 1, minWidth: '160px', padding: '10px 14px',
+            padding: '10px 24px', marginLeft: 'auto',
             background: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
             color: 'white', border: 'none', borderRadius: '8px',
             fontSize: '14px', fontWeight: '600', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
           }}
         >
-          🚀 Begin Fundraising
+          🚀 Start Fundraising
         </button>
       </div>
 
@@ -299,128 +299,6 @@ function Dashboard() {
           </p>
         </div>
       </div>
-
-      {/* My Groups */}
-      <div style={{
-        background: 'white',
-        borderRadius: '12px',
-        padding: '20px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h2 style={{ margin: 0, fontSize: '18px', color: '#2d3748', fontWeight: '700' }}>
-            📁 My Groups
-          </h2>
-          <button
-            onClick={() => navigate('/create-group')}
-            className="btn btn-primary"
-            style={{ fontSize: '13px', padding: '8px 16px' }}
-          >
-            + Create Group
-          </button>
-        </div>
-
-        {groups.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: '#a0aec0' }}>
-            <div style={{ fontSize: '48px', marginBottom: '12px' }}>📁</div>
-            <p style={{ margin: '0 0 16px', fontSize: '14px' }}>You haven't joined any groups yet</p>
-            <button
-              onClick={() => navigate('/create-group')}
-              className="btn btn-primary"
-            >
-              Create Your First Group
-            </button>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {groups.map(group => {
-              const progress = group.goal_amount > 0 
-                ? ((parseFloat(group.current_amount || 0) / parseFloat(group.goal_amount)) * 100).toFixed(0)
-                : 0;
-              const isAdmin = group.user_role === 'admin' || group.role === 'admin';
-              const currencySymbol = getCurrencySymbol(group.currency || 'USD');
-
-              return (
-                <div
-                  key={group.id}
-                  onClick={() => navigate(`/groups/${group.id}`)}
-                  style={{
-                    padding: '16px',
-                    background: '#f7fafc',
-                    borderRadius: '12px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    border: '1px solid #e2e8f0'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{
-                        width: '44px',
-                        height: '44px',
-                        borderRadius: '10px',
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'white',
-                        fontWeight: 'bold',
-                        fontSize: '18px'
-                      }}>
-                        {group.name?.charAt(0) || 'G'}
-                      </div>
-                      <div>
-                        <h3 style={{ margin: 0, fontSize: '16px', color: '#2d3748', fontWeight: '600' }}>
-                          {group.name}
-                        </h3>
-                        <span style={{
-                          padding: '2px 8px',
-                          background: isAdmin ? '#ed8936' : '#48bb78',
-                          color: 'white',
-                          borderRadius: '8px',
-                          fontSize: '10px',
-                          fontWeight: '600'
-                        }}>
-                          {isAdmin ? '👑 Admin' : '👤 Member'}
-                        </span>
-                      </div>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <p style={{ margin: 0, fontWeight: 'bold', color: '#2d3748', fontSize: '16px' }}>
-                        {currencySymbol}{formatAmount(group.current_amount || 0)}
-                      </p>
-                      <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#718096' }}>
-                        of {currencySymbol}{formatAmount(group.goal_amount)}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Progress Bar */}
-                  <div style={{ height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
-                    <div style={{
-                      height: '100%',
-                      width: `${Math.min(progress, 100)}%`,
-                      background: 'linear-gradient(90deg, #667eea, #48bb78)',
-                      borderRadius: '4px',
-                      transition: 'width 0.3s'
-                    }} />
-                  </div>
-                  <p style={{ margin: '6px 0 0', fontSize: '12px', color: '#718096', textAlign: 'right' }}>
-                    {progress}% complete
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
     </div>
   );

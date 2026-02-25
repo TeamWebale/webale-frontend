@@ -47,23 +47,8 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Center links */}
-        <div style={s.links}>
-          {[
-            ["/dashboard",    "📊 Dashboard"],
-            ["/create-group", "➕ New Group"],
-            ["/profile",      "👤 Profile"],
-          ].map(([to, label]) => (
-            <NavLink key={to} to={to} style={({ isActive }) => ({
-              ...s.link,
-              color:       isActive ? "#1B2D4F" : "#5A6A7E",
-              fontWeight:  isActive ? 700 : 500,
-              borderBottom: isActive ? "2px solid #667eea" : "2px solid transparent",
-            })}>
-              {label}
-            </NavLink>
-          ))}
-        </div>
+        {/* Center spacer */}
+        <div style={{ flex:1 }} />
 
         {/* Right controls — same width as right sidebar (250px) */}
         <div style={s.rightBlock}>
