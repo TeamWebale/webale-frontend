@@ -72,6 +72,7 @@ function GroupDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const tabMenuRef = useRef(null);
+  const actionMenuRef = useRef(null);
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
   // Data states
@@ -139,15 +140,22 @@ function GroupDetails() {
     return () => setRightSidebar(null);
   }, [group, pledges, subGoals]);
 
-  // Close tab menu on outside click
+  // Close all dropdowns on outside click
   useEffect(() => {
     const handler = (e) => {
       if (tabMenuRef.current && !tabMenuRef.current.contains(e.target)) {
         setShowTabMenu(false);
       }
+      if (actionMenuRef.current && !actionMenuRef.current.contains(e.target)) {
+        setShowActionMenu(false);
+      }
     };
     document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('touchstart', handler);
+    };
   }, []);
 
   // ==================== DATA LOADING ====================
@@ -1016,7 +1024,7 @@ function GroupDetails() {
         </div>
 
         {/* Action Menu */}
-        <div style={{ position: 'relative' }}>
+        <div ref={actionMenuRef} style={{ position: 'relative' }}>
           <button onClick={() => setShowActionMenu(!showActionMenu)} className="btn" style={{
             background: 'rgba(255,255,255,0.2)', color: 'white', padding: '10px 18px',
             fontSize: '14px', fontWeight: '600', width: '100%', display: 'flex',
