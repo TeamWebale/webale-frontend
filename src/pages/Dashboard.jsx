@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { groupAPI } from '../services/api';
 import { getCurrencySymbol } from '../utils/currencyConverter';
@@ -10,11 +10,27 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [recentActivity, setRecentActivity] = useState([]);
   const [showGroupMenu, setShowGroupMenu] = useState(false);
+  const groupMenuRef = useRef(null);
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   useEffect(() => {
     loadDashboardData();
+  }, []);
+
+  // Close My Groups dropdown when clicking outside
+  useEffect(() => {
+    const handler = (e) => {
+      if (groupMenuRef.current && !groupMenuRef.current.contains(e.target)) {
+        setShowGroupMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('touchstart', handler);
+    };
   }, []);
 
   const loadDashboardData = async () => {
@@ -191,7 +207,7 @@ function Dashboard() {
         display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap'
       }}>
         {/* My Groups dropdown */}
-        <div style={{ position: 'relative', flex: 1, minWidth: '160px' }}>
+        <div ref={groupMenuRef} style={{ position: 'relative', flex: 1, minWidth: '160px' }}>
           <button
             onClick={() => setShowGroupMenu(m => !m)}
             style={{

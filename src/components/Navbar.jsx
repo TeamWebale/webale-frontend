@@ -106,7 +106,7 @@ export default function Navbar() {
         <div style={s.mobileMenu} className="nav-mobile">
           {[
             ["/dashboard",    "📊 Dashboard"],
-            ["/create-group", "➕ New Group"],
+            ["/create-group", "🚀 Start Fundraising"],
             ["/profile",      "👤 Profile"],
           ].map(([to, label]) => (
             <Link key={to} to={to} style={s.mobileLink}

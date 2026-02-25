@@ -5,7 +5,7 @@
  * - Deadline calendar auto-clears after date is selected
  */
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
@@ -42,6 +42,7 @@ export default function CreateGroup() {
   const [error,         setError]         = useState("");
   const [loading,       setLoading]       = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(false);
+  const templateRef = useRef(null);
   const [deadlineLabel, setDeadlineLabel] = useState("");
 
   const handleChange = (e) => {
@@ -63,6 +64,21 @@ export default function CreateGroup() {
     setForm(f => ({ ...f, name: template.name, description: template.description }));
     setTemplatesOpen(false);
   };
+
+  // Close templates dropdown on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (templateRef.current && !templateRef.current.contains(e.target)) {
+        setTemplatesOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('touchstart', handler);
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -87,12 +103,12 @@ export default function CreateGroup() {
       <div style={s.card}>
 
         <div style={s.header}>
-          <h1 style={s.title}>Create new group</h1>
+          <h1 style={s.title}>Create Group</h1>
           <button onClick={() => navigate("/dashboard")} style={s.closeBtn}>✕</button>
         </div>
 
         {/* Quick Templates hamburger dropdown */}
-        <div style={{ marginBottom: "20px" }}>
+        <div ref={templateRef} style={{ marginBottom: "20px" }}>
           <button onClick={() => setTemplatesOpen(o => !o)} style={s.templateToggle}>
             <span>☰ Quick templates <span style={s.opt}>(optional)</span></span>
             <span style={{ fontSize: "10px", color: "#8899AA" }}>{templatesOpen ? "▲" : "▼"}</span>

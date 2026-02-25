@@ -119,7 +119,7 @@ function Sidebar() {
             : 'linear-gradient(135deg, #d1fae5, #a7f3d0)',
           color: isActive ? 'white' : '#047857',
         })}>
-          <span>➕</span> Create Group
+          <span>🚀</span> Start Fundraising
         </NavLink>
 
         <NavLink to="/activity-feed" style={({ isActive }) => ({
