@@ -231,11 +231,11 @@ function Dashboard() {
           )}
         </div>
 
-        {/* Begin Fundraising button */}
+        {/* Start Fundraising button */}
         <button
           onClick={() => navigate('/create-group')}
           style={{
-            padding: '10px 24px', marginLeft: 'auto',
+            padding: '10px 24px',
             background: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
             color: 'white', border: 'none', borderRadius: '8px',
             fontSize: '14px', fontWeight: '600', cursor: 'pointer',
