@@ -12,9 +12,11 @@ import { NavLink, useNavigate, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { groupAPI } from '../services/api';
 import WebaleLogo from './WebaleLogo';
+import { useAuth } from '../context/AuthContext';
 
 function Sidebar() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [stats, setStats] = useState({
     totalGroups: 0,
     adminGroups: 0,
@@ -94,11 +96,46 @@ function Sidebar() {
     }}>
 
       {/* ── Logo ── */}
-      <Link to="/dashboard" style={{ textDecoration: 'none', marginBottom: '24px', display: 'block' }}>
+      <Link to="/dashboard" style={{ textDecoration: 'none', marginBottom: '16px', display: 'block' }}>
         <div style={{ padding: '8px', borderRadius: '12px' }}>
           <WebaleLogo variant="full" size="sm" theme="light" />
         </div>
       </Link>
+
+      {/* ── Profile Card ── */}
+      <Link to="/profile" style={{ textDecoration: 'none', marginBottom: '16px', display: 'block' }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '12px',
+          padding: '10px 12px', borderRadius: '12px',
+          background: 'linear-gradient(135deg, #f0f4ff, #e8eeff)',
+          border: '1px solid #c7d2fe', cursor: 'pointer',
+          transition: 'all 0.15s',
+        }}>
+          {/* Emoji avatar with pencil badge */}
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            <div style={{
+              width: '44px', height: '44px', borderRadius: '50%',
+              background: 'linear-gradient(135deg, #667eea, #764ba2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '24px', boxShadow: '0 2px 8px rgba(102,126,234,0.3)',
+            }}>
+              {user?.avatar_url || '😊'}
+            </div>
+            <div style={{
+              position: 'absolute', bottom: '-1px', right: '-1px',
+              width: '18px', height: '18px', borderRadius: '50%',
+              background: '#667eea', border: '2px solid white',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '9px',
+            }}>✏️</div>
+          </div>
+          {/* Name */}
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: '#1B2D4F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {user?.first_name} {user?.last_name}
+            </div>
+            <div style={{ fontSize: '11px', color: '#667eea', fontWeight: 600 }}>Edit profile →</div>
+          </div>
 
       {/* ── Navigation ── */}
       <nav style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '20px' }}>
@@ -141,6 +178,18 @@ function Sidebar() {
         })}>
           <span>👤</span> Profile
         </NavLink>
+
+        {user?.is_platform_admin && (
+          <NavLink to="/admin" style={({ isActive }) => ({
+            ...navBtn,
+            background: isActive
+              ? 'linear-gradient(135deg, #1B2D4F, #4A7FC1)'
+              : 'linear-gradient(135deg, #ede9fe, #ddd6fe)',
+            color: isActive ? 'white' : '#6d28d9',
+          })}>
+            <span>🛡️</span> Admin Panel
+          </NavLink>
+        )}
 
         <NavLink to="/settings" style={({ isActive }) => ({
           ...navBtn,

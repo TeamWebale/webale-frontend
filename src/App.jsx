@@ -15,7 +15,7 @@ import Dashboard     from "./pages/Dashboard";
 import CreateGroup   from "./pages/CreateGroup";
 import GroupDetails  from "./pages/GroupDetails";
 import Profile       from "./pages/Profile";
-import PlatformAdmin from './pages/PlatformAdmin';
+import PlatformAdmin from "./pages/PlatformAdmin";
 
 function PublicRoute({ children }) {
   const { user } = useAuth();
@@ -46,7 +46,7 @@ export default function App() {
         <Route path="/create-group" element={<CreateGroup />} />
         <Route path="/groups/:id"   element={<GroupDetails />} />
         <Route path="/profile"      element={<Profile />} />
-        <Route path="/admin" element={<PlatformAdmin />} />
+        <Route path="/admin"        element={<PlatformAdmin />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/login" replace />} />
