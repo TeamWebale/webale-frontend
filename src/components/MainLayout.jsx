@@ -132,7 +132,7 @@ function LeftSidebar() {
       <nav style={{ marginBottom: "8px" }}>
         {[
           ["/dashboard",    "📊", "Dashboard",   "#e0e7ff", "#4c51bf"],
-          ["/create-group", "➕", "Create Group", "#d1fae5", "#047857"],
+          ["/create-group", "🚀", "Start Fundraising", "#d1fae5", "#047857"],
           ["/profile",      "👤", "Profile",      "#fce7f3", "#be185d"],
         ].map(([to, icon, label, bg, color]) => (
           <NavLink key={to} to={to} style={({ isActive }) => ({
