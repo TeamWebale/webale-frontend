@@ -116,6 +116,8 @@ function GroupDetails() {
   });
   const [editForm, setEditForm] = useState({ name: '', description: '', goalAmount: '', deadline: '', currency: 'USD' });
   const [inviteEmails, setInviteEmails] = useState('');
+  const [inviteType, setInviteType] = useState('single');
+  const [pledgeToast, setPledgeToast] = useState('');
   const [inviteTab, setInviteTab] = useState('email');
   const [inviteLink, setInviteLink] = useState('');
   const [inviteMessage, setInviteMessage] = useState('');
@@ -296,7 +298,7 @@ function GroupDetails() {
       });
       setShowPledgeModal(false);
       loadGroupData();
-      alert('Pledge created successfully!');
+      showPledgeToast('✅ Pledge created successfully!');
     } catch (err) {
       alert('Failed to create pledge: ' + (err.response?.data?.message || err.message));
     } finally {
@@ -379,7 +381,7 @@ function GroupDetails() {
       setShowRevisePledgeModal(false);
       setSelectedPledge(null);
       loadGroupData();
-      alert('Pledge revised successfully!');
+      showPledgeToast('✅ Pledge revised successfully!');
     } catch (err) {
       alert('Failed to revise pledge: ' + (err.response?.data?.message || err.message));
     } finally {
@@ -395,7 +397,7 @@ function GroupDetails() {
       setShowRevisePledgeModal(false);
       setSelectedPledge(null);
       loadGroupData();
-      alert('Pledge cancelled successfully.');
+      showPledgeToast('✅ Pledge cancelled.');
     } catch (err) {
       alert('Failed to cancel pledge: ' + (err.response?.data?.message || err.message));
     } finally {
@@ -993,6 +995,18 @@ function GroupDetails() {
   // ==================== MAIN RENDER ====================
   return (
     <div>
+
+      {/* Pledge Toast */}
+      {pledgeToast && (
+        <div style={{
+          position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)',
+          background: '#48bb78', color: 'white', padding: '12px 24px',
+          borderRadius: '10px', fontWeight: 600, fontSize: '14px',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.2)', zIndex: 9999,
+        }}>
+          {pledgeToast}
+        </div>
+      )}
 
       {/* Group Header */}
       <div style={{
@@ -1722,6 +1736,28 @@ function GroupDetails() {
       {/* Enhanced Invite Modal */}
       <Modal isOpen={showInviteModal} onClose={() => setShowInviteModal(false)} title="👥 Invite Members" width="520px">
         
+        {/* Single vs Multi invite selector */}
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+          <button onClick={() => setInviteType('single')} style={{
+            flex: 1, padding: '10px', borderRadius: '8px', fontWeight: 600, fontSize: '13px', cursor: 'pointer', border: '2px solid',
+            borderColor: inviteType === 'single' ? '#667eea' : '#e2e8f0',
+            background: inviteType === 'single' ? '#ebf4ff' : 'white',
+            color: inviteType === 'single' ? '#4a5568' : '#a0aec0'
+          }}>
+            🔒 Single-use invite<br/>
+            <span style={{ fontSize: '11px', fontWeight: 400 }}>Link works for one person only</span>
+          </button>
+          <button onClick={() => setInviteType('multi')} style={{
+            flex: 1, padding: '10px', borderRadius: '8px', fontWeight: 600, fontSize: '13px', cursor: 'pointer', border: '2px solid',
+            borderColor: inviteType === 'multi' ? '#667eea' : '#e2e8f0',
+            background: inviteType === 'multi' ? '#ebf4ff' : 'white',
+            color: inviteType === 'multi' ? '#4a5568' : '#a0aec0'
+          }}>
+            🌐 Multi-use invite<br/>
+            <span style={{ fontSize: '11px', fontWeight: 400 }}>Link works for anyone with it</span>
+          </button>
+        </div>
+
         {!inviteGenerated ? (
           <div style={{ textAlign: 'center', padding: '30px 0' }}>
             <div className="spinner" style={{ margin: '0 auto 12px' }}></div>
