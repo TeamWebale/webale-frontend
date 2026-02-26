@@ -94,12 +94,19 @@ export function AuthProvider({ children }) {
     });
 
     if (response.data.success) {
+      // OTP flow — no token yet, verification required
+      if (response.data.data?.requiresVerification) {
+        return { success: true, requiresVerification: true, email: response.data.data.email };
+      }
+      // Legacy direct-login flow (fallback)
       const { token, user } = response.data.data;
-      const normalized = normalizeUser(user);
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(normalized));
-      setUser(normalized);
-      setIsAuthenticated(true);
+      if (token && user) {
+        const normalized = normalizeUser(user);
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(normalized));
+        setUser(normalized);
+        setIsAuthenticated(true);
+      }
       return { success: true };
     }
     return { success: false, message: response.data.message };
