@@ -437,7 +437,7 @@ function GroupDetails() {
   const handleInvite = async () => {
     const userName = `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || 'A member';
     const groupName = group?.name || 'our fundraising group';
-    const defaultMessage = `${userName} cordially invites you to join "${groupName}" a private fundraising group on Webale platform. Follow this link to sign-in/sign-up, accept and join; see you there! 🤝`;
+    const defaultMessage = `${userName} cordially invites you to join "${groupName}" a private fundraising group on Webale! platform. Follow this link to sign-in or to sign-up so you may sign-in, then accept and join. See you there! 🤝`;
     setInviteMessage(defaultMessage);
     setInviteEmails('');
     setInviteLink('');
