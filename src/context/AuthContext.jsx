@@ -15,7 +15,7 @@ function normalizeUser(u) {
     // Keep camelCase copies too so any component can read either
     firstName:   first,
     lastName:    last,
-    avatar_url:  u.avatar_url  || u.avatarUrl  || "",
+    avatar_url:  u.avatar_url  || u.avatarUrl  || u.avatar || "",
     avatar_type: u.avatar_type || u.avatarType || "",
     created_at:  u.created_at  || u.createdAt  || "",
     last_active: u.last_active || u.lastActive || "",

@@ -39,7 +39,7 @@ export default function Profile() {
 
   // ── Avatar state ──
   const [selectedEmoji, setSelectedEmoji] = useState(
-    user?.avatar_type === "emoji" ? (user?.avatar_url || user?.avatarUrl || "") : ""
+    user?.avatar_url || user?.avatarUrl || "😊"
   );
   const [avatarSaving, setAvatarSaving] = useState(false);
 
@@ -191,7 +191,7 @@ export default function Profile() {
                   </button>
                 ))}
               </div>
-              {selectedEmoji && selectedEmoji !== (user?.avatar_url) && (
+              {selectedEmoji && (
                 <button
                   onClick={handleAvatarSave}
                   disabled={avatarSaving}

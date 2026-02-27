@@ -119,14 +119,14 @@ function Sidebar() {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '24px', boxShadow: '0 2px 8px rgba(102,126,234,0.3)',
             }}>
-              {user?.avatar_url || '😊'}
+              {user?.avatar_url || user?.avatar || '😊'}
             </div>
             <div style={{
               position: 'absolute', bottom: '-1px', right: '-1px',
               width: '18px', height: '18px', borderRadius: '50%',
               background: '#667eea', border: '2px solid white',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '9px',
+              fontSize: '10px', lineHeight: 1,
             }}>✏️</div>
           </div>
           {/* Name */}
@@ -136,6 +136,8 @@ function Sidebar() {
             </div>
             <div style={{ fontSize: '11px', color: '#667eea', fontWeight: 600 }}>Edit profile →</div>
           </div>
+        </div>
+      </Link>
 
       {/* ── Navigation ── */}
       <nav style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '20px' }}>

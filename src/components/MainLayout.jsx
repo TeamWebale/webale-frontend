@@ -100,8 +100,10 @@ function getFlag(country) {
 }
 
 function getAvatar(user) {
-  if (user?.avatar_type === "emoji" && user?.avatar_url) return user.avatar_url;
-  if (user?.avatarType  === "emoji" && user?.avatarUrl)  return user.avatarUrl;
+  // Pick up emoji from any of the possible field names
+  const emoji = user?.avatar_url || user?.avatarUrl || user?.avatar;
+  if (emoji) return emoji;
+  // Fallback to initials
   return (user?.first_name?.[0] || user?.firstName?.[0] || "") +
          (user?.last_name?.[0]  || user?.lastName?.[0]  || "");
 }
@@ -230,12 +232,21 @@ export default function MainLayout() {
 
             {/* Profile Banner */}
             <div style={ml.banner}>
-              <div style={ml.avatarRing}>
-                <div style={ml.avatar}>
-                  {isEmoji
-                    ? <span style={{fontSize:26}}>{avatar}</span>
-                    : <span style={ml.initials}>{avatar||"?"}</span>}
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                <div style={ml.avatarRing}>
+                  <div style={ml.avatar}>
+                    {isEmoji
+                      ? <span style={{fontSize:26}}>{avatar}</span>
+                      : <span style={ml.initials}>{avatar||"?"}</span>}
+                  </div>
                 </div>
+                <div style={{
+                  position: 'absolute', bottom: 0, right: 0,
+                  width: '22px', height: '22px', borderRadius: '50%',
+                  background: '#667eea', border: '2px solid white',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '11px', cursor: 'pointer',
+                }} onClick={() => window.location.href='/profile'} title="Edit profile">✏️</div>
               </div>
               <div>
                 <div style={ml.bannerName}>
