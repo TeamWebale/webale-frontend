@@ -10,38 +10,24 @@ export function initSentry() {
     tracesSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
     replaysSessionSampleRate: 0.0,
-
     integrations: [
       Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration({
-        maskAllText: true,
-        blockAllMedia: true,
-      }),
-      Sentry.feedbackIntegration({
-        colorScheme: 'dark',
-        formTitle: 'We listen',
-        nameLabel: 'Name',
-        namePlaceholder: 'First name or nickname',
-        emailLabel: 'Email',
-        emailPlaceholder: 'your@email.com',
-        messageLabel: 'What would you like to share?',
-        messagePlaceholder: 'Tell us what you love, what could be better, or report a problem…',
-        isNameRequired: false,
-        isEmailRequired: false,
-        showBranding: false,
-        autoInject: true,        // keep widget in DOM so we can trigger it
-        triggerLabel: '',        // empty label so default button is invisible
-        buttonLabel: 'Send Feedback',
-        submitButtonLabel: 'Send Feedback',
-        cancelButtonLabel: 'Cancel',
-      }),
+      Sentry.replayIntegration({ maskAllText: true, blockAllMedia: true }),
     ],
-
     ignoreErrors: [
       'ResizeObserver loop limit exceeded',
       'Non-Error promise rejection captured',
       /extensions\//i,
       /^chrome:\/\//i,
     ],
+  });
+}
+
+// Submit feedback directly via Sentry SDK
+export async function submitFeedback({ name, email, message }) {
+  return Sentry.captureFeedback({
+    name: name || 'Anonymous',
+    email: email || '',
+    message,
   });
 }
