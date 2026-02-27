@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
@@ -6,24 +6,47 @@ import { AuthProvider } from './context/AuthContext';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { initSentry } from './sentry';
-import * as Sentry from '@sentry/react';
 import './index.css';
 import './mobile-responsive.css';
 
 initSentry();
 
-// Custom feedback button — always shows label on both desktop and mobile
 function FeedbackButton() {
+  const attachedRef = useRef(false);
+
   useEffect(() => {
-    // Hide Sentry's default trigger so we use our own
+    // Hide Sentry's default trigger
     const style = document.createElement('style');
     style.textContent = '#sentry-feedback { display: none !important; }';
     document.head.appendChild(style);
   }, []);
 
-  const openFeedback = () => {
-    const feedback = Sentry.getFeedback();
-    if (feedback) feedback.openDialog();
+  const openFeedback = async () => {
+    try {
+      // Try the getFeedback API first
+      const { getFeedback } = await import('@sentry/react');
+      const feedback = getFeedback();
+      if (feedback) {
+        feedback.openDialog();
+        return;
+      }
+    } catch {}
+
+    // Fallback: click Sentry's hidden trigger button directly
+    const sentryBtn = document.querySelector('#sentry-feedback button, [data-sentry-feedback] button');
+    if (sentryBtn) {
+      sentryBtn.click();
+      return;
+    }
+
+    // Final fallback: temporarily show and click it
+    const widget = document.querySelector('#sentry-feedback');
+    if (widget) {
+      widget.style.display = 'block';
+      const btn = widget.querySelector('button');
+      if (btn) btn.click();
+      setTimeout(() => { widget.style.display = 'none'; }, 100);
+    }
   };
 
   return (

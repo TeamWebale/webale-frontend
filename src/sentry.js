@@ -1,8 +1,3 @@
-/**
- * sentry.js — src/sentry.js
- * Sentry error tracking + User Feedback widget.
- */
-
 import * as Sentry from '@sentry/react';
 
 export function initSentry() {
@@ -24,9 +19,6 @@ export function initSentry() {
       }),
       Sentry.feedbackIntegration({
         colorScheme: 'dark',
-        buttonLabel: 'Share Feedback',
-        submitButtonLabel: 'Send Feedback',
-        cancelButtonLabel: 'Cancel',
         formTitle: 'We listen',
         nameLabel: 'Name',
         namePlaceholder: 'First name or nickname',
@@ -37,8 +29,11 @@ export function initSentry() {
         isNameRequired: false,
         isEmailRequired: false,
         showBranding: false,
-        triggerLabel: '💬 Feedback',
-        triggerAriaLabel: 'Share feedback',
+        autoInject: true,        // keep widget in DOM so we can trigger it
+        triggerLabel: '',        // empty label so default button is invisible
+        buttonLabel: 'Send Feedback',
+        submitButtonLabel: 'Send Feedback',
+        cancelButtonLabel: 'Cancel',
       }),
     ],
 
