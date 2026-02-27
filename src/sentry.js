@@ -1,36 +1,54 @@
 /**
  * sentry.js — src/sentry.js
- * Initialize Sentry for frontend error tracking.
- * Import this in main.jsx BEFORE rendering the app.
+ * Sentry error tracking + User Feedback widget.
  */
 
 import * as Sentry from '@sentry/react';
 
 export function initSentry() {
-  // Only run in production
-  if (!import.meta.env.PROD) return;
+  if (!import.meta.env.VITE_SENTRY_DSN) return;
 
   Sentry.init({
     dsn: import.meta.env.VITE_SENTRY_DSN,
-    environment: 'production',
+    environment: import.meta.env.PROD ? 'production' : 'development',
     release: 'webale@1.0.0',
-
-    // Capture 10% of sessions for performance monitoring (free tier friendly)
     tracesSampleRate: 0.1,
-
-    // Capture replays only on errors
     replaysOnErrorSampleRate: 1.0,
     replaysSessionSampleRate: 0.0,
 
     integrations: [
       Sentry.browserTracingIntegration(),
       Sentry.replayIntegration({
-        maskAllText: true,      // mask sensitive text in replays
+        maskAllText: true,
         blockAllMedia: true,
+      }),
+      Sentry.feedbackIntegration({
+        // Widget appearance
+        colorScheme: 'dark',
+        buttonLabel: 'Share Feedback',
+        submitButtonLabel: 'Send Feedback',
+        cancelButtonLabel: 'Cancel',
+        formTitle: 'Share Your Experience',
+
+        // Fields
+        nameLabel: 'Your Name',
+        namePlaceholder: 'First name or nickname',
+        emailLabel: 'Your Email',
+        emailPlaceholder: 'your@email.com',
+        messageLabel: 'What would you like to share?',
+        messagePlaceholder: 'Tell us what you love, what could be better, or report a problem…',
+
+        // Make name + email optional so users can submit anonymously
+        isNameRequired: false,
+        isEmailRequired: false,
+        showBranding: false,
+
+        // Trigger button position
+        triggerLabel: '💬 Feedback',
+        triggerAriaLabel: 'Share feedback',
       }),
     ],
 
-    // Don't send errors from browser extensions or known noise
     ignoreErrors: [
       'ResizeObserver loop limit exceeded',
       'Non-Error promise rejection captured',
