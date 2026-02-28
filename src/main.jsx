@@ -11,6 +11,13 @@ import './mobile-responsive.css';
 
 initSentry();
 
+// Keep Render backend awake — ping every 10 minutes
+const keepAlive = () => {
+  fetch('https://webale-api.onrender.com/health').catch(() => {});
+};
+keepAlive();
+setInterval(keepAlive, 10 * 60 * 1000);
+
 function FeedbackWidget() {
   const [open, setOpen]       = useState(false);
   const [name, setName]       = useState('');

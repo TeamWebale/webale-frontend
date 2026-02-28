@@ -271,13 +271,13 @@ function GroupDetails() {
   };
 
   const submitPledge = async () => {
-    if (!pledgeForm.amount || parseFloat(pledgeForm.amount) <= 0) {
-      alert('Please enter the amount you wish to pledge.');
+    const rawAmount = String(pledgeForm.amount || '').replace(/,/g, '');
+    if (!rawAmount || isNaN(parseFloat(rawAmount)) || parseFloat(rawAmount) <= 0) {
       return;
     }
     setFormLoading(true);
     try {
-      const pledgeAmount = parseFloat(pledgeForm.amount);
+      const pledgeAmount = parseFloat(rawAmount);
       const groupCurrency = group?.currency || 'USD';
       let finalAmount = pledgeAmount;
       let originalAmount = pledgeAmount;
@@ -318,15 +318,15 @@ function GroupDetails() {
   };
 
   const handlePartPayment = async () => {
-    if (!partPaymentForm.amount || parseFloat(partPaymentForm.amount) <= 0) {
-      alert('Please enter the amount you wish to pledge.');
+    const rawPartAmount = String(partPaymentForm.amount || '').replace(/,/g, '');
+    if (!rawPartAmount || isNaN(parseFloat(rawPartAmount)) || parseFloat(rawPartAmount) <= 0) {
       return;
     }
     setFormLoading(true);
     try {
       await pledgeAPI.addContribution(id, {
         pledgeId: selectedPledge.id,
-        amount: parseFloat(partPaymentForm.amount)
+        amount: parseFloat(rawPartAmount)
       });
       setShowPartPaymentModal(false);
       setSelectedPledge(null);
@@ -353,13 +353,13 @@ function GroupDetails() {
   };
 
   const submitRevisePledge = async () => {
-    if (!revisePledgeForm.amount || parseFloat(revisePledgeForm.amount) <= 0) {
-      alert('Please enter the amount you wish to pledge.');
+    const rawReviseAmount = String(revisePledgeForm.amount || '').replace(/,/g, '');
+    if (!rawReviseAmount || isNaN(parseFloat(rawReviseAmount)) || parseFloat(rawReviseAmount) <= 0) {
       return;
     }
     setFormLoading(true);
     try {
-      const pledgeAmount = parseFloat(revisePledgeForm.amount);
+      const pledgeAmount = parseFloat(String(revisePledgeForm.amount || '').replace(/,/g, ''));
       const groupCurrency = group?.currency || 'USD';
       let finalAmount = pledgeAmount;
       let originalAmount = pledgeAmount;
