@@ -171,6 +171,16 @@ function Sidebar() {
           <span>📈</span> Activity Feed
         </NavLink>
 
+        <NavLink to="/inbox" style={({ isActive }) => ({
+          ...navBtn,
+          background: isActive
+            ? 'linear-gradient(135deg, #1B2D4F, #4A7FC1)'
+            : 'linear-gradient(135deg, #e0f2fe, #bae6fd)',
+          color: isActive ? 'white' : '#0369a1',
+        })}>
+          <span>💬</span> Messages
+        </NavLink>
+
         <NavLink to="/profile" style={({ isActive }) => ({
           ...navBtn,
           background: isActive
