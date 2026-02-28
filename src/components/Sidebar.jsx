@@ -13,10 +13,30 @@ import { useState, useEffect } from 'react';
 import { groupAPI } from '../services/api';
 import WebaleLogo from './WebaleLogo';
 import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
 
 function Sidebar() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [unreadMsgs, setUnreadMsgs] = useState(0);
+
+  useEffect(() => {
+    const fetchUnread = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        const res = await axios.get('https://webale-api.onrender.com/api/messages/groups', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = res.data?.data || res.data || [];
+        const total = (Array.isArray(data) ? data : []).reduce((sum, g) => sum + (g.unread_count || 0), 0);
+        setUnreadMsgs(total);
+      } catch {}
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30000);
+    return () => clearInterval(interval);
+  }, []);
   const [stats, setStats] = useState({
     totalGroups: 0,
     adminGroups: 0,
@@ -177,8 +197,15 @@ function Sidebar() {
             ? 'linear-gradient(135deg, #1B2D4F, #4A7FC1)'
             : 'linear-gradient(135deg, #e0f2fe, #bae6fd)',
           color: isActive ? 'white' : '#0369a1',
+          position: 'relative',
         })}>
           <span>💬</span> Messages
+          {unreadMsgs > 0 && (
+            <span style={{
+              marginLeft: 'auto', background: '#e53e3e', color: 'white',
+              borderRadius: '10px', padding: '1px 7px', fontSize: '11px', fontWeight: 700
+            }}>{unreadMsgs > 99 ? '99+' : unreadMsgs}</span>
+          )}
         </NavLink>
 
         <NavLink to="/profile" style={({ isActive }) => ({
