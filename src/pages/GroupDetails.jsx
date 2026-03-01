@@ -388,9 +388,20 @@ function GroupDetails() {
       let originalAmount = pledgeAmount;
 
       if (revisePledgeForm.currency && revisePledgeForm.currency !== groupCurrency) {
-        const converted = convertCurrency(pledgeAmount, revisePledgeForm.currency, groupCurrency);
-        finalAmount = converted.converted;
-        originalAmount = pledgeAmount;
+        try {
+          const converted = convertCurrency(pledgeAmount, revisePledgeForm.currency, groupCurrency);
+          if (converted && converted.converted && !isNaN(converted.converted) && converted.converted > 0) {
+            finalAmount = converted.converted;
+            originalAmount = pledgeAmount;
+          }
+        } catch { /* fallback to original amount */ }
+      }
+
+      // Safety check
+      if (!finalAmount || isNaN(finalAmount) || finalAmount <= 0) {
+        alert('Invalid amount. Please try again.');
+        setFormLoading(false);
+        return;
       }
 
       await pledgeAPI.update(id, selectedPledge.id, {
@@ -398,7 +409,7 @@ function GroupDetails() {
         fulfillmentDate: revisePledgeForm.fulfillmentDate || null,
         reminderFrequency: revisePledgeForm.reminderFrequency,
         isAnonymous: revisePledgeForm.isAnonymous,
-        currency: revisePledgeForm.currency,
+        currency: revisePledgeForm.currency || group?.currency || 'UGX',
         originalAmount: originalAmount,
         notes: revisePledgeForm.notes
       });
