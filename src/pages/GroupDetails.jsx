@@ -424,11 +424,13 @@ function GroupDetails() {
     }
   };
 
-  const handleCancelPledge = async () => {
+  const handleCancelPledge = async (pledgeArg) => {
+    const target = pledgeArg || selectedPledge;
+    if (!target) { alert('No pledge selected.'); return; }
     if (!window.confirm('Are you sure you want to cancel this pledge? This action will be tracked.')) return;
     setFormLoading(true);
     try {
-      await pledgeAPI.delete(id, selectedPledge.id);
+      await pledgeAPI.delete(id, target.id);
       setShowRevisePledgeModal(false);
       setSelectedPledge(null);
       loadGroupData();
@@ -2202,7 +2204,7 @@ function GroupDetails() {
                       <button onClick={() => {
                         if (window.confirm(`Delete pledge of ${currencySymbol}${formatAmount(pledge.amount)}? This cannot be undone.`)) {
                           setSelectedPledge(pledge);
-                          handleCancelPledge();
+                          handleCancelPledge(pledge);
                           setShowMyPledgesModal(false);
                         }
                       }} style={{
