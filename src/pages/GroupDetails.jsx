@@ -266,7 +266,7 @@ function GroupDetails() {
 
   // ==================== ACTION HANDLERS ====================
   const handleMakePledge = async () => {
-    setPledgeForm({ amount: '', fulfillmentDate: '', reminderFrequency: 'none', isAnonymous: false, currency: detectedCurrency || group?.currency || 'USD' });
+    setPledgeForm({ amount: '', fulfillmentDate: '', reminderFrequency: 'none', isAnonymous: false, currency: detectedCurrency || group?.currency || 'UGX' });
     setShowPledgeModal(true);
   };
 
@@ -284,24 +284,43 @@ function GroupDetails() {
 
       // If pledge currency differs from group currency, convert
       if (pledgeForm.currency && pledgeForm.currency !== groupCurrency) {
-        const converted = convertCurrency(pledgeAmount, pledgeForm.currency, groupCurrency);
-        finalAmount = converted.converted;
-        originalAmount = pledgeAmount;
+        try {
+          const converted = convertCurrency(pledgeAmount, pledgeForm.currency, groupCurrency);
+          if (converted && converted.converted && !isNaN(converted.converted) && converted.converted > 0) {
+            finalAmount = converted.converted;
+            originalAmount = pledgeAmount;
+          } else {
+            // Conversion failed — send in original currency, let backend store as-is
+            finalAmount = pledgeAmount;
+            originalAmount = pledgeAmount;
+          }
+        } catch {
+          finalAmount = pledgeAmount;
+          originalAmount = pledgeAmount;
+        }
       }
 
+      // Final safety check — ensure amount is a valid number
+      if (!finalAmount || isNaN(finalAmount) || finalAmount <= 0) {
+        alert('Invalid amount after conversion. Please try again.');
+        setFormLoading(false);
+        return;
+      }
       await pledgeAPI.create(id, {
         amount: finalAmount,
         fulfillmentDate: pledgeForm.fulfillmentDate || null,
         reminderFrequency: pledgeForm.reminderFrequency,
         isAnonymous: pledgeForm.isAnonymous,
-        currency: pledgeForm.currency,
+        currency: pledgeForm.currency || group?.currency || 'USD',
         originalAmount: originalAmount
       });
       setShowPledgeModal(false);
       loadGroupData();
       showPledgeToast('✅ Pledge created successfully!');
     } catch (err) {
-      alert('Failed to create pledge: ' + (err.response?.data?.message || err.message));
+      const msg = err.response?.data?.message || err.message || 'Unknown error';
+      const status = err.response?.status || 'no status';
+      alert('Failed to create pledge (' + status + '): ' + msg);
     } finally {
       setFormLoading(false);
     }
