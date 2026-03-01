@@ -116,7 +116,7 @@ function GroupDetails() {
   });
   const [editForm, setEditForm] = useState({ name: '', description: '', goalAmount: '', deadline: '', currency: 'USD' });
   const [inviteEmails, setInviteEmails] = useState('');
-  const [inviteType, setInviteType] = useState('single');
+  const [inviteType, setInviteType] = useState('multi');
   const [pledgeToast, setPledgeToast] = useState('');
   const showPledgeToast = (msg) => { setPledgeToast(msg); setTimeout(() => setPledgeToast(''), 3500); };
   const [feedOpen, setFeedOpen] = useState(true);
@@ -1781,17 +1781,8 @@ function GroupDetails() {
       {/* Enhanced Invite Modal */}
       <Modal isOpen={showInviteModal} onClose={() => setShowInviteModal(false)} title="👥 Invite Members" width="520px">
         
-        {/* Single vs Multi invite selector */}
+        {/* Multi vs Single invite selector */}
         <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-          <button onClick={() => setInviteType('single')} style={{
-            flex: 1, padding: '10px', borderRadius: '8px', fontWeight: 600, fontSize: '13px', cursor: 'pointer', border: '2px solid',
-            borderColor: inviteType === 'single' ? '#667eea' : '#e2e8f0',
-            background: inviteType === 'single' ? '#ebf4ff' : 'white',
-            color: inviteType === 'single' ? '#4a5568' : '#a0aec0'
-          }}>
-            🔒 Single-use invite<br/>
-            <span style={{ fontSize: '11px', fontWeight: 400 }}>Link works for one person only</span>
-          </button>
           <button onClick={() => setInviteType('multi')} style={{
             flex: 1, padding: '10px', borderRadius: '8px', fontWeight: 600, fontSize: '13px', cursor: 'pointer', border: '2px solid',
             borderColor: inviteType === 'multi' ? '#667eea' : '#e2e8f0',
@@ -1800,6 +1791,15 @@ function GroupDetails() {
           }}>
             🌐 Multi-use invite<br/>
             <span style={{ fontSize: '11px', fontWeight: 400 }}>Link works for anyone with it</span>
+          </button>
+          <button onClick={() => setInviteType('single')} style={{
+            flex: 1, padding: '10px', borderRadius: '8px', fontWeight: 600, fontSize: '13px', cursor: 'pointer', border: '2px solid',
+            borderColor: inviteType === 'single' ? '#667eea' : '#e2e8f0',
+            background: inviteType === 'single' ? '#ebf4ff' : 'white',
+            color: inviteType === 'single' ? '#4a5568' : '#a0aec0'
+          }}>
+            🔒 Single-use invite<br/>
+            <span style={{ fontSize: '11px', fontWeight: 400 }}>Link works for one person only</span>
           </button>
         </div>
 
