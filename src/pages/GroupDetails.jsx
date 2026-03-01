@@ -118,6 +118,7 @@ function GroupDetails() {
   const [inviteEmails, setInviteEmails] = useState('');
   const [inviteType, setInviteType] = useState('single');
   const [pledgeToast, setPledgeToast] = useState('');
+  const showPledgeToast = (msg) => { setPledgeToast(msg); setTimeout(() => setPledgeToast(''), 3500); };
   const [feedOpen, setFeedOpen] = useState(true);
   const [inviteTab, setInviteTab] = useState('email');
   const [inviteLink, setInviteLink] = useState('');
@@ -319,8 +320,11 @@ function GroupDetails() {
       showPledgeToast('✅ Pledge created successfully!');
     } catch (err) {
       const msg = err.response?.data?.message || err.message || 'Unknown error';
-      const status = err.response?.status || 'no status';
-      alert('Failed to create pledge (' + status + '): ' + msg);
+      if (!err.response) {
+        alert('Could not reach the server. Please wait a moment and try again — the server may be waking up.');
+      } else {
+        alert('Failed to create pledge: ' + msg);
+      }
     } finally {
       setFormLoading(false);
     }
