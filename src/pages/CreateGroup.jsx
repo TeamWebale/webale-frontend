@@ -189,7 +189,7 @@ const s = {
   card:             { background: "#fff", borderRadius: "16px", padding: "28px 32px", boxShadow: "0 2px 16px rgba(27,45,79,0.07)" },
   header:           { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" },
   title:            { fontSize: "20px", fontWeight: 700, color: "#1B2D4F", fontFamily: "'Segoe UI', sans-serif" },
-  closeBtn:         { background: "transparent", border: "none", fontSize: "18px", color: "#8899AA", cursor: "pointer", padding: "4px" },
+  closeBtn:         { background: "#fee2e2", border: "none", fontSize: "18px", color: "#e53e3e", cursor: "pointer", padding: "6px 10px", borderRadius: "8px", fontWeight: 700 },
   opt:              { fontWeight: 400, color: "#AAB8C8" },
   templateToggle:   { display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", background: "#F8FAFC", border: "1px solid #D8E3EE", borderRadius: "10px", padding: "9px 14px", fontSize: "13px", fontWeight: 600, color: "#1B2D4F", cursor: "pointer", fontFamily: "'Segoe UI', sans-serif", boxSizing: "border-box" },
   templateDropdown: { border: "1px solid #D8E3EE", borderTop: "none", borderRadius: "0 0 10px 10px", background: "#fff", overflow: "hidden" },

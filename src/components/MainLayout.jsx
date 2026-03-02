@@ -217,7 +217,7 @@ function MobileBottomNav() {
   const isAdmin = user?.is_platform_admin === true;
 
   const tabs = [
-    { to: "/dashboard",    icon: "📊", label: "Home" },
+    { to: "/dashboard",    icon: "🏠", label: "Home" },
     { to: "/create-group", icon: "🚀", label: "Fundraise" },
     { to: "/inbox",        icon: "💬", label: "Messages", badge: unread },
     { to: "/profile",      icon: "👤", label: "Profile" },

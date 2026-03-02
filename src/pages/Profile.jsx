@@ -127,7 +127,10 @@ export default function Profile() {
 
   return (
     <div style={styles.page}>
-      <h1 style={styles.pageTitle}>My Profile</h1>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+        <h1 style={{ ...styles.pageTitle, marginBottom: 0 }}>My Profile</h1>
+        <button onClick={() => navigate("/dashboard")} style={styles.closeBtn}>✕</button>
+      </div>
 
       {/* Tabs */}
       <div style={styles.tabs}>
@@ -295,6 +298,7 @@ export default function Profile() {
 const styles = {
   page:       { maxWidth: "680px", margin: "0 auto" },
   pageTitle:  { fontSize: "22px", fontWeight: 700, color: "#1B2D4F", marginBottom: "20px", fontFamily: "'Segoe UI', sans-serif" },
+  closeBtn:   { background: "#fee2e2", border: "none", fontSize: "18px", color: "#e53e3e", cursor: "pointer", padding: "6px 10px", borderRadius: "8px", fontWeight: 700 },
   tabs:       { display: "flex", gap: "4px", marginBottom: "20px" },
   tabBtn:     { padding: "9px 20px", borderRadius: "8px", border: "1px solid #D8E3EE", background: "#fff", fontSize: "14px", fontWeight: 500, color: "#5A6A7E", cursor: "pointer", fontFamily: "'Segoe UI', sans-serif" },
   tabActive:  { background: "#1B2D4F", color: "#fff", borderColor: "#1B2D4F" },

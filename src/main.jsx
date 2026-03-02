@@ -64,15 +64,12 @@ function FeedbackWidget() {
         @media (max-width: 900px) {
           .feedback-trigger {
             bottom: 76px !important;
-            padding: 10px !important;
-            border-radius: 50% !important;
-            font-size: 18px !important;
-            width: 44px !important;
-            height: 44px !important;
-            justify-content: center !important;
+            padding: 6px 12px !important;
+            font-size: 12px !important;
+            border-radius: 16px !important;
           }
           .feedback-trigger .feedback-label {
-            display: none !important;
+            font-size: 11px !important;
           }
         }
       `}</style>

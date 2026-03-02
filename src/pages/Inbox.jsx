@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 
@@ -21,6 +22,7 @@ function timeAgo(d) {
 
 export default function Inbox() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [groups, setGroups] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -111,6 +113,7 @@ export default function Inbox() {
       <div style={s.leftPanel}>
         <div style={s.leftHeader}>
           <h2 style={s.leftTitle}>💬 Messages</h2>
+          <button onClick={() => navigate('/dashboard')} style={s.closeBtn}>✕</button>
         </div>
         {groups.length === 0 ? (
           <div style={s.empty}>No group conversations yet</div>
@@ -231,8 +234,9 @@ const s = {
 
   // Left panel
   leftPanel:    { width: '300px', minWidth: '260px', background: 'white', borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', overflowY: 'auto' },
-  leftHeader:   { padding: '20px 16px 12px', borderBottom: '1px solid #f0f0f0' },
+  leftHeader:   { padding: '20px 16px 12px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
   leftTitle:    { margin: 0, fontSize: '17px', fontWeight: 700, color: '#1a202c' },
+  closeBtn:     { background: '#fee2e2', border: 'none', fontSize: '18px', color: '#e53e3e', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px', fontWeight: 700 },
   groupRow:     { display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', cursor: 'pointer', borderBottom: '1px solid #f7f7f7', transition: 'background 0.1s' },
   groupRowActive:{ background: '#f0f4ff', borderLeft: '3px solid #667eea' },
   groupAvatar:  { width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg,#667eea,#764ba2)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: 700, flexShrink: 0 },
