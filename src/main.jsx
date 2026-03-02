@@ -59,10 +59,21 @@ function FeedbackWidget() {
 
   return (
     <>
-      {/* Responsive style: push feedback button above mobile bottom nav */}
+      {/* Responsive: shrink feedback to small icon on mobile, above bottom nav */}
       <style>{`
         @media (max-width: 900px) {
-          .feedback-trigger { bottom: 76px !important; }
+          .feedback-trigger {
+            bottom: 76px !important;
+            padding: 10px !important;
+            border-radius: 50% !important;
+            font-size: 18px !important;
+            width: 44px !important;
+            height: 44px !important;
+            justify-content: center !important;
+          }
+          .feedback-trigger .feedback-label {
+            display: none !important;
+          }
         }
       `}</style>
 
@@ -79,7 +90,7 @@ function FeedbackWidget() {
           display: 'flex', alignItems: 'center', gap: '6px',
         }}
       >
-        💬 Feedback
+        💬 <span className="feedback-label">Feedback</span>
       </button>
 
       {/* Dialog */}

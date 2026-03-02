@@ -237,28 +237,28 @@ const s = {
   groupRowActive:{ background: '#f0f4ff', borderLeft: '3px solid #667eea' },
   groupAvatar:  { width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg,#667eea,#764ba2)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: 700, flexShrink: 0 },
   groupName:    { fontWeight: 600, fontSize: '14px', color: '#2d3748', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  groupPreview: { fontSize: '12px', color: '#a0aec0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 },
-  timeStamp:    { fontSize: '11px', color: '#cbd5e0' },
+  groupPreview: { fontSize: '12px', color: '#4a5568', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 },
+  timeStamp:    { fontSize: '11px', color: '#718096' },
   unreadBadge:  { background: '#667eea', color: 'white', borderRadius: '10px', padding: '1px 7px', fontSize: '11px', fontWeight: 700 },
-  empty:        { padding: 24, color: '#a0aec0', fontSize: '14px', textAlign: 'center' },
+  empty:        { padding: 24, color: '#4a5568', fontSize: '14px', textAlign: 'center' },
 
   // Right panel
   rightPanel:   { flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#fafbff' },
-  noSelect:     { display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: '#a0aec0', fontSize: '15px' },
+  noSelect:     { display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: '#4a5568', fontSize: '15px' },
   threadHeader: { display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 20px', background: 'white', borderBottom: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' },
   threadTitle:  { fontWeight: 700, fontSize: '15px', color: '#2d3748' },
-  threadSub:    { fontSize: '12px', color: '#a0aec0' },
+  threadSub:    { fontSize: '12px', color: '#4a5568' },
 
   // Messages
   messageList:  { flex: 1, overflowY: 'auto', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '12px' },
-  noMessages:   { textAlign: 'center', color: '#a0aec0', fontSize: '14px', marginTop: 40 },
+  noMessages:   { textAlign: 'center', color: '#4a5568', fontSize: '14px', marginTop: 40 },
   msgRow:       { display: 'flex', alignItems: 'flex-end', gap: '8px' },
   msgAvatar:    { width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#667eea,#764ba2)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0, marginBottom: 4 },
-  senderName:   { fontSize: '11px', color: '#718096', marginBottom: '3px', fontWeight: 600 },
+  senderName:   { fontSize: '11px', color: '#2d3748', marginBottom: '3px', fontWeight: 600 },
   bubble:       { padding: '10px 14px', borderRadius: '16px', fontSize: '14px', lineHeight: '1.5', wordBreak: 'break-word', whiteSpace: 'pre-wrap' },
   bubbleMe:     { background: 'linear-gradient(135deg,#667eea,#764ba2)', color: 'white', borderBottomRightRadius: '4px' },
   bubbleThem:   { background: 'white', color: '#2d3748', border: '1px solid #e2e8f0', borderBottomLeftRadius: '4px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' },
-  msgTime:      { fontSize: '10px', color: '#cbd5e0', marginTop: '3px' },
+  msgTime:      { fontSize: '10px', color: '#718096', marginTop: '3px' },
 
   // Compose
   compose:      { background: 'white', borderTop: '1px solid #e2e8f0', padding: '12px 16px' },

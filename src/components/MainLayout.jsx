@@ -229,7 +229,7 @@ function MobileBottomNav() {
       {tabs.map(({ to, icon, label, badge }) => (
         <NavLink key={to} to={to} style={({ isActive }) => ({
           ...mb.tab,
-          color: isActive ? "#667eea" : "#a0aec0",
+          color: isActive ? "#4338ca" : "#374151",
         })}>
           <span style={{ position: "relative", fontSize: "20px", lineHeight: 1 }}>
             {icon}
@@ -254,7 +254,7 @@ const mb = {
     textDecoration: "none", padding: "4px 8px", gap: "2px",
     transition: "color 0.15s",
   },
-  label: { fontSize: "10px", fontWeight: 600 },
+  label: { fontSize: "11px", fontWeight: 700 },
   badge: {
     position: "absolute", top: "-5px", right: "-8px",
     background: "#e53e3e", color: "white", fontSize: "9px", fontWeight: 700,
@@ -266,6 +266,7 @@ const mb = {
 // ── Main Layout ────────────────────────────────────────────────────
 export default function MainLayout() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [rightSidebar, setRightSidebar] = useState(null);
 
   const avatar      = getAvatar(user);
@@ -312,7 +313,7 @@ export default function MainLayout() {
                   background: '#667eea', border: '2px solid white',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '11px', cursor: 'pointer',
-                }} onClick={() => window.location.href='/profile'} title="Edit profile">✏️</div>
+                }} onClick={() => navigate('/profile')} title="Edit profile">✏️</div>
               </div>
               <div>
                 <div style={ml.bannerName}>
