@@ -66,7 +66,8 @@ export default function Profile() {
       const updated = res.data?.data?.user || res.data?.user || {};
       updateUser({ ...updated, first_name: firstName, last_name: lastName, country, bio, phone });
       setSaveMsg("✓ Profile saved!");
-      setTimeout(() => navigate("/dashboard"), 1000);
+      setTimeout(() => setSaveMsg(""), 3000);
+      setTimeout(() => navigate("/dashboard"), 1500);
     } catch (err) {
       setSaveMsg(err.response?.data?.message || "Failed to save profile.");
     } finally {
@@ -86,6 +87,7 @@ export default function Profile() {
       );
       updateUser({ avatar_url: selectedEmoji, avatarUrl: selectedEmoji, avatar_type: "emoji", avatarType: "emoji" });
       setSaveMsg("✓ Avatar saved!");
+      setTimeout(() => setSaveMsg(""), 3000);
     } catch (err) {
       setSaveMsg("Failed to save avatar.");
     } finally {
@@ -104,6 +106,7 @@ export default function Profile() {
         { headers: authHeaders() }
       );
       setPwMsg("✓ Password updated!");
+      setTimeout(() => setPwMsg(""), 3000);
       setCurrentPw(""); setNewPw(""); setConfirmPw("");
     } catch (err) {
       setPwMsg(err.response?.data?.message || "Failed to update password.");

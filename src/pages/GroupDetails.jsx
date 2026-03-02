@@ -354,7 +354,7 @@ function GroupDetails() {
       setShowPartPaymentModal(false);
       setSelectedPledge(null);
       loadGroupData();
-      alert('Part payment recorded!');
+      showPledgeToast('✅ Part payment recorded!');
     } catch (err) {
       alert('Failed to record payment: ' + (err.response?.data?.message || err.message));
     } finally {
@@ -462,7 +462,7 @@ function GroupDetails() {
       });
       setShowEditModal(false);
       loadGroupData();
-      alert('Group updated!');
+      showPledgeToast('✅ Group updated!');
     } catch (err) {
       alert('Failed to update group: ' + (err.response?.data?.message || err.message));
     } finally {
@@ -558,7 +558,7 @@ function GroupDetails() {
       });
       setShowRecurringModal(false);
       loadRecurring();
-      alert('Recurring pledge created!');
+      showPledgeToast('✅ Recurring pledge created!');
     } catch (err) {
       alert('Failed to create recurring pledge: ' + (err.response?.data?.message || err.message));
     } finally {
@@ -584,7 +584,7 @@ function GroupDetails() {
       });
       setShowSubGoalModal(false);
       loadGroupData();
-      alert('Sub-goal created!');
+      showPledgeToast('✅ Sub-goal created!');
     } catch (err) {
       alert('Failed to create sub-goal: ' + (err.response?.data?.message || err.message));
     } finally {
@@ -596,7 +596,7 @@ function GroupDetails() {
     setFormLoading(true);
     try {
       await groupAPI.delete(id);
-      alert('Group deleted');
+      showPledgeToast('✅ Group deleted');
       navigate('/dashboard');
     } catch (err) {
       alert('Failed to delete group: ' + (err.response?.data?.message || err.message));
@@ -825,7 +825,7 @@ function GroupDetails() {
     try {
       await groupAPI.removeMember(id, userId);
       loadGroupData();
-      alert('Member removed');
+      showPledgeToast('✅ Member removed');
     } catch (err) {
       alert('Failed to remove member: ' + (err.response?.data?.message || err.message));
     }
@@ -1884,7 +1884,7 @@ function GroupDetails() {
             <div style={{ marginBottom: '16px' }}>
               <button onClick={() => {
                 navigator.clipboard.writeText(inviteMessage + '\n\n' + inviteLink);
-                alert('Invite message + link copied to clipboard!');
+                showPledgeToast('✅ Invite link copied to clipboard!');
               }} style={{
                 width: '100%', padding: '12px', background: '#9f7aea', color: 'white', border: 'none',
                 borderRadius: '10px', fontSize: '14px', fontWeight: '700', cursor: 'pointer',
@@ -2014,7 +2014,7 @@ function GroupDetails() {
           try {
             await messagesAPI.sendMessage(id, { recipientId: messageForm.recipientId, content: messageForm.content });
             setShowMessageModal(false);
-            alert('Message sent!');
+            showPledgeToast('✅ Message sent!');
           } catch (err) {
             alert('Failed to send message: ' + (err.response?.data?.message || err.message));
           } finally { setFormLoading(false); }
