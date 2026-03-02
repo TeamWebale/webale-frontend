@@ -12,7 +12,7 @@ import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useState, useEffect, createContext, useContext } from "react";
 import Navbar from "./Navbar";
 import { useAuth } from "../context/AuthContext";
-import { groupAPI } from "../services/api";
+import { groupAPI, messagesAPI } from "../services/api";
 
 // ── Right Sidebar Context ──────────────────────────────────────────
 export const RightSidebarContext = createContext({ setRightSidebar: () => {} });
@@ -197,6 +197,72 @@ const ls = {
   },
 };
 
+// ── Mobile Bottom Tab Bar ────────────────────────────────────────
+function MobileBottomNav() {
+  const { user } = useAuth();
+  const [unread, setUnread] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    const poll = () => {
+      messagesAPI?.getUnreadCount?.().then(res => {
+        if (active) setUnread(res.data?.count || res.data?.unreadCount || 0);
+      }).catch(() => {});
+    };
+    poll();
+    const id = setInterval(poll, 30000);
+    return () => { active = false; clearInterval(id); };
+  }, []);
+
+  const isAdmin = user?.is_platform_admin === true;
+
+  const tabs = [
+    { to: "/dashboard",    icon: "📊", label: "Home" },
+    { to: "/create-group", icon: "🚀", label: "Fundraise" },
+    { to: "/inbox",        icon: "💬", label: "Messages", badge: unread },
+    { to: "/profile",      icon: "👤", label: "Profile" },
+    ...(isAdmin ? [{ to: "/admin", icon: "⚙️", label: "Admin" }] : []),
+  ];
+
+  return (
+    <nav className="mobile-bottom-nav" style={mb.bar}>
+      {tabs.map(({ to, icon, label, badge }) => (
+        <NavLink key={to} to={to} style={({ isActive }) => ({
+          ...mb.tab,
+          color: isActive ? "#667eea" : "#a0aec0",
+        })}>
+          <span style={{ position: "relative", fontSize: "20px", lineHeight: 1 }}>
+            {icon}
+            {badge > 0 && <span style={mb.badge}>{badge > 99 ? "99+" : badge}</span>}
+          </span>
+          <span style={mb.label}>{label}</span>
+        </NavLink>
+      ))}
+    </nav>
+  );
+}
+
+const mb = {
+  bar: {
+    display: "none", position: "fixed", bottom: 0, left: 0, right: 0,
+    background: "white", borderTop: "1px solid #e2e8f0",
+    padding: "6px 0 env(safe-area-inset-bottom, 6px)",
+    zIndex: 1000, justifyContent: "space-around", alignItems: "center",
+  },
+  tab: {
+    display: "flex", flexDirection: "column", alignItems: "center",
+    textDecoration: "none", padding: "4px 8px", gap: "2px",
+    transition: "color 0.15s",
+  },
+  label: { fontSize: "10px", fontWeight: 600 },
+  badge: {
+    position: "absolute", top: "-5px", right: "-8px",
+    background: "#e53e3e", color: "white", fontSize: "9px", fontWeight: 700,
+    borderRadius: "9px", padding: "1px 5px", minWidth: "16px",
+    textAlign: "center", lineHeight: "14px",
+  },
+};
+
 // ── Main Layout ────────────────────────────────────────────────────
 export default function MainLayout() {
   const { user } = useAuth();
@@ -258,7 +324,7 @@ export default function MainLayout() {
             </div>
 
             {/* Page content */}
-            <main style={ml.main}>
+            <main style={ml.main} className="main-content-area">
               <Outlet />
             </main>
 
@@ -280,8 +346,13 @@ export default function MainLayout() {
         @media (max-width: 900px) {
           .sidebar-left  { display: none !important; }
           .sidebar-right { display: none !important; }
+          .mobile-bottom-nav { display: flex !important; }
+          .main-content-area { padding-bottom: 70px !important; }
         }
       `}</style>
+
+      {/* Mobile Bottom Tab Bar — hidden on desktop, shown on mobile */}
+      <MobileBottomNav />
     </RightSidebarContext.Provider>
   );
 }
