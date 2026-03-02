@@ -59,8 +59,16 @@ function FeedbackWidget() {
 
   return (
     <>
+      {/* Responsive style: push feedback button above mobile bottom nav */}
+      <style>{`
+        @media (max-width: 900px) {
+          .feedback-trigger { bottom: 76px !important; }
+        }
+      `}</style>
+
       {/* Trigger button */}
       <button
+        className="feedback-trigger"
         onClick={() => setOpen(true)}
         style={{
           position: 'fixed', bottom: '20px', right: '20px', zIndex: 9999,
