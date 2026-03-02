@@ -231,7 +231,7 @@ function MobileBottomNav() {
           ...mb.tab,
           color: isActive ? "#4338ca" : "#374151",
         })}>
-          <span style={{ position: "relative", fontSize: "20px", lineHeight: 1 }}>
+          <span style={{ position: "relative", fontSize: "20px", lineHeight: 1, width: "24px", height: "24px", display: "flex", alignItems: "center", justifyContent: "center" }}>
             {icon}
             {badge > 0 && <span style={mb.badge}>{badge > 99 ? "99+" : badge}</span>}
           </span>
