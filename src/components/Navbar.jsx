@@ -132,7 +132,7 @@ export default function Navbar() {
             </Link>
           ))}
           {/* Language dropdown — closed by default */}
-          <div ref={mobileLangRef} style={{ position:"relative", borderBottom:"1px solid #f0f4f9" }}>
+          <div ref={mobileLangRef} style={{ position:"relative" }}>
             <button onClick={() => setMobileLangOpen(o => !o)} style={s.mobileLink2}>
               🌐 Language: {currentLang.label} {mobileLangOpen ? "▲" : "▼"}
             </button>
@@ -251,18 +251,22 @@ const s = {
     padding:"12px 20px 16px", flexDirection:"column", gap:"0",
   },
   mobileLink:{
-    fontSize:"15px", color:"#fff", fontWeight:600,
-    textDecoration:"none", padding:"11px 14px",
-    borderBottom:"1px solid rgba(255,255,255,0.1)", display:"block",
-    background:"linear-gradient(135deg,#1B2D4F,#2d4a7a)", borderRadius:"8px",
-    marginBottom:"4px",
+    fontSize:"15px", color:"#fff", fontWeight:700,
+    textDecoration:"none", padding:"12px 14px",
+    display:"block",
+    background:"linear-gradient(135deg,#0f1b33,#1B2D4F)", borderRadius:"10px",
+    marginBottom:"6px",
+    boxShadow:"0 2px 8px rgba(15,27,51,0.3)",
+    letterSpacing:"0.3px",
   },
   mobileLink2:{
-    width:"100%", fontSize:"15px", color:"#1B2D4F", fontWeight:500,
-    textDecoration:"none", padding:"11px 0", display:"flex",
+    width:"100%", fontSize:"15px", color:"#fff", fontWeight:700,
+    textDecoration:"none", padding:"12px 14px", display:"flex",
     justifyContent:"space-between", alignItems:"center",
-    background:"none", border:"none", cursor:"pointer",
+    background:"linear-gradient(135deg,#38b2ac,#319795)", border:"none",
+    borderRadius:"10px", cursor:"pointer",
     fontFamily:"'Segoe UI',sans-serif", textAlign:"left",
+    marginBottom:"6px", boxShadow:"0 2px 8px rgba(49,151,149,0.3)",
   },
   mobileAction:{
     width:"100%", textAlign:"left", background:"linear-gradient(135deg,#667eea,#764ba2)",
