@@ -181,9 +181,10 @@ const s = {
     justifyContent:"flex-end", gap:"8px",
   },
   pill:{
-    background:"#F0F4F9", border:"1px solid #E2E8F0", borderRadius:"8px",
-    padding:"5px 10px", fontSize:"12px", fontWeight:600,
-    color:"#4A5568", cursor:"pointer", whiteSpace:"nowrap",
+    background:"linear-gradient(135deg,#667eea,#764ba2)", border:"none", borderRadius:"8px",
+    padding:"6px 12px", fontSize:"12px", fontWeight:600,
+    color:"#fff", cursor:"pointer", whiteSpace:"nowrap",
+    boxShadow:"0 2px 8px rgba(102,126,234,0.3)",
   },
   langDrop:{
     position:"absolute", top:"calc(100% + 6px)", right:0,
@@ -197,10 +198,11 @@ const s = {
     fontSize:"13px", color:"#2d3748", cursor:"pointer", textAlign:"left",
   },
   logoutBtn:{
-    background:"transparent", border:"1px solid #D0DCE8",
+    background:"linear-gradient(135deg,#e53e3e,#c53030)", border:"none",
     borderRadius:"8px", padding:"6px 14px", fontSize:"13px",
-    fontWeight:500, color:"#5A6A7E", cursor:"pointer",
+    fontWeight:600, color:"#fff", cursor:"pointer",
     fontFamily:"'Segoe UI',sans-serif", whiteSpace:"nowrap",
+    boxShadow:"0 2px 8px rgba(229,62,62,0.3)",
   },
   // Mobile
   mobileBar:{
@@ -214,11 +216,11 @@ const s = {
     fontStyle:"italic", marginLeft:"4px",
   },
   hamburger:{
-    background:"#1B2D4F", border:"none", borderRadius:"8px",
+    background:"linear-gradient(135deg,#667eea,#764ba2)", border:"none", borderRadius:"8px",
     width:"40px", height:"40px", display:"flex",
     alignItems:"center", justifyContent:"center",
     fontSize:"22px", color:"white", cursor:"pointer",
-    flexShrink:0, boxShadow:"0 2px 8px rgba(27,45,79,0.3)",
+    flexShrink:0, boxShadow:"0 2px 8px rgba(102,126,234,0.35)",
   },
   mobileMenu:{
     background:"#fff", borderTop:"1px solid #E8EEF5",
@@ -230,15 +232,16 @@ const s = {
     borderBottom:"1px solid #F0F4F9", display:"block",
   },
   mobileAction:{
-    width:"100%", textAlign:"left", background:"none",
-    border:"none", borderBottom:"1px solid #F0F4F9",
-    padding:"11px 0", fontSize:"14px", color:"#4a5568",
-    fontWeight:500, cursor:"pointer",
+    width:"100%", textAlign:"left", background:"linear-gradient(135deg,#667eea,#764ba2)",
+    border:"none", borderRadius:"8px",
+    padding:"11px 14px", fontSize:"14px", color:"#fff",
+    fontWeight:600, cursor:"pointer", marginTop:"6px",
   },
   mobileLogout:{
-    marginTop:"10px", width:"100%", textAlign:"center",
-    background:"#fff5f5", border:"1px solid #fed7d7",
+    marginTop:"8px", width:"100%", textAlign:"center",
+    background:"linear-gradient(135deg,#e53e3e,#c53030)", border:"none",
     borderRadius:"8px", padding:"11px 0", fontSize:"14px",
-    fontWeight:600, color:"#c53030", cursor:"pointer",
+    fontWeight:600, color:"#fff", cursor:"pointer",
+    boxShadow:"0 2px 8px rgba(229,62,62,0.25)",
   },
 };
