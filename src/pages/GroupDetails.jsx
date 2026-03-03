@@ -287,11 +287,13 @@ function GroupDetails() {
       if (pledgeForm.currency && pledgeForm.currency !== groupCurrency) {
         try {
           const converted = convertCurrency(pledgeAmount, pledgeForm.currency, groupCurrency);
-          if (converted && converted.converted && !isNaN(converted.converted) && converted.converted > 0) {
-            finalAmount = converted.converted;
+          // convertCurrency may return a plain number or an object with .converted
+          const convertedValue = typeof converted === 'number' ? converted
+            : (converted?.converted ?? converted?.amount ?? null);
+          if (convertedValue && !isNaN(convertedValue) && convertedValue > 0) {
+            finalAmount = convertedValue;
             originalAmount = pledgeAmount;
           } else {
-            // Conversion failed — send in original currency, let backend store as-is
             finalAmount = pledgeAmount;
             originalAmount = pledgeAmount;
           }
@@ -391,8 +393,10 @@ function GroupDetails() {
       if (revisePledgeForm.currency && revisePledgeForm.currency !== groupCurrency) {
         try {
           const converted = convertCurrency(pledgeAmount, revisePledgeForm.currency, groupCurrency);
-          if (converted && converted.converted && !isNaN(converted.converted) && converted.converted > 0) {
-            finalAmount = converted.converted;
+          const convertedValue = typeof converted === 'number' ? converted
+            : (converted?.converted ?? converted?.amount ?? null);
+          if (convertedValue && !isNaN(convertedValue) && convertedValue > 0) {
+            finalAmount = convertedValue;
             originalAmount = pledgeAmount;
           }
         } catch { /* fallback to original amount */ }
