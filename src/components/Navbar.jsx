@@ -124,7 +124,7 @@ export default function Navbar() {
           {[
             ["/dashboard",    "📊 Dashboard"],
             ["/create-group", "🚀 Start Fundraising"],
-            ["/profile",      "👤 Profile"],
+            ["/profile",      "🧑‍💼 Profile"],
           ].map(([to, label]) => (
             <Link key={to} to={to} style={s.mobileLink}
               onClick={() => setMenuOpen(false)}>

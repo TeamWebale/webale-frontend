@@ -31,6 +31,7 @@ export default function Inbox() {
   const [selectedRecipient, setSelectedRecipient] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [mobileView, setMobileView] = useState('list'); // 'list' or 'thread'
   const bottomRef = useRef(null);
 
   useEffect(() => { loadGroups(); }, []);
@@ -110,7 +111,7 @@ export default function Inbox() {
   return (
     <div style={s.page}>
       {/* ── Left panel: group list ── */}
-      <div style={s.leftPanel}>
+      <div style={s.leftPanel} className={`inbox-left ${mobileView === 'thread' ? 'inbox-hide-mobile' : ''}`}>
         <div style={s.leftHeader}>
           <h2 style={s.leftTitle}>💬 Messages</h2>
           <button onClick={() => navigate('/dashboard')} style={s.closeBtn}>✕</button>
@@ -121,7 +122,7 @@ export default function Inbox() {
           groups.map(g => (
             <div
               key={g.id}
-              onClick={() => setSelectedGroup(g)}
+              onClick={() => { setSelectedGroup(g); setMobileView('thread'); }}
               style={{ ...s.groupRow, ...(selectedGroup?.id === g.id ? s.groupRowActive : {}) }}
             >
               <div style={s.groupAvatar}>{g.name?.[0]?.toUpperCase() || '?'}</div>
@@ -141,13 +142,14 @@ export default function Inbox() {
       </div>
 
       {/* ── Right panel: message thread ── */}
-      <div style={s.rightPanel}>
+      <div style={s.rightPanel} className={`inbox-right ${mobileView === 'list' ? 'inbox-hide-mobile' : ''}`}>
         {!selectedGroup ? (
           <div style={s.noSelect}>Select a group to view messages</div>
         ) : (
           <>
             {/* Thread header */}
             <div style={s.threadHeader}>
+              <button onClick={() => setMobileView('list')} className="inbox-back-btn" style={s.backBtn}>← Back</button>
               <div style={s.groupAvatar}>{selectedGroup.name?.[0]?.toUpperCase()}</div>
               <div>
                 <div style={s.threadTitle}>{selectedGroup.name}</div>
@@ -223,6 +225,16 @@ export default function Inbox() {
           </>
         )}
       </div>
+
+      <style>{`
+        .inbox-back-btn { display: none; }
+        @media (max-width: 768px) {
+          .inbox-hide-mobile { display: none !important; }
+          .inbox-left { width: 100% !important; min-width: 0 !important; border-right: none !important; }
+          .inbox-right { width: 100% !important; }
+          .inbox-back-btn { display: flex !important; }
+        }
+      `}</style>
     </div>
   );
 }
@@ -250,6 +262,7 @@ const s = {
   rightPanel:   { flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#fafbff' },
   noSelect:     { display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: '#4a5568', fontSize: '15px' },
   threadHeader: { display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 20px', background: 'white', borderBottom: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' },
+  backBtn:      { background: 'linear-gradient(135deg,#667eea,#764ba2)', border: 'none', borderRadius: '8px', padding: '6px 12px', fontSize: '13px', fontWeight: 700, color: '#fff', cursor: 'pointer', alignItems: 'center', marginRight: '4px', boxShadow: '0 2px 6px rgba(102,126,234,0.3)' },
   threadTitle:  { fontWeight: 700, fontSize: '15px', color: '#2d3748' },
   threadSub:    { fontSize: '12px', color: '#4a5568' },
 
