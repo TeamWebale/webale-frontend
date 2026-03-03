@@ -479,29 +479,7 @@ function GroupDetails() {
   const handleInvite = async () => {
     const userName = `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || 'A member';
     const groupName = group?.name || 'our fundraising group';
-    const defaultMessage = `${userName} cordially invites you to join "${groupName}" a private fundraising group on Webale! web-app platform. You would have to sign-in to 'accept' this invite in order to join the fundraising group; so follow the link below to sign-in or to sign-up and then sign-in. See you there! 🤝
-
-#Webale is stepping in to automate hitherto manually kept fundraising operations and records — there's more in pipeline soon to be unveiled!
-
-1. Privacy-First: Every group is invitation-only; so only trusted people (family, friends, colleagues, communities) participate; meaning groups that already trust each other and only need a structured, transparent way to pool money.
-
-2. Easy Invitations — Share participant or member invite links via WhatsApp, QR Code or Email. The choice is yours between sending 'Multi-Use links' for open groups or 'Single-Use links' for more controlled or confidential-access groups.
-
-3. Works on any device — Responsive design with mobile bottom navigation so members can fully participate, as in, check progress, make and edit or remove pledges, receive notification/ reminders and read or send group messages; all from their phones.
-
-4. Admin Controls — Group admins can manage membership, assign and/ or remove roles, block undesired users, transfer group ownership, export data to either CSV or pdf files or use oversight analytics on platform-level admin dashboard.
-
-5. Flexible Pledge Management — One-time or recurring pledges (revisable), make partial payments, and admins can record offline/offshore donations (cash, bank transfers, mobile money etc). Not everyone pays digitally or all at once.
-
-6. Real-time Progress Visibility — Members stay motivated when they can see momentum. [Live donor feed, milestone badges (25/50/75/100%), progress-bars against goals, and sub-goals for breaking large targets into manageable chunks].
-
-7. Transparent Tracking — Every pledge, payment, and action is logged; so members see who pledged what, what's been paid, and what's outstanding (a full activity log and audit trail), so no one has to wonder where the money conversation stands.
-
-8. Multi-Currency Support — Members from different countries can pledge in their own currency (160+ supported), with built-in conversion. This matters for diaspora groups fundraising across borders.
-
-9. Built-in Communication — Direct messaging within groups, automated welcome messages for new members, and in-app (reminder) notifications. No need to run a separate WhatsApp group alongside the fundraiser.
-
-10. Flexible Platform Fees — with time a section of functions will be categorized as premium (optional) and a modest fee charged to cover costs of our operations, maintenance, subscriptions, research and development.`;
+    const defaultMessage = `${userName} cordially invites you to join "${groupName}" a private fundraising group on Webale! web-app platform. You would have to sign-in to 'accept' this invite in order to join the fundraising group; so follow the link below to sign-in or to first sign-up and then sign-in. See you there! 🤝\n\n*#Webale is offering in to automate hitherto manually kept fundraising records  and operations — there's more in pipeline; soon to be unveiled!*\n\n1. Privacy-First: Every group is invitation-only; so only trusted people (family, friends, colleagues, communities) participate; meaning groups that already trust each other and only need a structured, transparent way to pool money.\n\n2. Easy Invitations — Share participant or member invite links via WhatsApp, QR Code or Email. The choice is yours between sending 'Multi-Use links' for open groups or 'Single-Use links' for more controlled or confidential-access groups.\n\n3. Works on any device — Responsive design with mobile bottom navigation so members can fully participate, as in, check progress, make and edit or remove pledges, receive notification/ reminders and read or send group messages; all from their phones.\n\n4. Admin Controls — Group admins can manage membership, assign and/ or remove roles, block undesired users, transfer group ownership, export data to either CSV or pdf files or use oversight analytics on platform-level admin dashboard.\n\n5. Flexible Pledge Management — One-time or recurring pledges (revisable), make partial payments, and admins can record offline/offshore donations (cash, bank transfers, mobile money etc). Not everyone pays digitally or all at once.\n\n6. Real-time Progress Visibility — Members stay motivated when they can see momentum. [Live donor feed, milestone badges (25/50/75/100%), progress-bars against goals, and sub-goals for breaking large targets into manageable chunks].\n\n7. Transparent Tracking — Every pledge, payment, and action is logged; so members see who pledged what, what's been paid, and what's outstanding (a full activity log and audit trail), so no one has to wonder where the money conversation stands.\n\n8. Multi-Currency Support — Members from different countries can pledge in their own currency (160+ supported), with built-in conversion. This matters for diaspora groups fundraising across borders.\n\n9. Built-in Communication — Direct messaging within groups, automated welcome messages for new members, and in-app (reminder) notifications. No need to run a separate WhatsApp group alongside the fundraiser.\n\n10. Flexible Platform Fees — with time a section of functions will be categorized as premium (optional) and a modest fee charged to cover costs of our operations, maintenance, subscriptions, research and development.`;
     setInviteMessage(defaultMessage);
     setInviteEmails('');
     setInviteLink('');
