@@ -312,7 +312,8 @@ function GroupDetails() {
         fulfillmentDate: pledgeForm.fulfillmentDate || null,
         reminderFrequency: pledgeForm.reminderFrequency,
         isAnonymous: pledgeForm.isAnonymous,
-        currency: pledgeForm.currency || group?.currency || 'USD',
+        currency: groupCurrency,
+        pledge_currency: pledgeForm.currency || groupCurrency,
         originalAmount: originalAmount
       });
       setShowPledgeModal(false);
@@ -409,7 +410,8 @@ function GroupDetails() {
         fulfillmentDate: revisePledgeForm.fulfillmentDate || null,
         reminderFrequency: revisePledgeForm.reminderFrequency,
         isAnonymous: revisePledgeForm.isAnonymous,
-        currency: revisePledgeForm.currency || group?.currency || 'UGX',
+        currency: groupCurrency,
+        pledge_currency: revisePledgeForm.currency || groupCurrency,
         originalAmount: originalAmount,
         notes: revisePledgeForm.notes
       });
@@ -1593,7 +1595,7 @@ function GroupDetails() {
             borderRadius: '10px', marginBottom: '16px', border: '1px solid #bee3f8'
           }}>
             <p style={{ margin: '0 0 4px', fontSize: '11px', fontWeight: '700', color: '#667eea', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Estimated Equivalent
+              Amount that will be tracked
             </p>
             <p style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#2d3748' }}>
               {(() => {
@@ -1603,7 +1605,7 @@ function GroupDetails() {
               })()}
             </p>
             <p style={{ margin: '4px 0 0', fontSize: '10px', color: '#718096' }}>
-              in group currency ({group?.currency || 'USD'}) &bull; Rates are approximate
+              Converted to group currency ({group?.currency || 'USD'}) &bull; Rates are approximate
             </p>
           </div>
         )}
@@ -1669,7 +1671,7 @@ function GroupDetails() {
             borderRadius: '10px', marginBottom: '16px', border: '1px solid #bee3f8'
           }}>
             <p style={{ margin: '0 0 4px', fontSize: '11px', fontWeight: '700', color: '#667eea', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Estimated Equivalent
+              Amount that will be tracked
             </p>
             <p style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#2d3748' }}>
               {(() => {
@@ -1679,7 +1681,7 @@ function GroupDetails() {
               })()}
             </p>
             <p style={{ margin: '4px 0 0', fontSize: '10px', color: '#718096' }}>
-              in group currency ({group?.currency || 'USD'}) &bull; Rates are approximate
+              Converted to group currency ({group?.currency || 'USD'}) &bull; Rates are approximate
             </p>
           </div>
         )}
