@@ -141,11 +141,11 @@ export default function Navbar() {
                 {LANGUAGES.map(l => (
                   <button key={l.code} onClick={() => { setLang(l.code); setMobileLangOpen(false); }}
                     style={{
-                      padding:"6px 12px", borderRadius:"6px",
-                      border:"none", fontSize:"12px", fontWeight:600,
-                      background: l.code === lang ? "linear-gradient(135deg,#667eea,#764ba2)" : "#f0f4f9",
-                      color:      l.code === lang ? "white" : "#4a5568",
-                      cursor:"pointer", boxShadow: l.code === lang ? "0 2px 6px rgba(102,126,234,0.3)" : "none",
+                      padding:"8px 14px", borderRadius:"8px",
+                      border:"none", fontSize:"13px", fontWeight:700,
+                      background: l.code === lang ? "linear-gradient(135deg,#667eea,#764ba2)" : "linear-gradient(135deg,#1B2D4F,#4A7FC1)",
+                      color: "#fff",
+                      cursor:"pointer", boxShadow:"0 2px 6px rgba(27,45,79,0.2)",
                     }}>
                     {l.label}
                   </button>
@@ -254,9 +254,9 @@ const s = {
     fontSize:"15px", color:"#fff", fontWeight:700,
     textDecoration:"none", padding:"12px 14px",
     display:"block",
-    background:"linear-gradient(135deg,#0f1b33,#1B2D4F)", borderRadius:"10px",
+    background:"linear-gradient(135deg,#1B2D4F,#4A7FC1)", borderRadius:"10px",
     marginBottom:"6px",
-    boxShadow:"0 2px 8px rgba(15,27,51,0.3)",
+    boxShadow:"0 2px 8px rgba(27,45,79,0.25)",
     letterSpacing:"0.3px",
   },
   mobileLink2:{
