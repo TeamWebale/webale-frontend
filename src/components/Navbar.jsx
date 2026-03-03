@@ -4,7 +4,7 @@
  * Desktop: Logo block (220px = left sidebar width) | nav links (center) | controls (250px = right sidebar width)
  * Mobile:  W icon | "Webale!" | spacer | bell | dark hamburger button
  */
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect, useRef } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import WebaleLogo from "./WebaleLogo";
 import AuthContext from "../context/AuthContext";
@@ -24,6 +24,23 @@ export default function Navbar() {
   const [darkMode, setDarkMode] = useState(false);
   const [lang,     setLang]     = useState("en");
   const [langOpen, setLangOpen] = useState(false);
+  const [mobileLangOpen, setMobileLangOpen] = useState(false);
+  const langRef = useRef(null);
+  const mobileLangRef = useRef(null);
+
+  // Close desktop language dropdown on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (langRef.current && !langRef.current.contains(e.target)) setLangOpen(false);
+      if (mobileLangRef.current && !mobileLangRef.current.contains(e.target)) setMobileLangOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    document.addEventListener("touchstart", handler);
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("touchstart", handler);
+    };
+  }, []);
 
   const handleLogout = () => {
     if (auth?.logout) auth.logout();
@@ -53,7 +70,7 @@ export default function Navbar() {
         {/* Right controls — same width as right sidebar (250px) */}
         <div style={s.rightBlock}>
           {/* Language */}
-          <div style={{ position:"relative" }}>
+          <div ref={langRef} style={{ position:"relative" }}>
             <button onClick={() => setLangOpen(o => !o)} style={s.pill}>
               {currentLang.label} ▾
             </button>
@@ -114,20 +131,27 @@ export default function Navbar() {
               {label}
             </Link>
           ))}
-          {/* Language row */}
-          <div style={{ display:"flex", gap:"8px", padding:"10px 0", borderBottom:"1px solid #f0f4f9", flexWrap:"wrap" }}>
-            {LANGUAGES.map(l => (
-              <button key={l.code} onClick={() => setLang(l.code)}
-                style={{
-                  padding:"6px 12px", borderRadius:"6px",
-                  border:"1px solid #e2e8f0", fontSize:"12px", fontWeight:600,
-                  background: l.code === lang ? "#667eea" : "white",
-                  color:      l.code === lang ? "white"   : "#4a5568",
-                  cursor:"pointer",
-                }}>
-                {l.label}
-              </button>
-            ))}
+          {/* Language dropdown — closed by default */}
+          <div ref={mobileLangRef} style={{ position:"relative", borderBottom:"1px solid #f0f4f9" }}>
+            <button onClick={() => setMobileLangOpen(o => !o)} style={s.mobileLink2}>
+              🌐 Language: {currentLang.label} {mobileLangOpen ? "▲" : "▼"}
+            </button>
+            {mobileLangOpen && (
+              <div style={{ display:"flex", gap:"8px", padding:"8px 0 12px", flexWrap:"wrap" }}>
+                {LANGUAGES.map(l => (
+                  <button key={l.code} onClick={() => { setLang(l.code); setMobileLangOpen(false); }}
+                    style={{
+                      padding:"6px 12px", borderRadius:"6px",
+                      border:"none", fontSize:"12px", fontWeight:600,
+                      background: l.code === lang ? "linear-gradient(135deg,#667eea,#764ba2)" : "#f0f4f9",
+                      color:      l.code === lang ? "white" : "#4a5568",
+                      cursor:"pointer", boxShadow: l.code === lang ? "0 2px 6px rgba(102,126,234,0.3)" : "none",
+                    }}>
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <button onClick={() => setDarkMode(d => !d)} style={s.mobileAction}>
             {darkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
@@ -227,9 +251,18 @@ const s = {
     padding:"12px 20px 16px", flexDirection:"column", gap:"0",
   },
   mobileLink:{
-    fontSize:"15px", color:"#1B2D4F", fontWeight:500,
-    textDecoration:"none", padding:"11px 0",
-    borderBottom:"1px solid #F0F4F9", display:"block",
+    fontSize:"15px", color:"#fff", fontWeight:600,
+    textDecoration:"none", padding:"11px 14px",
+    borderBottom:"1px solid rgba(255,255,255,0.1)", display:"block",
+    background:"linear-gradient(135deg,#1B2D4F,#2d4a7a)", borderRadius:"8px",
+    marginBottom:"4px",
+  },
+  mobileLink2:{
+    width:"100%", fontSize:"15px", color:"#1B2D4F", fontWeight:500,
+    textDecoration:"none", padding:"11px 0", display:"flex",
+    justifyContent:"space-between", alignItems:"center",
+    background:"none", border:"none", cursor:"pointer",
+    fontFamily:"'Segoe UI',sans-serif", textAlign:"left",
   },
   mobileAction:{
     width:"100%", textAlign:"left", background:"linear-gradient(135deg,#667eea,#764ba2)",
@@ -238,9 +271,9 @@ const s = {
     fontWeight:600, cursor:"pointer", marginTop:"6px",
   },
   mobileLogout:{
-    marginTop:"8px", width:"100%", textAlign:"center",
+    marginTop:"8px", width:"100%", textAlign:"left",
     background:"linear-gradient(135deg,#e53e3e,#c53030)", border:"none",
-    borderRadius:"8px", padding:"11px 0", fontSize:"14px",
+    borderRadius:"8px", padding:"11px 14px", fontSize:"14px",
     fontWeight:600, color:"#fff", cursor:"pointer",
     boxShadow:"0 2px 8px rgba(229,62,62,0.25)",
   },

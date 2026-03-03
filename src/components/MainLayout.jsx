@@ -191,9 +191,10 @@ const ls = {
   logout:{
     display:"flex", alignItems:"center", justifyContent:"center", gap:"8px",
     width:"100%", marginTop:"16px", padding:"11px",
-    background:"linear-gradient(135deg,#fed7d7,#feb2b2)",
-    color:"#c53030", border:"none", borderRadius:"10px",
+    background:"linear-gradient(135deg,#e53e3e,#c53030)",
+    color:"#fff", border:"none", borderRadius:"10px",
     fontSize:"13px", fontWeight:600, cursor:"pointer",
+    boxShadow:"0 2px 8px rgba(229,62,62,0.25)",
   },
 };
 
