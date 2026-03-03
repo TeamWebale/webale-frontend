@@ -479,29 +479,29 @@ function GroupDetails() {
   const handleInvite = async () => {
     const userName = `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || 'A member';
     const groupName = group?.name || 'our fundraising group';
-    const defaultMessage = `*${userName}* cordially invites you to join *${groupName}* a private fundraising group on Webale! web-app platform. You would have to sign-in in order to "accept" this invite and join the fundraising group; so follow the link below to sign-in (if you already signed-up) or to first sign-up so you may sign-in. See you there! 🤝
+    const defaultMessage = `*${userName}* cordially invites you to join *${groupName}* a private fundraising group on *Webale!* a web-app platform. You would have to sign-in in order to "accept" this invite and join the fundraising group; so follow the link below and sign-in (if you already signed-up) otherwise first sign-up so you may sign-in. See you there! 🤝
 
-*#Webale!* is making its debut into the fundraising automation space, especially to relieve you of manually kept records thereby liberating your time, focus and peace of mind; to enliven the process and speed up operations. Below is what's active so far but we are innovating around the clock and there's more in pipeline; soon to be unveiled!
+*#Webale!* is making its debut into the fundraising automation space; especially to relieve you of manually kept records and thereby liberate your time, focus and peace of mind; seeking to enliven the process and speed up operations. Below is what's currently active but we are innovating around the clock and there's more in pipeline; soon to be unveiled!
 
-*1. Privacy-First* — Every group is invitation-only; so only trusted people (family, friends, colleagues, communities) participate; meaning groups that already trust each other and only need a structured, transparent way to pool money.
+1. *Privacy-First* — Every group is invitation-only; so it's composed of only trusted people participate (friends and family, workplace or village colleagues, alumni, communities); meaning groups that already trust each other and only need a structured, transparent way to pool money.
 
-*2. Easy Invitations* — Share participant or member invite links via WhatsApp, QR Code or Email. The choice is yours between sending 'Multi-Use links' for open groups or 'Single-Use links' for more controlled or confidential-access groups.
+2. *Easy Invitations* — Share participant or member invite links via WhatsApp, QR Code or Email. The choice is yours between sending 'Multi-Use' or 'Single-Use' links for respectivelt open or confidential more controlled-access groups.
 
-*3. Works On Any Device* — Responsive design with mobile bottom navigation so members can fully participate, as in, check progress, make and edit or remove pledges, receive notification/ reminders and read or send group messages; all from their phones.
+3. *Works On Any Device* — Responsive design with mobile bottom navigation so members can conveniently fully participate using their phones, as in; check campaign progress, make, edit or remove pledges, receive notification and reminders, read and send group or direct (inbox) messages.
 
-*4. Admin Controls* — Group admins can manage membership, assign and/ or remove roles, block undesired users, transfer group ownership, export data to either CSV or pdf files or use oversight analytics on platform-level admin dashboard.
+4. *Admin Controls* — Group admins can manage membership, assign and/ or remove roles, block undesired members, transfer group ownership, export data to either CSV or pdf files or use oversight analytics on platform-level admin dashboard.
 
-*5. Flexible Pledge Management* — One-time or recurring pledges (revisable), make partial payments, and admins can record offline/offshore donations (cash, bank transfers, mobile money etc). Not everyone pays digitally or all at once.
+5. *Flexible Pledge Management* — Whether one-time or recurring pledges - both being fully revisable; and while admins can record offline/offshore donations (cash, bank transfers, mobile money etc from non-platform members), yet *Webale!* also tracks and accounts for make partial payments as not everyone pays digitally or in full at once.
 
-*6. Real-Time Progress Visibility* — Members stay motivated when they can see momentum. [Live donor feed, milestone badges (25/50/75/100%), progress-bars against goals, and sub-goals for breaking large targets into manageable chunks].
+6. *Real-Time Progress Visibility* — Members stay motivated when they see momentum. [Live donor feed, milestone badges (25/50/75/100%), progress-bars against goals, and sub-goals for breaking large targets into manageable chunks].
 
-*7. Transparent Tracking* — Every pledge, payment, and action is logged; so members see who pledged what, what's been paid, and what's outstanding (a full activity log and audit trail), so no one has to wonder where the money conversation stands.
+7. *Transparent Tracking* — Every pledge, payment, and action is logged; so members see who pledged what, what's been paid, and what's outstanding (a full activity log and audit trail), so no one has to wonder where the money conversation stands.
 
-*8. Multi-Currency Support* — Members from different countries can pledge in their own currency (160+ supported), with built-in conversion. This matters for diaspora groups fundraising across borders.
+8. *Multi-Currency Support* — Members from different countries can pledge in their own currency (160+ supported), with built-in conversion. This matters for diaspora groups fundraising across borders.
 
-*9. Built-In Communication* — Direct messaging within groups, automated welcome messages for new members, and in-app (reminder) notifications. No need to run a separate WhatsApp group alongside the fundraiser.
+9. *Built-In Communication* — Direct messaging within groups, automated welcome messages for new members, and in-app (reminder) notifications. No need to run a separate WhatsApp group alongside the fundraiser.
 
-*10. Flexible Platform Fees* — with time a section of functions will be categorized as premium (optional) and a modest fee charged to cover costs of our operations, maintenance, subscriptions, research and development.`;
+10. *Flexible Platform Fees* — with time a section of functions will be moved to premium (optional) for a modest fee to be charged and cover costs of our operations, maintenance, subscriptions, research and development.`;
     setInviteMessage(defaultMessage);
     setInviteEmails('');
     setInviteLink('');
