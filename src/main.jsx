@@ -74,6 +74,10 @@ function FeedbackWidget() {
           .feedback-trigger .feedback-label {
             font-size: 10px !important;
           }
+          /* Hide feedback button on inbox page to avoid obstructing send */
+          body:has(.inbox-page) .feedback-trigger {
+            display: none !important;
+          }
         }
       `}</style>
 

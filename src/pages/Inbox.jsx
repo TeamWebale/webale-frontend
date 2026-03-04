@@ -109,7 +109,7 @@ export default function Inbox() {
   );
 
   return (
-    <div style={s.page}>
+    <div style={s.page} className="inbox-page">
       {/* ── Left panel: group list ── */}
       <div style={s.leftPanel} className={`inbox-left ${mobileView === 'thread' ? 'inbox-hide-mobile' : ''}`}>
         <div style={s.leftHeader}>
@@ -231,7 +231,7 @@ export default function Inbox() {
         @media (max-width: 768px) {
           .inbox-hide-mobile { display: none !important; }
           .inbox-left { width: 100% !important; min-width: 0 !important; border-right: none !important; }
-          .inbox-right { width: 100% !important; }
+          .inbox-right { width: 100% !important; max-width: 100vw !important; overflow-x: hidden !important; }
           .inbox-back-btn { display: flex !important; }
         }
       `}</style>
@@ -272,7 +272,7 @@ const s = {
   msgRow:       { display: 'flex', alignItems: 'flex-end', gap: '8px', maxWidth: '100%' },
   msgAvatar:    { width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#667eea,#764ba2)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0, marginBottom: 4 },
   senderName:   { fontSize: '11px', color: '#2d3748', marginBottom: '3px', fontWeight: 600 },
-  bubble:       { padding: '10px 14px', borderRadius: '16px', fontSize: '14px', lineHeight: '1.5', wordBreak: 'break-word', whiteSpace: 'pre-wrap' },
+  bubble:       { padding: '10px 14px', borderRadius: '16px', fontSize: '14px', lineHeight: '1.5', wordBreak: 'break-word', whiteSpace: 'pre-wrap', overflowWrap: 'break-word', maxWidth: '100%' },
   bubbleMe:     { background: 'linear-gradient(135deg,#667eea,#764ba2)', color: 'white', borderBottomRightRadius: '4px' },
   bubbleThem:   { background: 'white', color: '#2d3748', border: '1px solid #e2e8f0', borderBottomLeftRadius: '4px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' },
   msgTime:      { fontSize: '10px', color: '#718096', marginTop: '3px' },

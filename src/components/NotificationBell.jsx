@@ -68,7 +68,36 @@ export default function NotificationBell() {
     try {
       const res = await axios.get(`${API}/messages/${groupId}`, { headers: authHeaders() });
       const data = res.data?.data || res.data || [];
-      setConversations(Array.isArray(data) ? data : []);
+      const msgs = Array.isArray(data) ? data : [];
+      
+      // If data already has sender_name or grouped conversations, use as-is
+      // Otherwise group flat messages by sender to build conversation list
+      if (msgs.length > 0 && (msgs[0].sender_name || msgs[0].name)) {
+        setConversations(msgs);
+      } else {
+        // Group by sender_id, extract names from first_name/last_name
+        const grouped = {};
+        msgs.forEach(m => {
+          const sid = m.sender_id || m.user_id || 'unknown';
+          if (!grouped[sid]) {
+            grouped[sid] = {
+              user_id: sid,
+              sender_name: `${m.first_name || ''} ${m.last_name || ''}`.trim() || 'User',
+              first_name: m.first_name,
+              last_name: m.last_name,
+              last_message: m.content || m.message || '',
+              created_at: m.created_at,
+            };
+          } else {
+            // Keep the latest message
+            if (m.created_at > grouped[sid].created_at) {
+              grouped[sid].last_message = m.content || m.message || '';
+              grouped[sid].created_at = m.created_at;
+            }
+          }
+        });
+        setConversations(Object.values(grouped));
+      }
     } catch { /* silent */ }
   }, []);
 
@@ -209,8 +238,8 @@ export default function NotificationBell() {
                 ? <p style={styles.empty}>No conversations yet.</p>
                 : conversations.map((c, i) => (
                   <div key={i} style={styles.convoItem} onClick={() => openThread(c)}>
-                    <div style={styles.convoName}>{c.sender_name || c.name || "User"}</div>
-                    <div style={styles.convoPreview}>{c.last_message || ""}</div>
+                    <div style={styles.convoName}>{c.sender_name || c.name || `${c.first_name || ''} ${c.last_name || ''}`.trim() || "User"}</div>
+                    <div style={styles.convoPreview}>{c.last_message || c.content || ""}</div>
                   </div>
                 ))
               }
