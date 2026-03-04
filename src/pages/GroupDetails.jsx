@@ -194,12 +194,13 @@ function GroupDetails() {
   }, [pledges, seenPledgeIds]);
 
   const feedRef = useRef(null);
+  const feedOpenRef = useRef(feedOpen);
+  feedOpenRef.current = feedOpen;
 
   const handleOpenFeed = () => {
     const willOpen = !feedOpen;
     setFeedOpen(willOpen);
     if (willOpen) {
-      // Mark all current pledges as seen
       const allIds = pledges.map(p => p.id);
       setSeenPledgeIds(allIds);
       setNewDonorCount(0);
@@ -210,17 +211,13 @@ function GroupDetails() {
   // Close feed on outside click
   useEffect(() => {
     const handler = (e) => {
-      if (feedOpen && feedRef.current && !feedRef.current.contains(e.target)) {
+      if (feedOpenRef.current && feedRef.current && !feedRef.current.contains(e.target)) {
         setFeedOpen(false);
       }
     };
-    document.addEventListener('mousedown', handler);
-    document.addEventListener('touchstart', handler);
-    return () => {
-      document.removeEventListener('mousedown', handler);
-      document.removeEventListener('touchstart', handler);
-    };
-  }, [feedOpen]);
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
+  }, []);
 
   const loadGroupData = async () => {
     try {
