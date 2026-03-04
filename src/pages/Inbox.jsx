@@ -166,7 +166,7 @@ export default function Inbox() {
                   const isMe = m.sender_id === user?.id;
                   const senderName = isMe ? 'You' : `${m.first_name || ''} ${m.last_name || ''}`.trim();
                   // Format newlines in message content
-                  const lines = (m.content || '').split('\\n');
+                  const lines = (m.content || '').split(/\\n|\n/);
                   return (
                     <div key={m.id} style={{ ...s.msgRow, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
                       {!isMe && (
@@ -267,9 +267,9 @@ const s = {
   threadSub:    { fontSize: '12px', color: '#4a5568' },
 
   // Messages
-  messageList:  { flex: 1, overflowY: 'auto', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '12px' },
+  messageList:  { flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '12px' },
   noMessages:   { textAlign: 'center', color: '#4a5568', fontSize: '14px', marginTop: 40 },
-  msgRow:       { display: 'flex', alignItems: 'flex-end', gap: '8px' },
+  msgRow:       { display: 'flex', alignItems: 'flex-end', gap: '8px', maxWidth: '100%' },
   msgAvatar:    { width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#667eea,#764ba2)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0, marginBottom: 4 },
   senderName:   { fontSize: '11px', color: '#2d3748', marginBottom: '3px', fontWeight: 600 },
   bubble:       { padding: '10px 14px', borderRadius: '16px', fontSize: '14px', lineHeight: '1.5', wordBreak: 'break-word', whiteSpace: 'pre-wrap' },

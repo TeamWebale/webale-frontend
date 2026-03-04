@@ -205,10 +205,20 @@ function MobileBottomNav() {
 
   useEffect(() => {
     let active = true;
+    const token = localStorage.getItem("token");
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const poll = () => {
-      messagesAPI?.getUnreadCount?.().then(res => {
-        if (active) setUnread(res.data?.count || res.data?.unreadCount || 0);
-      }).catch(() => {});
+      // Use same endpoint as NotificationBell which is known to work
+      fetch("https://webale-api.onrender.com/api/messages/groups", { headers })
+        .then(r => r.json())
+        .then(res => {
+          if (!active) return;
+          const data = res?.data || res || [];
+          const groups = Array.isArray(data) ? data : [];
+          const total = groups.reduce((sum, g) => sum + (g.unread_count || 0), 0);
+          setUnread(total);
+        })
+        .catch(() => {});
     };
     poll();
     const id = setInterval(poll, 30000);
