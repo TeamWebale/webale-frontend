@@ -193,19 +193,34 @@ function GroupDetails() {
     }
   }, [pledges, seenPledgeIds]);
 
+  const feedRef = useRef(null);
+
   const handleOpenFeed = () => {
-    setFeedOpen(o => {
-      const opening = !o;
-      if (opening) {
-        // Mark all current pledges as seen
-        const allIds = pledges.map(p => p.id);
-        setSeenPledgeIds(allIds);
-        setNewDonorCount(0);
-        try { sessionStorage.setItem('seenPledgeIds_' + id, JSON.stringify(allIds)); } catch {}
-      }
-      return opening;
-    });
+    const willOpen = !feedOpen;
+    setFeedOpen(willOpen);
+    if (willOpen) {
+      // Mark all current pledges as seen
+      const allIds = pledges.map(p => p.id);
+      setSeenPledgeIds(allIds);
+      setNewDonorCount(0);
+      try { sessionStorage.setItem('seenPledgeIds_' + id, JSON.stringify(allIds)); } catch {}
+    }
   };
+
+  // Close feed on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (feedOpen && feedRef.current && !feedRef.current.contains(e.target)) {
+        setFeedOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('touchstart', handler);
+    };
+  }, [feedOpen]);
 
   const loadGroupData = async () => {
     try {
@@ -934,7 +949,7 @@ function GroupDetails() {
   const RightSidebar = () => (
     <>
       {/* Live Donor Feed */}
-      <div style={{
+      <div ref={feedRef} style={{
         background: 'linear-gradient(135deg, #ffffff 0%, #f7fafc 100%)', borderRadius: '12px', padding: '16px',
         marginBottom: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0'
       }}>
