@@ -259,8 +259,8 @@ export default function Inbox() {
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '4px', justifyContent: isMe ? 'flex-end' : 'flex-start', padding: '2px 0 4px', marginLeft: isMe ? 0 : '48px' }}>
-                        <button onClick={() => handleReplyTo(m.content)} style={s.actionBtn} title="Reply">↩ Reply</button>
-                        <button onClick={() => handleForward(m.content)} style={s.actionBtn} title="Forward">⤳ Forward</button>
+                        <button onClick={() => handleReplyTo(m.content)} style={{ ...s.actionBtn, color: '#3182ce' }} title="Reply">↩ Reply</button>
+                        <button onClick={() => handleForward(m.content)} style={{ ...s.actionBtn, color: '#38a169' }} title="Forward">⤳ Forward</button>
                         {isMe && <button onClick={() => handleDeleteMsg(m.id)} style={{ ...s.actionBtn, color: '#e53e3e' }} title="Delete">🗑 Delete</button>}
                         {!isMe && <button onClick={() => blockUser(m.sender_id, senderName)} style={{ ...s.actionBtn, color: '#e53e3e' }} title="Block user">🚫 Block</button>}
                       </div>
@@ -311,6 +311,7 @@ export default function Inbox() {
 
       <style>{`
         .inbox-back-btn { display: none; }
+        .inbox-left { width: 300px; min-width: 260px; }
         @media (max-width: 768px) {
           .inbox-hide-mobile { display: none !important; }
           .inbox-left { width: 100% !important; min-width: 0 !important; border-right: none !important; }
@@ -328,7 +329,7 @@ const s = {
   spinner:      { width: 36, height: 36, border: '3px solid #e2e8f0', borderTop: '3px solid #667eea', borderRadius: '50%', animation: 'spin 0.8s linear infinite' },
 
   // Left panel
-  leftPanel:    { width: '300px', minWidth: '260px', background: 'white', borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', overflowY: 'auto' },
+  leftPanel:    { background: 'white', borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', overflowY: 'auto' },
   leftHeader:   { padding: '20px 16px 12px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
   leftTitle:    { margin: 0, fontSize: '17px', fontWeight: 700, color: '#1a202c' },
   closeBtn:     { background: '#fee2e2', border: 'none', fontSize: '18px', color: '#e53e3e', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px', fontWeight: 700 },
@@ -359,7 +360,7 @@ const s = {
   msgRow:       { display: 'flex', alignItems: 'flex-end', gap: '8px', maxWidth: '100%' },
   msgAvatar:    { width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#667eea,#764ba2)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0, marginBottom: 4 },
   senderName:   { fontSize: '11px', color: '#2d3748', marginBottom: '3px', fontWeight: 600 },
-  actionBtn:    { background: 'none', border: 'none', fontSize: '11px', cursor: 'pointer', padding: '2px 6px', color: '#8899AA', borderRadius: '4px', fontWeight: 500, fontFamily: "'Segoe UI', sans-serif" },
+  actionBtn:    { background: 'none', border: 'none', fontSize: '11px', cursor: 'pointer', padding: '2px 6px', borderRadius: '4px', fontWeight: 600, fontFamily: "'Segoe UI', sans-serif" },
   bubble:       { padding: '10px 14px', borderRadius: '16px', fontSize: '14px', lineHeight: '1.5', wordBreak: 'break-word', whiteSpace: 'pre-wrap', overflowWrap: 'break-word', maxWidth: '100%' },
   bubbleMe:     { background: 'linear-gradient(135deg,#667eea,#764ba2)', color: 'white', borderBottomRightRadius: '4px' },
   bubbleThem:   { background: 'white', color: '#2d3748', border: '1px solid #e2e8f0', borderBottomLeftRadius: '4px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' },
