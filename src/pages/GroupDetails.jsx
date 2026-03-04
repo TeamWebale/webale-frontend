@@ -119,7 +119,11 @@ function GroupDetails() {
   const [inviteType, setInviteType] = useState('multi');
   const [pledgeToast, setPledgeToast] = useState('');
   const showPledgeToast = (msg) => { setPledgeToast(msg); setTimeout(() => setPledgeToast(''), 3500); };
-  const [feedOpen, setFeedOpen] = useState(true);
+  const [feedOpen, setFeedOpen] = useState(false);
+  const [seenPledgeIds, setSeenPledgeIds] = useState(() => {
+    try { return JSON.parse(sessionStorage.getItem('seenPledgeIds_' + id) || '[]'); } catch { return []; }
+  });
+  const [newDonorCount, setNewDonorCount] = useState(0);
   const [inviteTab, setInviteTab] = useState('email');
   const [inviteLink, setInviteLink] = useState('');
   const [inviteMessage, setInviteMessage] = useState('');
@@ -179,6 +183,29 @@ function GroupDetails() {
       if (activeTab === 'audit') loadAudit();
     }
   }, [activeTab, group]);
+
+  // Track new donations for Live Donor Feed badge
+  useEffect(() => {
+    if (pledges.length > 0) {
+      const currentIds = pledges.map(p => p.id);
+      const unseen = currentIds.filter(pid => !seenPledgeIds.includes(pid));
+      setNewDonorCount(unseen.length);
+    }
+  }, [pledges, seenPledgeIds]);
+
+  const handleOpenFeed = () => {
+    setFeedOpen(o => {
+      const opening = !o;
+      if (opening) {
+        // Mark all current pledges as seen
+        const allIds = pledges.map(p => p.id);
+        setSeenPledgeIds(allIds);
+        setNewDonorCount(0);
+        try { sessionStorage.setItem('seenPledgeIds_' + id, JSON.stringify(allIds)); } catch {}
+      }
+      return opening;
+    });
+  };
 
   const loadGroupData = async () => {
     try {
@@ -479,21 +506,21 @@ function GroupDetails() {
   const handleInvite = async () => {
     const userName = `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || 'A member';
     const groupName = group?.name || 'our fundraising group';
-    const defaultMessage = `*${userName}* cordially invites you to join *${groupName}* fundraising on *Webale!* web-app platform. You would have to sign-in and "accept" this invite in order to join the fundraising group; so follow the link below and sign-in (if you already signed-up), otherwise sign-up so you may sign-in. See you there! 🤝
+    const defaultMessage = `*${userName}* cordially invites you to join *${groupName}* a private fundraising group on *Webale!* web-app platform. You would have to sign-in and "accept" this invite to join the fundraising group; so follow the link below and sign-in (if you already signed-up), otherwise sign-up so you may sign-in. See you there! 🤝
 
-*#Webale!* is making it's debut into the fundraising automation space; promising to liberate fundraisers' time, focus and peace of mind lost in juggling manual records and hassling physical outreach. We strive to break the barrier posed by manual pledge-cards and bridge the time and distance gap limitations of in-person meetings. In all we hope to enliven and bring vybe to the process while speeding up resourse mobilization. Below is what's currently active but we are innovating around the clock so there's more in pipeline; soon to be unveiled!
+*#Webale!* is making a debut into the fundraising automation space; especially to relieve you of manually kept records and thereby liberate your time, focus and peace of mind. We seek to break the barrier of manual pledge-cards, time and distance-bound physical meetings; in all we'ii enliven the process and speed up operations. Below is what's currently active but we are innovating around the clock so there's more in pipeline; soon to be unveiled!
 
 1. *Privacy-First* — Every group is built by invitation-only; so participation is composed of only trusted people (friends and family, workplace colleagues, alumni, local communities); meaning groups that already trust each other and only need a structured, transparent way to pool money.
 
 2. *Easy Invitations* — Share participant or member invite links via WhatsApp, QR Code or Email. The choice is yours between sending 'Multi-Use' or 'Single-Use' links for respectively open or confidential (more controlled) access groups.
 
-3. *Works On Any Device* — Members can conveniently fully participate even on their phones, as in; check campaign progress, make, edit, fulfill or even remove pledges; receive notification and reminders, read and send group or direct (inbox) messages.
+3. *Works On Any Device* — Responsive design with mobile bottom navigation so members can conveniently fully participate using their phones, as in; check campaign progress, make, edit, fulfill or even remove pledges; receive notification and reminders, read and send group or direct (inbox) messages.
 
 4. *Admin Controls* — Group admins can manage membership, assign and/ or remove roles, block undesired members, transfer group ownership, export data to either CSV or pdf files or use oversight analytics on platform-level admin dashboard.
 
-5. *Flexible Pledge Management* — Be it one-time or recurring pledges, both are revisable and/ or deletable; and while admins can record offline/ offshore donations (being cash, bank transfers, mobile money etc from non-platform member donors), yet *Webale!* also accounts and tracks 'make partial/ installement payments' since not everyone is in position to pay digitally or in full at once.
+5. *Flexible Pledge Management* — Both one-time or recurring pledges are revisable and/ or deletable; and while admins can record offline/ offshore donations (being cash, bank transfers, mobile money etc from non-platform members), yet *Webale!* also tracks and accounts for make partial payments as not everyone is in position to pay digitally or in full at once.
 
-6. *Real-Time Progress Visibility* — Members both get and stay motivated when momentum is visualized through our Live Donor Feeds, Milestone Badges (25/ 50/ 75/ 100%), Progress-Bars highlighting goals while Sub-Goals break large targets into manageable chunks.
+6. *Real-Time Progress Visibility* — Members stay motivated when they see momentum building and for this we deploy Live Donor Feed, Milestone Badges (25/ 50/ 75/ 100%), Progress-Bars against goals, and Sub-Goals so as to break large targets into manageable chunks].
 
 7. *Transparent Tracking* — Every pledge, payment, and action is logged; so members see who pledged what, what's been paid, and what's outstanding (a full activity log and audit trail), so no one has to wonder where the money conversation stands.
 
@@ -501,7 +528,7 @@ function GroupDetails() {
 
 9. *Built-In Communication* — Direct messaging within groups, automated welcome messages for new members, and in-app (reminder) notifications. No need to run a separate WhatsApp group alongside the fundraiser.
 
-10. *Flexible Platform Fees* — with time some functions and features will be moved to Premium (optional) and a modest fee charged to cover costs of our operations, maintenance, coverage, subscriptions, research and development.`;
+10. *Flexible Platform Fees* — with time a section of functions will be moved to premium (optional) and a modest fee charged to cover costs of our operations, maintenance, coverage, subscriptions, research and development.`;
     setInviteMessage(defaultMessage);
     setInviteEmails('');
     setInviteLink('');
@@ -912,7 +939,7 @@ function GroupDetails() {
         marginBottom: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0'
       }}>
         <div
-          onClick={() => setFeedOpen(o => !o)}
+          onClick={handleOpenFeed}
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: feedOpen ? '12px' : '0', cursor: 'pointer' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -921,6 +948,13 @@ function GroupDetails() {
               animation: 'pulse 2s infinite', display: 'inline-block'
             }} />
             <h3 style={{ margin: 0, fontSize: '15px', color: '#2d3748', fontWeight: '700' }}>Live Donor Feed</h3>
+            {!feedOpen && newDonorCount > 0 && (
+              <span style={{
+                background: '#e53e3e', color: '#fff', borderRadius: '10px', fontSize: '10px',
+                fontWeight: 700, padding: '2px 7px', minWidth: '18px', textAlign: 'center',
+                animation: 'pulse 1.5s infinite'
+              }}>{newDonorCount} new</span>
+            )}
           </div>
           <span style={{ fontSize: '12px', color: '#a0aec0', userSelect: 'none' }}>{feedOpen ? '▲' : '▼'}</span>
         </div>
