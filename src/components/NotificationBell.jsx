@@ -35,6 +35,13 @@ export default function NotificationBell() {
   const [sending,      setSending]      = useState(false);
   const dropRef  = useRef(null);
   const pollRef  = useRef(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // ── fetch alerts ──────────────────────────────────────────────
   const fetchAlerts = useCallback(async () => {
@@ -129,7 +136,7 @@ export default function NotificationBell() {
     <div style={{ position: "relative" }} ref={dropRef}>
       {/* ── Bell button ── */}
       <button
-        onClick={() => setOpen(!open)}
+        onClick={() => { setOpen(!open); if (isMobile) setTab("alerts"); }}
         style={styles.bellBtn}
         aria-label="Notifications"
       >
@@ -150,12 +157,14 @@ export default function NotificationBell() {
             >
               Alerts {unreadAlerts > 0 && <span style={styles.tabBadge}>{unreadAlerts}</span>}
             </button>
-            <button
-              onClick={() => { setTab("messages"); setMsgLevel("groups"); }}
-              style={{ ...styles.tabBtn, ...(tab === "messages" ? styles.tabActive : {}) }}
-            >
-              Messages {unreadMsgs > 0 && <span style={styles.tabBadge}>{unreadMsgs}</span>}
-            </button>
+            {!isMobile && (
+              <button
+                onClick={() => { setTab("messages"); setMsgLevel("groups"); }}
+                style={{ ...styles.tabBtn, ...(tab === "messages" ? styles.tabActive : {}) }}
+              >
+                Messages {unreadMsgs > 0 && <span style={styles.tabBadge}>{unreadMsgs}</span>}
+              </button>
+            )}
           </div>
 
           {/* ── ALERTS TAB ── */}
@@ -199,9 +208,9 @@ export default function NotificationBell() {
               {conversations.length === 0
                 ? <p style={styles.empty}>No conversations yet.</p>
                 : conversations.map((c, i) => (
-                  <div key={i} style={styles.groupItem} onClick={() => openThread(c)}>
-                    <div style={styles.groupName}>{c.sender_name || c.name || "User"}</div>
-                    <div style={styles.alertTime}>{c.last_message || ""}</div>
+                  <div key={i} style={styles.convoItem} onClick={() => openThread(c)}>
+                    <div style={styles.convoName}>{c.sender_name || c.name || "User"}</div>
+                    <div style={styles.convoPreview}>{c.last_message || ""}</div>
                   </div>
                 ))
               }
@@ -219,8 +228,9 @@ export default function NotificationBell() {
                     const isMine = m.is_mine || m.sent_by_me;
                     return (
                       <div key={i} style={{ ...styles.bubble, ...(isMine ? styles.bubbleMine : styles.bubbleTheirs) }}>
-                        <span style={styles.bubbleText}>{m.content || m.message}</span>
-                        <span style={styles.bubbleTime}>
+                        {!isMine && <span style={styles.bubbleSender}>{m.sender_name || m.first_name || "User"}</span>}
+                        <span style={{ ...styles.bubbleText, color: isMine ? "#fff" : "#1B2D4F" }}>{m.content || m.message}</span>
+                        <span style={{ ...styles.bubbleTime, color: isMine ? "rgba(255,255,255,0.5)" : "#8899AA" }}>
                           {m.created_at ? new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : ""}
                         </span>
                       </div>
@@ -265,14 +275,18 @@ const styles = {
   alertTime: { fontSize: "11px", color: "#8899AA", marginTop: "3px", fontFamily: "'Segoe UI', sans-serif" },
   groupItem: { padding: "12px 16px", borderBottom: "1px solid #F0F4F9", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between" },
   groupName: { fontSize: "14px", color: "#1B2D4F", fontWeight: 500, fontFamily: "'Segoe UI', sans-serif" },
+  convoItem: { padding: "12px 16px", borderBottom: "1px solid #F0F4F9", cursor: "pointer", display: "flex", flexDirection: "column", gap: "3px" },
+  convoName: { fontSize: "14px", color: "#1B2D4F", fontWeight: 600, fontFamily: "'Segoe UI', sans-serif" },
+  convoPreview: { fontSize: "12px", color: "#718096", fontFamily: "'Segoe UI', sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
   backBtn: { background: "none", border: "none", color: "#4A7FC1", fontSize: "13px", cursor: "pointer", padding: "10px 16px 4px", fontFamily: "'Segoe UI', sans-serif" },
   levelTitle: { fontSize: "13px", fontWeight: 600, color: "#1B2D4F", padding: "4px 16px 8px", fontFamily: "'Segoe UI', sans-serif" },
   threadWrap: { display: "flex", flexDirection: "column", maxHeight: "400px" },
   threadBody: { flex: 1, overflowY: "auto", padding: "8px 12px", display: "flex", flexDirection: "column", gap: "8px", maxHeight: "260px" },
-  bubble: { maxWidth: "80%", padding: "8px 12px", borderRadius: "12px", display: "flex", flexDirection: "column", gap: "3px" },
+  bubble: { maxWidth: "80%", padding: "8px 12px", borderRadius: "12px", display: "flex", flexDirection: "column", gap: "3px", wordWrap: "break-word", overflowWrap: "break-word" },
   bubbleMine: { background: "#1B2D4F", alignSelf: "flex-end", borderBottomRightRadius: "3px" },
   bubbleTheirs: { background: "#F0F4F9", alignSelf: "flex-start", borderBottomLeftRadius: "3px" },
-  bubbleText: { fontSize: "13px", color: "#FFFFFF", fontFamily: "'Segoe UI', sans-serif" },
+  bubbleSender: { fontSize: "11px", fontWeight: 700, color: "#667eea", fontFamily: "'Segoe UI', sans-serif" },
+  bubbleText: { fontSize: "13px", color: "#FFFFFF", fontFamily: "'Segoe UI', sans-serif", whiteSpace: "pre-wrap", wordBreak: "break-word" },
   bubbleTime: { fontSize: "10px", color: "rgba(255,255,255,0.5)", alignSelf: "flex-end", fontFamily: "'Segoe UI', sans-serif" },
   replyRow: { display: "flex", gap: "8px", padding: "10px 12px", borderTop: "1px solid #E8EEF5" },
   replyInput: { flex: 1, background: "#F0F4F9", border: "1px solid #D8E3EE", borderRadius: "8px", padding: "8px 12px", fontSize: "13px", outline: "none", fontFamily: "'Segoe UI', sans-serif" },
