@@ -33,7 +33,35 @@ export default function NotificationBell() {
   const [unreadAlerts, setUnreadAlerts] = useState(0);
   const [unreadMsgs,   setUnreadMsgs]   = useState(0);
   const [sending,      setSending]      = useState(false);
+  const [forwardMsg,   setForwardMsg]   = useState("");
+  const [blockedUsers, setBlockedUsers] = useState(() => {
+    try {
+      const u = JSON.parse(localStorage.getItem('user') || '{}');
+      return JSON.parse(localStorage.getItem(`blockedUsers_${u.id || 'anon'}`) || '[]');
+    } catch { return []; }
+  });
   const dropRef  = useRef(null);
+
+  const getBlockedKey = () => {
+    try {
+      const u = JSON.parse(localStorage.getItem('user') || '{}');
+      return `blockedUsers_${u.id || 'anon'}`;
+    } catch { return 'blockedUsers_anon'; }
+  };
+
+  const blockUser = (senderId, senderName) => {
+    const updated = [...blockedUsers.filter(b => b.id !== senderId), { id: senderId, name: senderName }];
+    setBlockedUsers(updated);
+    localStorage.setItem(getBlockedKey(), JSON.stringify(updated));
+  };
+
+  const unblockUser = (senderId) => {
+    const updated = blockedUsers.filter(b => b.id !== senderId);
+    setBlockedUsers(updated);
+    localStorage.setItem(getBlockedKey(), JSON.stringify(updated));
+  };
+
+  const isBlocked = (senderId) => blockedUsers.some(b => b.id === senderId);
   const pollRef  = useRef(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
@@ -126,6 +154,15 @@ export default function NotificationBell() {
     setSending(false);
   };
 
+  // ── delete message ────────────────────────────────────────────
+  const handleDeleteMsg = async (msgId) => {
+    if (!msgId) return;
+    try {
+      await axios.delete(`${API}/messages/${msgId}`, { headers: authHeaders() });
+      setThread(prev => prev.filter(m => m.id !== msgId));
+    } catch { /* silent */ }
+  };
+
   // ── polling ───────────────────────────────────────────────────
   useEffect(() => {
     fetchAlerts();
@@ -152,7 +189,13 @@ export default function NotificationBell() {
   const openGroup = (g) => {
     setSelectedGroup(g);
     fetchConversations(g.id);
-    setMsgLevel("convos");
+    if (forwardMsg) {
+      setReply(`📨 Forwarded:\n${forwardMsg}`);
+      setForwardMsg("");
+      setMsgLevel("convos");
+    } else {
+      setMsgLevel("convos");
+    }
   };
 
   const openThread = (convo) => {
@@ -249,19 +292,28 @@ export default function NotificationBell() {
           {tab === "messages" && msgLevel === "thread" && (
             <div style={styles.threadWrap}>
               <button onClick={() => setMsgLevel("convos")} style={styles.backBtn}>← Back</button>
-              <p style={styles.levelTitle}>{selectedUser?.sender_name || selectedUser?.name}</p>
+              <p style={styles.levelTitle}>{selectedUser?.sender_name || selectedUser?.name || `${selectedUser?.first_name || ''} ${selectedUser?.last_name || ''}`.trim()}</p>
               <div style={styles.threadBody}>
-                {thread.length === 0
+                {thread.filter(m => !isBlocked(m.sender_id || m.user_id)).length === 0
                   ? <p style={styles.empty}>No messages.</p>
-                  : thread.map((m, i) => {
+                  : [...thread].filter(m => !isBlocked(m.sender_id || m.user_id)).reverse().map((m, i) => {
                     const isMine = m.is_mine || m.sent_by_me;
+                    const sName = m.sender_name || m.first_name || "User";
                     return (
-                      <div key={i} style={{ ...styles.bubble, ...(isMine ? styles.bubbleMine : styles.bubbleTheirs) }}>
-                        {!isMine && <span style={styles.bubbleSender}>{m.sender_name || m.first_name || "User"}</span>}
-                        <span style={{ ...styles.bubbleText, color: isMine ? "#fff" : "#1B2D4F" }}>{m.content || m.message}</span>
-                        <span style={{ ...styles.bubbleTime, color: isMine ? "rgba(255,255,255,0.5)" : "#8899AA" }}>
-                          {m.created_at ? new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : ""}
-                        </span>
+                      <div key={m.id || i} style={{ marginBottom: '4px' }}>
+                        <div style={{ ...styles.bubble, ...(isMine ? styles.bubbleMine : styles.bubbleTheirs) }}>
+                          {!isMine && <span style={styles.bubbleSender}>{sName}</span>}
+                          <span style={{ ...styles.bubbleText, color: isMine ? "#fff" : "#1B2D4F" }}>{m.content || m.message}</span>
+                          <span style={{ ...styles.bubbleTime, color: isMine ? "rgba(255,255,255,0.5)" : "#8899AA" }}>
+                            {m.created_at ? new Date(m.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: "2-digit", minute: "2-digit" }) : ""}
+                          </span>
+                        </div>
+                        <div style={styles.msgActions}>
+                          <button onClick={() => { setReply(`↩ ${(m.content || m.message || '').substring(0, 40)}...\n\n`); }} style={styles.actionBtn} title="Reply">↩</button>
+                          <button onClick={() => { setMsgLevel("groups"); setForwardMsg(m.content || m.message || ''); }} style={styles.actionBtn} title="Forward">⤳</button>
+                          {isMine && <button onClick={() => handleDeleteMsg(m.id)} style={{ ...styles.actionBtn, color: '#e53e3e' }} title="Delete">🗑</button>}
+                          {!isMine && <button onClick={() => blockUser(m.sender_id || m.user_id, sName)} style={{ ...styles.actionBtn, color: '#e53e3e' }} title="Block">🚫</button>}
+                        </div>
                       </div>
                     );
                   })
@@ -320,4 +372,6 @@ const styles = {
   replyRow: { display: "flex", gap: "8px", padding: "10px 12px", borderTop: "1px solid #E8EEF5" },
   replyInput: { flex: 1, background: "#F0F4F9", border: "1px solid #D8E3EE", borderRadius: "8px", padding: "8px 12px", fontSize: "13px", outline: "none", fontFamily: "'Segoe UI', sans-serif" },
   sendBtn: { background: "linear-gradient(135deg,#00C2CC,#4A7FC1)", color: "#fff", border: "none", borderRadius: "8px", padding: "8px 12px", cursor: "pointer", fontSize: "14px" },
+  msgActions: { display: "flex", gap: "2px", padding: "2px 0", justifyContent: "flex-start" },
+  actionBtn: { background: "none", border: "none", fontSize: "13px", cursor: "pointer", padding: "2px 6px", color: "#8899AA", borderRadius: "4px", transition: "background 0.1s" },
 };

@@ -31,8 +31,64 @@ export default function Inbox() {
   const [selectedRecipient, setSelectedRecipient] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [mobileView, setMobileView] = useState('list'); // 'list' or 'thread'
+  const [mobileView, setMobileView] = useState('list');
+  const [showBlocked, setShowBlocked] = useState(false);
   const bottomRef = useRef(null);
+
+  // Blocked users — stored in localStorage per user
+  const getBlockedKey = () => `blockedUsers_${user?.id || 'anon'}`;
+  const [blockedUsers, setBlockedUsers] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(`blockedUsers_${null}`) || '[]'); } catch { return []; }
+  });
+
+  // Re-load blocked list once user is available
+  useEffect(() => {
+    if (user?.id) {
+      try {
+        const stored = JSON.parse(localStorage.getItem(getBlockedKey()) || '[]');
+        setBlockedUsers(stored);
+      } catch { setBlockedUsers([]); }
+    }
+  }, [user?.id]);
+
+  const blockUser = (senderId, senderName) => {
+    if (!senderId || senderId === user?.id) return;
+    const updated = [...blockedUsers.filter(b => b.id !== senderId), { id: senderId, name: senderName }];
+    setBlockedUsers(updated);
+    localStorage.setItem(getBlockedKey(), JSON.stringify(updated));
+  };
+
+  const unblockUser = (senderId) => {
+    const updated = blockedUsers.filter(b => b.id !== senderId);
+    setBlockedUsers(updated);
+    localStorage.setItem(getBlockedKey(), JSON.stringify(updated));
+  };
+
+  const isBlocked = (senderId) => blockedUsers.some(b => b.id === senderId);
+
+  // Filter messages — hide messages from blocked users
+  const visibleMessages = messages.filter(m => !isBlocked(m.sender_id));
+
+  const handleDeleteMsg = async (msgId) => {
+    if (!msgId || !selectedGroup) return;
+    try {
+      await axios.delete(`${API}/messages/${msgId}`, { headers: headers() });
+      setMessages(prev => prev.filter(m => m.id !== msgId));
+    } catch { /* silent */ }
+  };
+
+  const handleReplyTo = (content) => {
+    const preview = (content || '').substring(0, 50).replace(/\n/g, ' ');
+    setNewMsg(`↩ "${preview}..."\n\n`);
+  };
+
+  const handleForward = (content) => {
+    const fwdText = `📨 Forwarded:\n${content || ''}`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(fwdText);
+      alert('Message copied to clipboard — paste it in the group you want to forward to.');
+    }
+  };
 
   useEffect(() => { loadGroups(); }, []);
 
@@ -114,8 +170,28 @@ export default function Inbox() {
       <div style={s.leftPanel} className={`inbox-left ${mobileView === 'thread' ? 'inbox-hide-mobile' : ''}`}>
         <div style={s.leftHeader}>
           <h2 style={s.leftTitle}>💬 Messages</h2>
-          <button onClick={() => navigate('/dashboard')} style={s.closeBtn}>✕</button>
+          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+            <button onClick={() => setShowBlocked(o => !o)} style={s.blockedToggle} title="Blocked users">
+              🚫 {blockedUsers.length > 0 ? blockedUsers.length : ''}
+            </button>
+            <button onClick={() => navigate('/dashboard')} style={s.closeBtn}>✕</button>
+          </div>
         </div>
+        {showBlocked && (
+          <div style={s.blockedPanel}>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: '#1a202c', marginBottom: '8px' }}>Blocked Users</div>
+            {blockedUsers.length === 0 ? (
+              <div style={{ fontSize: '12px', color: '#8899AA' }}>No blocked users</div>
+            ) : (
+              blockedUsers.map(b => (
+                <div key={b.id} style={s.blockedRow}>
+                  <span style={{ fontSize: '13px', color: '#2d3748', fontWeight: 500 }}>{b.name || 'User'}</span>
+                  <button onClick={() => unblockUser(b.id)} style={s.unblockBtn}>Unblock</button>
+                </div>
+              ))
+            )}
+          </div>
+        )}
         {groups.length === 0 ? (
           <div style={s.empty}>No group conversations yet</div>
         ) : (
@@ -159,27 +235,34 @@ export default function Inbox() {
 
             {/* Messages */}
             <div style={s.messageList}>
-              {messages.length === 0 ? (
+              {visibleMessages.length === 0 ? (
                 <div style={s.noMessages}>No messages yet — say hello! 👋</div>
               ) : (
-                messages.map(m => {
+                [...visibleMessages].reverse().map(m => {
                   const isMe = m.sender_id === user?.id;
                   const senderName = isMe ? 'You' : `${m.first_name || ''} ${m.last_name || ''}`.trim();
-                  // Format newlines in message content
                   const lines = (m.content || '').split(/\\n|\n/);
                   return (
-                    <div key={m.id} style={{ ...s.msgRow, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-                      {!isMe && (
-                        <div style={s.msgAvatar}>{m.avatar_url || m.first_name?.[0] || '?'}</div>
-                      )}
-                      <div style={{ maxWidth: '70%' }}>
-                        {!isMe && <div style={s.senderName}>{senderName}</div>}
-                        <div style={{ ...s.bubble, ...(isMe ? s.bubbleMe : s.bubbleThem) }}>
-                          {lines.map((line, i) => (
-                            <span key={i}>{line}{i < lines.length - 1 && <br />}</span>
-                          ))}
+                    <div key={m.id}>
+                      <div style={{ ...s.msgRow, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
+                        {!isMe && (
+                          <div style={s.msgAvatar}>{m.avatar_url || m.first_name?.[0] || '?'}</div>
+                        )}
+                        <div style={{ maxWidth: '70%' }}>
+                          {!isMe && <div style={s.senderName}>{senderName}</div>}
+                          <div style={{ ...s.bubble, ...(isMe ? s.bubbleMe : s.bubbleThem) }}>
+                            {lines.map((line, i) => (
+                              <span key={i}>{line}{i < lines.length - 1 && <br />}</span>
+                            ))}
+                          </div>
+                          <div style={{ ...s.msgTime, textAlign: isMe ? 'right' : 'left' }}>{timeAgo(m.created_at)}</div>
                         </div>
-                        <div style={{ ...s.msgTime, textAlign: isMe ? 'right' : 'left' }}>{timeAgo(m.created_at)}</div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '4px', justifyContent: isMe ? 'flex-end' : 'flex-start', padding: '2px 0 4px', marginLeft: isMe ? 0 : '48px' }}>
+                        <button onClick={() => handleReplyTo(m.content)} style={s.actionBtn} title="Reply">↩ Reply</button>
+                        <button onClick={() => handleForward(m.content)} style={s.actionBtn} title="Forward">⤳ Forward</button>
+                        {isMe && <button onClick={() => handleDeleteMsg(m.id)} style={{ ...s.actionBtn, color: '#e53e3e' }} title="Delete">🗑 Delete</button>}
+                        {!isMe && <button onClick={() => blockUser(m.sender_id, senderName)} style={{ ...s.actionBtn, color: '#e53e3e' }} title="Block user">🚫 Block</button>}
                       </div>
                     </div>
                   );
@@ -249,6 +332,10 @@ const s = {
   leftHeader:   { padding: '20px 16px 12px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
   leftTitle:    { margin: 0, fontSize: '17px', fontWeight: 700, color: '#1a202c' },
   closeBtn:     { background: '#fee2e2', border: 'none', fontSize: '18px', color: '#e53e3e', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px', fontWeight: 700 },
+  blockedToggle:{ background: '#f0f4f9', border: '1px solid #e2e8f0', fontSize: '13px', color: '#4a5568', cursor: 'pointer', padding: '5px 10px', borderRadius: '8px', fontWeight: 600 },
+  blockedPanel: { padding: '12px 16px', background: '#fef2f2', borderBottom: '1px solid #fed7d7' },
+  blockedRow:   { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid #fee2e2' },
+  unblockBtn:   { background: 'linear-gradient(135deg,#48bb78,#38a169)', border: 'none', color: '#fff', fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '6px', cursor: 'pointer' },
   groupRow:     { display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', cursor: 'pointer', borderBottom: '1px solid #f7f7f7', transition: 'background 0.1s' },
   groupRowActive:{ background: '#f0f4ff', borderLeft: '3px solid #667eea' },
   groupAvatar:  { width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg,#667eea,#764ba2)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: 700, flexShrink: 0 },
@@ -272,6 +359,7 @@ const s = {
   msgRow:       { display: 'flex', alignItems: 'flex-end', gap: '8px', maxWidth: '100%' },
   msgAvatar:    { width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#667eea,#764ba2)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0, marginBottom: 4 },
   senderName:   { fontSize: '11px', color: '#2d3748', marginBottom: '3px', fontWeight: 600 },
+  actionBtn:    { background: 'none', border: 'none', fontSize: '11px', cursor: 'pointer', padding: '2px 6px', color: '#8899AA', borderRadius: '4px', fontWeight: 500, fontFamily: "'Segoe UI', sans-serif" },
   bubble:       { padding: '10px 14px', borderRadius: '16px', fontSize: '14px', lineHeight: '1.5', wordBreak: 'break-word', whiteSpace: 'pre-wrap', overflowWrap: 'break-word', maxWidth: '100%' },
   bubbleMe:     { background: 'linear-gradient(135deg,#667eea,#764ba2)', color: 'white', borderBottomRightRadius: '4px' },
   bubbleThem:   { background: 'white', color: '#2d3748', border: '1px solid #e2e8f0', borderBottomLeftRadius: '4px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' },
