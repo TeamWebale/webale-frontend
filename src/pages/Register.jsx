@@ -24,6 +24,7 @@ export default function Register() {
   });
   const [error,   setError]   = useState("");
   const [loading, setLoading] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   // ── Step 2: OTP verification ───────────────────────────────────
   const [step,       setStep]       = useState(1);          // 1 = form, 2 = OTP
@@ -43,6 +44,7 @@ export default function Register() {
     if (form.password !== form.confirmPassword) { setError("Passwords do not match"); return; }
     if (!form.country) { setError("Please select your country"); return; }
     if (form.password.length < 8) { setError("Password must be at least 8 characters"); return; }
+    if (!acceptedTerms) { setError("You must accept the Terms & Conditions to create an account"); return; }
     setLoading(true);
     try {
       await axios.post(`${API}/auth/register`, {
@@ -288,7 +290,26 @@ export default function Register() {
               required value={form.confirmPassword} onChange={set("confirmPassword")} />
           </div>
 
-          <button type="submit" disabled={loading} style={s.submitBtn}>
+          <div style={{ marginBottom:"18px" }}>
+            <label style={{ display:"flex", alignItems:"flex-start", gap:"10px", cursor:"pointer" }}>
+              <input
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={e => setAcceptedTerms(e.target.checked)}
+                style={{ marginTop:"3px", flexShrink:0, width:"18px", height:"18px", cursor:"pointer", accentColor:"#00E5CC" }}
+              />
+              <span style={{ fontSize:"13px", lineHeight:"1.5", color:"rgba(255,255,255,0.6)" }}>
+                I have read and agree to the{" "}
+                <a href="/terms" target="_blank" rel="noopener noreferrer"
+                  style={{ color:"#00E5CC", fontWeight:700, textDecoration:"underline" }}>
+                  Terms &amp; Conditions
+                </a>
+              </span>
+            </label>
+          </div>
+
+          <button type="submit" disabled={loading || !acceptedTerms}
+            style={{ ...s.submitBtn, opacity: (!acceptedTerms || loading) ? 0.5 : 1 }}>
             {loading ? "Creating account…" : "🚀 Create Account"}
           </button>
         </form>
