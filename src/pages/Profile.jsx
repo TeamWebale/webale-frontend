@@ -290,6 +290,12 @@ export default function Profile() {
           </div>
         )}
 
+        <div style={{ textAlign: 'center', padding: '20px 0 8px' }}>
+          <a href="/terms" style={{ fontSize: '13px', color: '#667eea', textDecoration: 'none', fontWeight: 600 }}>
+            📜 Terms &amp; Conditions
+          </a>
+        </div>
+
       </div>
     </div>
   );
