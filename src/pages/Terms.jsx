@@ -8,6 +8,15 @@ export default function Terms() {
   const navigate = useNavigate();
   const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
+  const handleGoBack = () => {
+    // If opened in a new tab (no history), close the tab; otherwise navigate back
+    if (window.history.length <= 1) {
+      window.close();
+    } else {
+      navigate(-1);
+    }
+  };
+
   return (
     <div style={s.page}>
       <div style={s.card}>
@@ -17,7 +26,7 @@ export default function Terms() {
             <p style={s.subtitle}>Webale! Private Group Fundraising Platform</p>
             <p style={s.date}>Last updated: {today}</p>
           </div>
-          <button onClick={() => navigate(-1)} style={s.closeBtn}>✕</button>
+          <button onClick={handleGoBack} style={s.closeBtn}>✕</button>
         </div>
 
         <div style={s.body}>
@@ -177,7 +186,7 @@ export default function Terms() {
 
           <div style={s.footer}>
             <p style={s.footerText}>© {new Date().getFullYear()} Webale! — All rights reserved.</p>
-            <button onClick={() => navigate(-1)} style={s.backBtn}>← Go Back</button>
+            <button onClick={handleGoBack} style={s.backBtn}>← Go Back</button>
           </div>
 
         </div>
