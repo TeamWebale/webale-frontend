@@ -100,7 +100,8 @@ export default function Inbox() {
   }, [selectedGroup]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const list = document.querySelector('.inbox-msg-list');
+    if (list) list.scrollTop = 0;
   }, [messages]);
 
   // Poll for new messages every 15s
@@ -258,11 +259,11 @@ export default function Inbox() {
                           <div style={{ ...s.msgTime, textAlign: isMe ? 'right' : 'left' }}>{timeAgo(m.created_at)}</div>
                         </div>
                       </div>
-                      <div style={{ display: 'flex', gap: '4px', justifyContent: isMe ? 'flex-end' : 'flex-start', padding: '2px 0 4px', marginLeft: isMe ? 0 : '48px', flexWrap: 'wrap' }}>
-                        <button onClick={() => handleReplyTo(m.content)} style={{ ...s.actionBtn, color: '#3182ce' }} title="Reply">↩ Reply</button>
-                        <button onClick={() => handleForward(m.content)} style={{ ...s.actionBtn, color: '#38a169' }} title="Forward">⤳ Forward</button>
-                        {isMe && <button onClick={() => handleDeleteMsg(m.id)} style={{ ...s.actionBtn, color: '#e53e3e' }} title="Delete">🗑 Delete</button>}
-                        {!isMe && <button onClick={() => blockUser(m.sender_id, senderName)} style={{ ...s.actionBtn, color: '#e53e3e' }} title="Block user">🚫 Block</button>}
+                      <div style={{ display: 'flex', gap: '2px', justifyContent: isMe ? 'flex-end' : 'flex-start', padding: '1px 0 4px', marginLeft: isMe ? 0 : '40px' }}>
+                        <button onClick={() => handleReplyTo(m.content)} style={{ ...s.actionBtn, color: '#3182ce' }} title="Reply">↩Reply</button>
+                        <button onClick={() => handleForward(m.content)} style={{ ...s.actionBtn, color: '#38a169' }} title="Forward">⤳Fwd</button>
+                        {isMe && <button onClick={() => handleDeleteMsg(m.id)} style={{ ...s.actionBtn, color: '#e53e3e' }} title="Delete">🗑Del</button>}
+                        {!isMe && <button onClick={() => blockUser(m.sender_id, senderName)} style={{ ...s.actionBtn, color: '#e53e3e' }} title="Block user">🚫Block</button>}
                       </div>
                     </div>
                   );
@@ -374,7 +375,7 @@ const s = {
   msgRow:       { display: 'flex', alignItems: 'flex-end', gap: '8px', maxWidth: '100%', overflow: 'hidden' },
   msgAvatar:    { width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#667eea,#764ba2)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0, marginBottom: 4 },
   senderName:   { fontSize: '11px', color: '#2d3748', marginBottom: '3px', fontWeight: 600 },
-  actionBtn:    { background: 'none', border: 'none', fontSize: '11px', cursor: 'pointer', padding: '2px 6px', borderRadius: '4px', fontWeight: 600, fontFamily: "'Segoe UI', sans-serif" },
+  actionBtn:    { background: 'none', border: 'none', fontSize: '11px', cursor: 'pointer', padding: '1px 4px', borderRadius: '4px', fontWeight: 600, fontFamily: "'Segoe UI', sans-serif", whiteSpace: 'nowrap' },
   bubble:       { padding: '10px 14px', borderRadius: '16px', fontSize: '14px', lineHeight: '1.5', wordBreak: 'break-word', overflowWrap: 'break-word' },
   bubbleMe:     { background: 'linear-gradient(135deg,#667eea,#764ba2)', color: 'white', borderBottomRightRadius: '4px' },
   bubbleThem:   { background: 'white', color: '#2d3748', border: '1px solid #e2e8f0', borderBottomLeftRadius: '4px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' },
