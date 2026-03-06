@@ -4,7 +4,7 @@
  * Route: /inbox
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
@@ -33,7 +33,6 @@ export default function Inbox() {
   const [sending, setSending] = useState(false);
   const [mobileView, setMobileView] = useState('list');
   const [showBlocked, setShowBlocked] = useState(false);
-  const bottomRef = useRef(null);
 
   // Blocked users — stored in localStorage per user
   const getBlockedKey = () => `blockedUsers_${user?.id || 'anon'}`;
@@ -98,11 +97,6 @@ export default function Inbox() {
       loadMembers(selectedGroup.id);
     }
   }, [selectedGroup]);
-
-  useEffect(() => {
-    const list = document.querySelector('.inbox-msg-list');
-    if (list) list.scrollTop = 0;
-  }, [messages]);
 
   // Poll for new messages every 15s
   useEffect(() => {
@@ -269,7 +263,6 @@ export default function Inbox() {
                   );
                 })
               )}
-              <div ref={bottomRef} />
             </div>
 
             {/* Compose */}

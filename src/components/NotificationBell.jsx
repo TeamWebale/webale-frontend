@@ -309,10 +309,10 @@ export default function NotificationBell() {
                           </span>
                         </div>
                         <div style={styles.msgActions}>
-                          <button onClick={() => { setReply(`↩ ${(m.content || m.message || '').substring(0, 40)}...\n\n`); }} style={{ ...styles.actionBtn, color: '#3182ce' }} title="Reply">↩</button>
-                          <button onClick={() => { setMsgLevel("groups"); setForwardMsg(m.content || m.message || ''); }} style={{ ...styles.actionBtn, color: '#38a169' }} title="Forward">⤳</button>
-                          {isMine && <button onClick={() => handleDeleteMsg(m.id)} style={{ ...styles.actionBtn, color: '#e53e3e' }} title="Delete">🗑</button>}
-                          {!isMine && <button onClick={() => blockUser(m.sender_id || m.user_id, sName)} style={{ ...styles.actionBtn, color: '#e53e3e' }} title="Block">🚫</button>}
+                          <button onClick={() => { setReply(`↩ ${(m.content || m.message || '').substring(0, 40)}...\n\n`); }} style={{ ...styles.actionBtn, color: '#3182ce' }} title="Reply">↩ Reply</button>
+                          <button onClick={() => { setMsgLevel("groups"); setForwardMsg(m.content || m.message || ''); }} style={{ ...styles.actionBtn, color: '#38a169' }} title="Forward">⤳ Fwd</button>
+                          {isMine && <button onClick={() => handleDeleteMsg(m.id)} style={{ ...styles.actionBtn, color: '#e53e3e' }} title="Delete">🗑 Del</button>}
+                          {!isMine && <button onClick={() => blockUser(m.sender_id || m.user_id, sName)} style={{ ...styles.actionBtn, color: '#e53e3e' }} title="Block">🚫 Block</button>}
                         </div>
                       </div>
                     );
