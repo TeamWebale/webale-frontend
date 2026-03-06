@@ -234,7 +234,7 @@ export default function Inbox() {
             </div>
 
             {/* Messages */}
-            <div style={s.messageList}>
+            <div style={s.messageList} className="inbox-msg-list">
               {visibleMessages.length === 0 ? (
                 <div style={s.noMessages}>No messages yet — say hello! 👋</div>
               ) : (
@@ -243,14 +243,14 @@ export default function Inbox() {
                   const senderName = isMe ? 'You' : `${m.first_name || ''} ${m.last_name || ''}`.trim();
                   const lines = (m.content || '').split(/\\n|\n/);
                   return (
-                    <div key={m.id}>
+                    <div key={m.id} className="inbox-msg-wrapper" style={{ maxWidth: '100%', overflow: 'hidden' }}>
                       <div style={{ ...s.msgRow, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
                         {!isMe && (
                           <div style={s.msgAvatar}>{m.avatar_url || m.first_name?.[0] || '?'}</div>
                         )}
-                        <div style={{ maxWidth: '70%' }}>
+                        <div style={{ maxWidth: '75%', minWidth: 0, overflow: 'hidden' }}>
                           {!isMe && <div style={s.senderName}>{senderName}</div>}
-                          <div style={{ ...s.bubble, ...(isMe ? s.bubbleMe : s.bubbleThem) }}>
+                          <div className="inbox-bubble" style={{ ...s.bubble, ...(isMe ? s.bubbleMe : s.bubbleThem) }}>
                             {lines.map((line, i) => (
                               <span key={i}>{line}{i < lines.length - 1 && <br />}</span>
                             ))}
@@ -258,7 +258,7 @@ export default function Inbox() {
                           <div style={{ ...s.msgTime, textAlign: isMe ? 'right' : 'left' }}>{timeAgo(m.created_at)}</div>
                         </div>
                       </div>
-                      <div style={{ display: 'flex', gap: '4px', justifyContent: isMe ? 'flex-end' : 'flex-start', padding: '2px 0 4px', marginLeft: isMe ? 0 : '48px' }}>
+                      <div style={{ display: 'flex', gap: '4px', justifyContent: isMe ? 'flex-end' : 'flex-start', padding: '2px 0 4px', marginLeft: isMe ? 0 : '48px', flexWrap: 'wrap' }}>
                         <button onClick={() => handleReplyTo(m.content)} style={{ ...s.actionBtn, color: '#3182ce' }} title="Reply">↩ Reply</button>
                         <button onClick={() => handleForward(m.content)} style={{ ...s.actionBtn, color: '#38a169' }} title="Forward">⤳ Forward</button>
                         {isMe && <button onClick={() => handleDeleteMsg(m.id)} style={{ ...s.actionBtn, color: '#e53e3e' }} title="Delete">🗑 Delete</button>}
@@ -311,12 +311,41 @@ export default function Inbox() {
 
       <style>{`
         .inbox-back-btn { display: none; }
-        .inbox-left { width: 300px; min-width: 260px; }
+        .inbox-left { width: 300px; min-width: 260px; flex-shrink: 0; }
         @media (max-width: 768px) {
+          .inbox-page {
+            flex-direction: column !important;
+            overflow-x: hidden !important;
+            width: 100% !important;
+            max-width: 100vw !important;
+          }
           .inbox-hide-mobile { display: none !important; }
-          .inbox-left { width: 100% !important; min-width: 0 !important; border-right: none !important; }
-          .inbox-right { width: 100% !important; max-width: 100vw !important; overflow-x: hidden !important; }
+          .inbox-left {
+            width: 100% !important;
+            min-width: 0 !important;
+            max-width: 100% !important;
+            border-right: none !important;
+            flex-shrink: 1 !important;
+          }
+          .inbox-right {
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow-x: hidden !important;
+          }
           .inbox-back-btn { display: flex !important; }
+          .inbox-msg-list {
+            overflow-x: hidden !important;
+            max-width: 100% !important;
+          }
+          .inbox-msg-wrapper {
+            max-width: 100% !important;
+            overflow-x: hidden !important;
+          }
+          .inbox-bubble {
+            max-width: 85% !important;
+            overflow-wrap: break-word !important;
+            word-break: break-word !important;
+          }
         }
       `}</style>
     </div>
@@ -324,7 +353,7 @@ export default function Inbox() {
 }
 
 const s = {
-  page:         { display: 'flex', height: 'calc(100vh - 80px)', background: '#f8fafc', fontFamily: "'Segoe UI', sans-serif", overflow: 'hidden' },
+  page:         { display: 'flex', height: 'calc(100vh - 80px)', background: '#f8fafc', fontFamily: "'Segoe UI', sans-serif", overflow: 'hidden', maxWidth: '100%', width: '100%' },
   loadWrap:     { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh' },
   spinner:      { width: 36, height: 36, border: '3px solid #e2e8f0', borderTop: '3px solid #667eea', borderRadius: '50%', animation: 'spin 0.8s linear infinite' },
 
@@ -347,7 +376,7 @@ const s = {
   empty:        { padding: 24, color: '#4a5568', fontSize: '14px', textAlign: 'center' },
 
   // Right panel
-  rightPanel:   { flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#fafbff' },
+  rightPanel:   { flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#fafbff', minWidth: 0, maxWidth: '100%' },
   noSelect:     { display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: '#4a5568', fontSize: '15px' },
   threadHeader: { display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 20px', background: 'white', borderBottom: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' },
   backBtn:      { background: 'linear-gradient(135deg,#667eea,#764ba2)', border: 'none', borderRadius: '8px', padding: '6px 12px', fontSize: '13px', fontWeight: 700, color: '#fff', cursor: 'pointer', alignItems: 'center', marginRight: '4px', boxShadow: '0 2px 6px rgba(102,126,234,0.3)' },
