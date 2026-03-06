@@ -243,7 +243,7 @@ export default function Inbox() {
                   const senderName = isMe ? 'You' : `${m.first_name || ''} ${m.last_name || ''}`.trim();
                   const lines = (m.content || '').split(/\\n|\n/);
                   return (
-                    <div key={m.id} className="inbox-msg-wrapper">
+                    <div key={m.id} className="inbox-msg-wrapper" style={{ marginBottom: '12px' }}>
                       <div style={{ ...s.msgRow, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
                         {!isMe && (
                           <div style={s.msgAvatar}>{m.avatar_url || m.first_name?.[0] || '?'}</div>
@@ -329,15 +329,8 @@ export default function Inbox() {
           .inbox-right {
             width: 100% !important;
             height: calc(100vh - 140px);
-            display: flex !important;
-            flex-direction: column !important;
           }
           .inbox-back-btn { display: flex !important; }
-          .inbox-msg-list {
-            display: flex !important;
-            flex-direction: column !important;
-            overflow-x: hidden !important;
-          }
         }
       `}</style>
     </div>
@@ -376,7 +369,7 @@ const s = {
   threadSub:    { fontSize: '12px', color: '#4a5568' },
 
   // Messages
-  messageList:  { flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '12px' },
+  messageList:  { flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '20px 16px' },
   noMessages:   { textAlign: 'center', color: '#4a5568', fontSize: '14px', marginTop: 40 },
   msgRow:       { display: 'flex', alignItems: 'flex-end', gap: '8px', maxWidth: '100%', overflow: 'hidden' },
   msgAvatar:    { width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#667eea,#764ba2)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0, marginBottom: 4 },
