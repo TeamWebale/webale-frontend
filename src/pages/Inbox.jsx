@@ -313,23 +313,30 @@ export default function Inbox() {
         .inbox-back-btn { display: none; }
         .inbox-left { width: 300px; min-width: 260px; flex-shrink: 0; }
         @media (max-width: 768px) {
+          .inbox-page {
+            display: block !important;
+            height: auto !important;
+            min-height: calc(100vh - 140px);
+            overflow: auto !important;
+          }
           .inbox-hide-mobile { display: none !important; }
           .inbox-left {
             width: 100% !important;
             min-width: 0 !important;
             border-right: none !important;
+            height: calc(100vh - 140px);
           }
           .inbox-right {
             width: 100% !important;
+            height: calc(100vh - 140px);
+            display: flex !important;
+            flex-direction: column !important;
           }
           .inbox-back-btn { display: flex !important; }
-          .inbox-msg-wrapper {
-            max-width: 100% !important;
-            overflow: hidden !important;
-          }
-          .inbox-bubble {
-            max-width: 80vw !important;
-            word-break: break-word !important;
+          .inbox-msg-list {
+            display: flex !important;
+            flex-direction: column !important;
+            overflow-x: hidden !important;
           }
         }
       `}</style>
