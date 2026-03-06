@@ -361,7 +361,7 @@ const s = {
   empty:        { padding: 24, color: '#4a5568', fontSize: '14px', textAlign: 'center' },
 
   // Right panel
-  rightPanel:   { flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#fafbff' },
+  rightPanel:   { flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#fafbff', minWidth: 0 },
   noSelect:     { display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: '#4a5568', fontSize: '15px' },
   threadHeader: { display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 20px', background: 'white', borderBottom: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' },
   backBtn:      { background: 'linear-gradient(135deg,#667eea,#764ba2)', border: 'none', borderRadius: '8px', padding: '6px 12px', fontSize: '13px', fontWeight: 700, color: '#fff', cursor: 'pointer', alignItems: 'center', marginRight: '4px', boxShadow: '0 2px 6px rgba(102,126,234,0.3)' },
@@ -371,11 +371,11 @@ const s = {
   // Messages
   messageList:  { flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '12px' },
   noMessages:   { textAlign: 'center', color: '#4a5568', fontSize: '14px', marginTop: 40 },
-  msgRow:       { display: 'flex', alignItems: 'flex-end', gap: '8px', maxWidth: '100%' },
+  msgRow:       { display: 'flex', alignItems: 'flex-end', gap: '8px', maxWidth: '100%', overflow: 'hidden' },
   msgAvatar:    { width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#667eea,#764ba2)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0, marginBottom: 4 },
   senderName:   { fontSize: '11px', color: '#2d3748', marginBottom: '3px', fontWeight: 600 },
   actionBtn:    { background: 'none', border: 'none', fontSize: '11px', cursor: 'pointer', padding: '2px 6px', borderRadius: '4px', fontWeight: 600, fontFamily: "'Segoe UI', sans-serif" },
-  bubble:       { padding: '10px 14px', borderRadius: '16px', fontSize: '14px', lineHeight: '1.5', wordBreak: 'break-word', whiteSpace: 'pre-wrap', overflowWrap: 'break-word', maxWidth: '100%' },
+  bubble:       { padding: '10px 14px', borderRadius: '16px', fontSize: '14px', lineHeight: '1.5', wordBreak: 'break-word', overflowWrap: 'break-word' },
   bubbleMe:     { background: 'linear-gradient(135deg,#667eea,#764ba2)', color: 'white', borderBottomRightRadius: '4px' },
   bubbleThem:   { background: 'white', color: '#2d3748', border: '1px solid #e2e8f0', borderBottomLeftRadius: '4px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' },
   msgTime:      { fontSize: '10px', color: '#718096', marginTop: '3px' },
