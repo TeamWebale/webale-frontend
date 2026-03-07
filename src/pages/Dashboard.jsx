@@ -285,13 +285,13 @@ function Dashboard() {
           It was frustrating watching fundraisers manually repost to update donor groups of the campaign progress; so we built <strong>Webale!</strong> to automate a number of things.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          Invitation-only groups already trust each other so they simply need a structured, transparent way to pool money. <strong>Webale!</strong> is designed with your fundraising circle in mind; so across the board we offer clarity of fundraising target, progress and many things in between.
+          Invitation-only groups already trust each other so they simply need a structured, transparent way to pool money. <strong>Webale!</strong> is designed with your fundraising circle in mind; so across the board your donors get clarity of fundraising target, progress and many things in between.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          Get all pledges tracked and contributions logged so members are kept updated of who — committed what, who fulfilled, even who quit; and the rest of the money conversation. There real-time progress bars for members' visual of how far from the finishing line, quarterly milestone marks, multi-currency conversion across 160+ countries, automated acknowledgements, built-in messaging, admin controls that put fundraisers firmly in charge, etc. Yet that's but only an intro of how much innovation we intend to deploy for the success of your fundraising cause.
+          Get all pledges tracked and contributions logged so members are kept updated of who — committed what, who fulfilled, even who quit; and the rest of the money conversation. Real-time progress bars for members' visual of how far from and/ or close to the finishing line, quarterly milestone marks, multi-currency conversion across 160+ countries, automated reminders and acknowledgements, built-in member messaging, admin controls that put fundraisers firmly in charge, etc. Yet we are only at the intro for how much innovation we intend to deploy for the success of your fundraising cause.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          Be it a five family members group or five hundred diaspora contributors, <strong>Webale!</strong> replaces the chaos of manual record-keeping with a living and breathing dashboard that keeps everyone aligned, motivated, acknowledged and notified.
+          Be it a five member family group or five hundred diaspora contributors, <strong>Webale!</strong> replaces the chaos of manual record-keeping with a living and breathing dashboard that keeps everyone aligned, motivated, acknowledged and notified.
         </p>
         <p style={{ margin: 0, fontWeight: 700, fontSize: '15px' }}>
           Because your cause is personal, <span style={{ color: '#00E5CC' }}>Webale! — Private Group Fundraising</span>; gives you a befitting platform.
