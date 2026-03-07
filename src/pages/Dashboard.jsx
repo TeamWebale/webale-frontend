@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { groupAPI } from '../services/api';
+import { useRightSidebar } from '../components/MainLayout';
 import { getCurrencySymbol } from '../utils/currencyConverter';
 import { formatTimeAgo } from '../utils/timeFormatter';
 
@@ -11,6 +12,7 @@ function Dashboard() {
   const [recentActivity, setRecentActivity] = useState([]);
   const [showGroupMenu, setShowGroupMenu] = useState(false);
   const groupMenuRef = useRef(null);
+  const { setRightSidebar } = useRightSidebar();
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
@@ -170,6 +172,12 @@ function Dashboard() {
       </div>
     </>
   );
+
+  // Inject right sidebar into MainLayout
+  useEffect(() => {
+    if (!loading) setRightSidebar(<RightSidebar />);
+    return () => setRightSidebar(null);
+  }, [loading, groups, recentActivity]);
 
   // ==================== LOADING STATE ====================
   if (loading) {
