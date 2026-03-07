@@ -323,6 +323,34 @@ function Dashboard() {
           </p>
         </div>
       </div>
+
+      {/* Webale! Pitch Card */}
+      <div style={{
+        background: 'linear-gradient(135deg, #1B2D4F 0%, #2d4a7a 50%, #4A7FC1 100%)',
+        borderRadius: '14px',
+        padding: '24px 22px',
+        marginBottom: '20px',
+        color: 'white',
+        boxShadow: '0 4px 20px rgba(27,45,79,0.25)',
+        lineHeight: '1.75',
+        fontSize: '14px',
+      }}>
+        <p style={{ margin: '0 0 14px', fontStyle: 'italic', opacity: 0.85 }}>
+          It was frustrating watching fundraisers manually repost to update donors of campaign progress; so we built <strong>Webale!</strong> to automate a number of things.
+        </p>
+        <p style={{ margin: '0 0 14px' }}>
+          Invitation-only groups already trust each other and simply need a structured, transparent way to pool money. <strong>Webale!</strong> is designed with your fundraising circle in mind; offering cross-board clarity of target, progress and everything in between.
+        </p>
+        <p style={{ margin: '0 0 14px' }}>
+          With us all pledges are tracked and contributions logged so members are kept updated of who — committed what, who fulfilled, even who quit; and the rest of money conversation; including real-time progress bars for a visual of how far from the finishing line as well as quarterly milestone celebrations, multi-currency conversion across 160+ countries, automated acknowledgements, built-in messaging, admin controls that put fundraisers firmly in charge, etc; yet that's but only intro of how much innovation we intend to deploy for the success of your fundraising cause.
+        </p>
+        <p style={{ margin: '0 0 14px' }}>
+          Be it five family members or five hundred diaspora contributors, <strong>Webale!</strong> replaces the chaos of manual record-keeping with a living, breathing dashboard that keeps everyone aligned, motivated, accessible and accountable.
+        </p>
+        <p style={{ margin: 0, fontWeight: 700, fontSize: '15px' }}>
+          Because your cause is personal, <span style={{ color: '#00E5CC' }}>Webale! — Private Group Fundraising</span>; gives you a befitting platform.
+        </p>
+      </div>
     </div>
   );
 }
