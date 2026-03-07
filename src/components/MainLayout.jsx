@@ -173,8 +173,8 @@ function LeftSidebar() {
         display:"flex", alignItems:"center", gap:"10px",
         padding:"9px 14px", borderRadius:"10px", textDecoration:"none",
         fontSize:"13px", fontWeight:600, marginBottom:"8px",
-        background: isActive ? "linear-gradient(135deg,#1B2D4F,#4A7FC1)" : "#f0f4f9",
-        color: isActive ? "#fff" : "#4a5568",
+        background: isActive ? "linear-gradient(135deg,#1B2D4F,#4A7FC1)" : "linear-gradient(135deg,#fef3c7,#fef3c7)",
+        color: isActive ? "#fff" : "#92400e",
         transition:"all 0.15s",
       })}>
         <span>📜</span>Terms &amp; Conditions
