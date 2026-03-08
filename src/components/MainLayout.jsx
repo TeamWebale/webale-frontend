@@ -380,7 +380,7 @@ export default function MainLayout() {
 }
 
 const ml = {
-  shell:{ minHeight:"100vh", background:"#F0F4F9", display:"flex", flexDirection:"column" },
+  shell:{ minHeight:"100vh", background:"linear-gradient(180deg, #e8eef6 0%, #f0f4f9 40%, #f5f0ff 100%)", display:"flex", flexDirection:"column" },
   body:{ display:"flex", flex:1, minHeight:0 },
   mainCol:{ flex:1, display:"flex", flexDirection:"column", minWidth:0 },
   banner:{
