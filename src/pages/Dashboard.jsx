@@ -233,20 +233,21 @@ function Dashboard() {
               position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0,
               background: 'white', borderRadius: '10px', zIndex: 999,
               boxShadow: '0 8px 24px rgba(0,0,0,0.15)', border: '1px solid #e2e8f0',
-              overflow: 'hidden',
             }}>
               {groups.map(g => (
-                <button key={g.id}
-                  onClick={() => { navigate(`/groups/${g.id}`); setShowGroupMenu(false); }}
+                <a key={g.id}
+                  href={`/groups/${g.id}`}
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowGroupMenu(false); navigate(`/groups/${g.id}`); }}
                   style={{
                     display: 'block', width: '100%', textAlign: 'left',
                     padding: '10px 14px', background: 'none',
-                    border: 'none', borderBottom: '1px solid #f0f4f9',
+                    borderBottom: '1px solid #f0f4f9',
                     fontSize: '13px', color: '#2d3748', cursor: 'pointer', fontWeight: 500,
+                    textDecoration: 'none', boxSizing: 'border-box',
                   }}
                 >
                   📁 {g.name}
-                </button>
+                </a>
               ))}
             </div>
           )}
@@ -282,13 +283,13 @@ function Dashboard() {
           Watching fundraisers manually repost to update donor groups of their campaign progress, we nodded saying; it's not meant to be that way – and got down to building <strong>Webale!</strong> for automation of such and related tasks.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          Invitation-only groups already trust each other, so all they needed is a structured, transparent way to pool money. Because <strong>Webale!</strong> is designed with your donor circle in mind, across the board we deliver clarity of the fundraising target and progress using an array of tools and features in between.
+          Invitation-only groups already trust each other so all they needed is a structured, transparent way to pool money. Because <strong>Webale!</strong> is designed with your donor circle in mind, across the board we deliver clarity of the fundraising target, campaign progress and an array of such tools and features.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          Get all pledges tracked and contributions logged so members are continually updated of who committed what, who fulfilled, even who quit; and the rest of the money conversation. Real time progress-bars charm members with a visual of how far away or close they are to the finishing line; igniting a 'yes we can' inspiration wave of participation.
+          Get all pledges tracked and contributions logged so members are continually updated of who committed what, who fulfilled, even who quit; and the rest of the money conversation. Real time progress-bars charm members with a visual of how far or close they are to the finishing line; thereby inspiring a 'yes we can' wave of participation.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          The rest is marks of quarterly milestones, multi-currency conversions across 160+ countries, automated reminders and acknowledgements, built-in member messaging, admin controls that put fundraisers firmly in charge, etc. Moreover that's only a peek into our arsenal of innovation we intend to deploy for the success of your fundraising so; what keeps you from starting – today!
+          The rest is marks of quarterly milestones, multi-currency conversions across 160+ countries, automated reminders and acknowledgements, built-in member messaging, admin controls that put fundraisers firmly in charge, etc. Moreover that's only a peek into the arsenal of innovation we intend to deploy for the success of your fundraising so; what keeps you from starting – today!
         </p>
         <p style={{ margin: '0 0 14px' }}>
           Be it a five member family group or five hundred diaspora contributors, <strong>Webale!</strong> is here especially to replace the chaos of manual record-keeping with a living and breathing dashboard that keeps everyone aligned, motivated, acknowledged and fully notified.
