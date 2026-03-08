@@ -212,7 +212,8 @@ function Dashboard() {
       <div style={{
         background: 'white', borderRadius: '12px', padding: '14px 16px',
         marginBottom: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-        display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap'
+        display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
+        position: 'relative', zIndex: 10
       }}>
         {/* My Groups dropdown */}
         <div ref={groupMenuRef} style={{ position: 'relative', flex: 1, minWidth: '160px' }}>
@@ -282,25 +283,27 @@ function Dashboard() {
         fontSize: '14px',
       }}>
         <p style={{ margin: '0 0 14px', fontStyle: 'italic', opacity: 0.85 }}>
-          We watched fundraisers manually repost to update donor groups of their campaign progress and we agreed that it's not meant to be that way; so we got down to building <strong>Webale!</strong> and automate a number of things.
+          We watched fundraisers manually repost to update donor groups of their campaign progress and we agreed it's not meant to be that way; so we got down to building <strong>Webale!</strong> and automate a number of things.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          Invitation-only groups already trust each other so all they need is a structured, transparent way to pool money. <strong>Webale!</strong> is designed with your fundraising circle in mind; so that across the board your donors get clarity of the fundraising target, progress and many things in between.
+          Invitation-only groups already trust each other so all they need is a structured, transparent way to pool money. <strong>Webale!</strong> is designed with your fundraising circle in mind; so across the board your donors get clarity of the fundraising target, progress and such other things in between.
         </p>
         <p style={{ margin: '0 0 14px' }}>
           Get all pledges tracked and contributions logged so members are kept updated of who committed what, who fulfilled, even who quit; and the rest of the money conversation. Real time progress-bars charm members with a visual of how far away or close they are to the finishing line.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          The rest is marks of quarterly milestones, multi-currency conversion across 160+ countries, automated reminders and acknowledgements, built-in member messaging, admin controls that put fundraisers firmly in charge, etc. That's only peek into innovation we intend to deploy for the success of your fundraising.
+          The rest is marks of quarterly milestones, multi-currency conversions across 160+ countries, automated reminders and acknowledgements, built-in member messaging, admin controls that put fundraisers firmly in charge, etc. That being only a peek into innovation we intend to deploy for the success of your fundraising; what keeps you from starting – right away!
         </p>
         <p style={{ margin: '0 0 14px' }}>
           Be it a five member family group or five hundred diaspora contributors, <strong>Webale!</strong> is here to replace the chaos of manual record-keeping with a living and breathing dashboard that keeps everyone aligned, motivated, acknowledged and notified.
         </p>
-        <p style={{ margin: '0 0 8px', fontWeight: 700, fontSize: '15px' }}>
-          Because your cause is personal, <span style={{ color: '#00E5CC' }}>Webale! — Private Group Fundraising</span>; gives you a befitting platform.
+        <p style={{ margin: '0 0 10px', fontWeight: 700, fontSize: '15px' }}>
+          Because your cause is personal, <span style={{ color: '#00E5CC' }}>Webale! — Private Group Fundraising</span> gives you a befitting platform.
         </p>
-        <p style={{ margin: 0, fontSize: '13px', opacity: 0.7 }}>
-          theteam@webale.net
+        <p style={{ margin: 0 }}>
+          <a href="mailto:theteam@webale.net" style={{ color: '#FFB800', fontWeight: 700, fontSize: '14px', textDecoration: 'none' }}>
+            theteam@webale.net 📧
+          </a>
         </p>
       </div>
 
