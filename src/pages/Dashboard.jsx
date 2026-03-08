@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { groupAPI } from '../services/api';
 import { useRightSidebar } from '../components/MainLayout';
 import { getCurrencySymbol } from '../utils/currencyConverter';
@@ -11,24 +11,12 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [recentActivity, setRecentActivity] = useState([]);
   const [showGroupMenu, setShowGroupMenu] = useState(false);
-  const groupMenuRef = useRef(null);
   const { setRightSidebar } = useRightSidebar();
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   useEffect(() => {
     loadDashboardData();
-  }, []);
-
-  // Close My Groups dropdown when clicking outside
-  useEffect(() => {
-    const handler = (e) => {
-      if (groupMenuRef.current && !groupMenuRef.current.contains(e.target)) {
-        setShowGroupMenu(false);
-      }
-    };
-    document.addEventListener('click', handler);
-    return () => document.removeEventListener('click', handler);
   }, []);
 
   const loadDashboardData = async () => {
@@ -212,7 +200,7 @@ function Dashboard() {
         position: 'relative', zIndex: 10, overflow: 'visible'
       }}>
         {/* My Groups dropdown */}
-        <div ref={groupMenuRef} style={{ position: 'relative', flex: 1, minWidth: '160px' }}>
+        <div style={{ position: 'relative', flex: 1, minWidth: '160px' }}>
           <button
             onClick={() => setShowGroupMenu(m => !m)}
             style={{
@@ -235,19 +223,18 @@ function Dashboard() {
               boxShadow: '0 8px 24px rgba(0,0,0,0.15)', border: '1px solid #e2e8f0',
             }}>
               {groups.map(g => (
-                <a key={g.id}
-                  href={`/groups/${g.id}`}
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowGroupMenu(false); navigate(`/groups/${g.id}`); }}
+                <Link key={g.id}
+                  to={`/groups/${g.id}`}
+                  onClick={() => setShowGroupMenu(false)}
                   style={{
-                    display: 'block', width: '100%', textAlign: 'left',
-                    padding: '10px 14px', background: 'none',
+                    display: 'block', padding: '10px 14px',
                     borderBottom: '1px solid #f0f4f9',
-                    fontSize: '13px', color: '#2d3748', cursor: 'pointer', fontWeight: 500,
-                    textDecoration: 'none', boxSizing: 'border-box',
+                    fontSize: '13px', color: '#2d3748', fontWeight: 500,
+                    textDecoration: 'none',
                   }}
                 >
                   📁 {g.name}
-                </a>
+                </Link>
               ))}
             </div>
           )}
@@ -280,13 +267,13 @@ function Dashboard() {
         fontSize: '14px',
       }}>
         <p style={{ margin: '0 0 14px', fontStyle: 'italic', opacity: 0.85 }}>
-          Watching fundraisers manually repost to update donor groups of their campaign progress, we nodded saying; it's not meant to be that way – and got down to building <strong>Webale!</strong> for automation of such and related tasks.
+          Watching fundraisers manually repost to update donor groups of their campaign progress, we nodded saying; it was never meant to be that way – and got down to building <strong>Webale!</strong> for automation of such and related tasks.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          Invitation-only groups already trust each other so all they needed is a structured, transparent way to pool money. Because <strong>Webale!</strong> is designed with your donor circle in mind, across the board we deliver clarity of the fundraising target, campaign progress and an array of such tools and features.
+          Invitation-only groups already trust each other so all they needed is a structured, transparent way to pool money. Because <strong>Webale!</strong> is designed with your donor circle in mind, across the board we deliver clarity of the fundraising target and campaign progress using an array of tools and features.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          Get all pledges tracked and contributions logged so members are continually updated of who committed what, who fulfilled, even who quit; and the rest of the money conversation. Real time progress-bars charm members with a visual of how far or close they are to the finishing line; thereby inspiring a 'yes we can' wave of participation.
+          The App gets all pledges tracked and contributions logged so members are continually updated of who committed what, who fulfilled, even who quit; and the rest of the money conversation. Real time progress-bars charm members with a visual of how far or close they are to the finishing line; inspiring a 'yes we can' wave of participation.
         </p>
         <p style={{ margin: '0 0 14px' }}>
           The rest is marks of quarterly milestones, multi-currency conversions across 160+ countries, automated reminders and acknowledgements, built-in member messaging, admin controls that put fundraisers firmly in charge, etc. Moreover that's only a peek into the arsenal of innovation we intend to deploy for the success of your fundraising so; what keeps you from starting – today!
