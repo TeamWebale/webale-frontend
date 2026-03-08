@@ -27,12 +27,8 @@ function Dashboard() {
         setShowGroupMenu(false);
       }
     };
-    document.addEventListener('mousedown', handler);
-    document.addEventListener('touchstart', handler);
-    return () => {
-      document.removeEventListener('mousedown', handler);
-      document.removeEventListener('touchstart', handler);
-    };
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
   }, []);
 
   const loadDashboardData = async () => {
@@ -213,7 +209,7 @@ function Dashboard() {
         background: 'white', borderRadius: '12px', padding: '14px 16px',
         marginBottom: '20px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
         display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
-        position: 'relative', zIndex: 10
+        position: 'relative', zIndex: 10, overflow: 'visible'
       }}>
         {/* My Groups dropdown */}
         <div ref={groupMenuRef} style={{ position: 'relative', flex: 1, minWidth: '160px' }}>
@@ -235,7 +231,7 @@ function Dashboard() {
           {showGroupMenu && groups.length > 0 && (
             <div style={{
               position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0,
-              background: 'white', borderRadius: '10px', zIndex: 100,
+              background: 'white', borderRadius: '10px', zIndex: 999,
               boxShadow: '0 8px 24px rgba(0,0,0,0.15)', border: '1px solid #e2e8f0',
               overflow: 'hidden',
             }}>
@@ -283,19 +279,19 @@ function Dashboard() {
         fontSize: '14px',
       }}>
         <p style={{ margin: '0 0 14px', fontStyle: 'italic', opacity: 0.85 }}>
-          We watched fundraisers manually repost to update donor groups of their campaign progress and we agreed it's not meant to be that way; so we got down to building <strong>Webale!</strong> and automate a number of things.
+          We watched fundraisers manually repost to update their donor groups of campaign progress and we nodded saying; it's not meant to be that way – so we got down to building <strong>Webale!</strong> and automate a number of things.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          Invitation-only groups already trust each other so all they need is a structured, transparent way to pool money. <strong>Webale!</strong> is designed with your fundraising circle in mind; so across the board your donors get clarity of the fundraising target, progress and such other things in between.
+          <em>Invitation-Only</em> groups already trust each other, so all they needed is a structured, transparent way to pool money. Because <strong>Webale!</strong> is designed with your fundraising circle in mind, across the board your donors get clarity of the fundraising target, progress and such other things in between.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          Get all pledges tracked and contributions logged so members are kept updated of who committed what, who fulfilled, even who quit; and the rest of the money conversation. Real time progress-bars charm members with a visual of how far away or close they are to the finishing line.
+          Get all pledges tracked and contributions logged so members are continually updated of who committed what, who fulfilled, even who quit; and the rest of the money conversation. Real time progress-bars charm members with a visual of how far away or close they are to the finishing line; causing a 'yes we can' inspiration wave of participation.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          The rest is marks of quarterly milestones, multi-currency conversions across 160+ countries, automated reminders and acknowledgements, built-in member messaging, admin controls that put fundraisers firmly in charge, etc. That being only a peek into innovation we intend to deploy for the success of your fundraising; what keeps you from starting – right away!
+          The rest is marks of quarterly milestones, multi-currency conversions across 160+ countries, automated reminders and acknowledgements, built-in member messaging, admin controls that put fundraisers firmly in charge, etc. Moreover that's only a peek into innovation we intend to deploy for the success of your fundraising so; what keeps you from starting – today!
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          Be it a five member family group or five hundred diaspora contributors, <strong>Webale!</strong> is here to replace the chaos of manual record-keeping with a living and breathing dashboard that keeps everyone aligned, motivated, acknowledged and notified.
+          Be it a five member family group or five hundred diaspora contributors, <strong>Webale!</strong> is here especially to replace the chaos of manual record-keeping with a living and breathing dashboard that keeps everyone aligned, motivated, acknowledged and notified.
         </p>
         <p style={{ margin: '0 0 10px', fontWeight: 700, fontSize: '15px' }}>
           Because your cause is personal, <span style={{ color: '#00E5CC' }}>Webale! — Private Group Fundraising</span> gives you a befitting platform.
