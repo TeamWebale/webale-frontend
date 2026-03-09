@@ -98,19 +98,18 @@ export default function Register() {
         otp:   code,
       });
       if (res.data.success) {
-        // Store token + user, update AuthContext
+        // Store token + user
         const { token, user } = res.data.data;
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(user));
-        if (login) login(token, user);
 
-        // Check for pending invite
+        // Check for pending invite, then do a full page load so AuthContext picks up the token
         const pendingInvite = localStorage.getItem("pendingInvite");
         if (pendingInvite) {
           localStorage.removeItem("pendingInvite");
-          navigate(`/invite/${pendingInvite}`);
+          window.location.href = `/invite/${pendingInvite}`;
         } else {
-          navigate("/dashboard");
+          window.location.href = "/dashboard";
         }
       }
     } catch (err) {
