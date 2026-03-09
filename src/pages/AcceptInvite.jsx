@@ -106,9 +106,9 @@ export default function AcceptInvite() {
             {error && <div style={s.error}>{error}</div>}
 
             <div style={s.btnCol}>
-              <p style={s.loginNote}>Sign in to accept this invitation:</p>
+              <p style={s.loginNote}>Sign in to accept this invitation (if you already signed up);</p>
               <button onClick={handleSignIn} style={s.acceptBtn}>Sign In to Accept</button>
-              <p style={s.loginNote}>Or sign up then sign in:</p>
+              <p style={s.loginNote}>Else sign up so you may sign in:</p>
               <button onClick={handleRegister} style={s.acceptBtn}>Create Account & Join</button>
             </div>
           </div>

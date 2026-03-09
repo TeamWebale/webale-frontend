@@ -26,12 +26,8 @@ function Dashboard() {
       const groupsData = res.data.data?.groups || res.data.groups || res.data || [];
       setGroups(Array.isArray(groupsData) ? groupsData : []);
 
-      // Mock recent activity (replace with API call when available)
-      setRecentActivity([
-        { id: 1, type: 'pledge', user: 'John', action: 'made a pledge', amount: 500, time: new Date(Date.now() - 3600000) },
-        { id: 2, type: 'payment', user: 'Sarah', action: 'paid their pledge', amount: 250, time: new Date(Date.now() - 7200000) },
-        { id: 3, type: 'join', user: 'Mike', action: 'joined Wedding Fund', time: new Date(Date.now() - 86400000) },
-      ]);
+      // Recent activity will be populated from API when available
+      setRecentActivity([]);
     } catch (err) {
       console.error('Error loading dashboard:', err);
     } finally {
