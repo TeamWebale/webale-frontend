@@ -4,7 +4,7 @@
  * Route: /inbox
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
@@ -33,6 +33,8 @@ export default function Inbox() {
   const [sending, setSending] = useState(false);
   const [mobileView, setMobileView] = useState('list');
   const [showBlocked, setShowBlocked] = useState(false);
+  const [forwardMode, setForwardMode] = useState(null); // holds message content to forward
+  const composeRef = useRef(null);
 
   // Blocked users — stored in localStorage per user
   const getBlockedKey = () => `blockedUsers_${user?.id || 'anon'}`;
@@ -70,23 +72,42 @@ export default function Inbox() {
 
   const handleDeleteMsg = async (msgId) => {
     if (!msgId || !selectedGroup) return;
+    if (!window.confirm('Delete this message?')) return;
     try {
       await axios.delete(`${API}/messages/${msgId}`, { headers: headers() });
       setMessages(prev => prev.filter(m => m.id !== msgId));
-    } catch { /* silent */ }
+    } catch (err) {
+      alert('Could not delete message. This feature may not be available yet.');
+    }
   };
 
   const handleReplyTo = (content) => {
     const preview = (content || '').substring(0, 50).replace(/\n/g, ' ');
     setNewMsg(`↩ "${preview}..."\n\n`);
+    // Scroll to compose field
+    setTimeout(() => {
+      composeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      composeRef.current?.querySelector('textarea')?.focus();
+    }, 100);
   };
 
   const handleForward = (content) => {
-    const fwdText = `📨 Forwarded:\n${content || ''}`;
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(fwdText);
-      alert('Message copied to clipboard — paste it in the group you want to forward to.');
-    }
+    setForwardMode(content);
+    // Switch to group list so user can pick destination
+    setSelectedGroup(null);
+    setMobileView('list');
+  };
+
+  const handleSelectGroupForForward = (group) => {
+    setSelectedGroup(group);
+    setMobileView('thread');
+    setNewMsg(`📨 Forwarded:\n${forwardMode || ''}`);
+    setForwardMode(null);
+    // Scroll to compose after messages load
+    setTimeout(() => {
+      composeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      composeRef.current?.querySelector('textarea')?.focus();
+    }, 500);
   };
 
   useEffect(() => { loadGroups(); }, []);
@@ -187,13 +208,19 @@ export default function Inbox() {
             )}
           </div>
         )}
+        {forwardMode && (
+          <div style={{ padding: '10px 16px', background: '#ebf8ff', borderBottom: '1px solid #bee3f8', fontSize: '13px', color: '#2b6cb0', fontWeight: 600 }}>
+            📨 Select a group to forward the message to:
+            <button onClick={() => setForwardMode(null)} style={{ background: 'none', border: 'none', color: '#e53e3e', fontWeight: 700, cursor: 'pointer', marginLeft: '8px', fontSize: '12px' }}>Cancel</button>
+          </div>
+        )}
         {groups.length === 0 ? (
           <div style={s.empty}>No group conversations yet</div>
         ) : (
           groups.map(g => (
             <div
               key={g.id}
-              onClick={() => { setSelectedGroup(g); setMobileView('thread'); }}
+              onClick={() => forwardMode ? handleSelectGroupForForward(g) : (setSelectedGroup(g), setMobileView('thread'))}
               style={{ ...s.groupRow, ...(selectedGroup?.id === g.id ? s.groupRowActive : {}) }}
             >
               <div style={s.groupAvatar}>{g.name?.[0]?.toUpperCase() || '?'}</div>
@@ -266,7 +293,7 @@ export default function Inbox() {
             </div>
 
             {/* Compose */}
-            <div style={s.compose}>
+            <div ref={composeRef} style={s.compose}>
               {members.length > 0 && (
                 <select
                   value={selectedRecipient}
