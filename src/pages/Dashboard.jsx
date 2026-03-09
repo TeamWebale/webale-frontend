@@ -266,13 +266,13 @@ function Dashboard() {
           Watching fundraisers manually repost to update donor groups of campaign progress got us thinking; 'it was never meant to be that way,' and we rolled the sleeves to build <strong>Webale!</strong> for automation of a number of related tasks.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          Because <strong>Webale!</strong> is designed with your donor circle in mind; team growth, campaign target and action tracking dominated the array of tools and features. After all, invitation-only groups already trust each other so all they needed was a structured, transparent way to enliven the task and pool money.
+          Because <strong>Webale!</strong> is designed with your donor circle in mind; team growth, campaign target and action tracking dominated the array of tools and features. After all, invitation-only groups already trust each other; all they needed was a structured, transparent way to enliven the task and pool money.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          The App gets all pledges and contributions tracked and logged so members are continually updated of who committed to what, fulfilled, revised or even revoked a pledge. In other money conversation, real time progress-bars charm members with a visual of how far or close the group is to the finishing line; which inspires a 'yes we can' wave of participation.
+          The App gets all pledge and contributions tracked and logged so members are continually updated of who committed to what, fulfilled, revised or even revoked a pledge. Continuing the money conversation, real time progress-bars charm members with a visual of how far or close the group is to the finishing line; inspiring a 'yes we can' wave of participation.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          The rest is currency conversions across 160+ countries, quarterly milestones, automated reminders and acknowledgements, in-built member messaging, admin controls that put fundraisers firmly in charge, etc.
+          The rest is currency conversions across 160+ countries, quarterly milestones, automated reminders, acknowledgements, in-built member messaging and admin controls that put fundraisers firmly in charge, etc.
         </p>
         <p style={{ margin: '0 0 14px' }}>
           Moreover that's a mere peek into the arsenal of innovation we intend to deploy for the success of your fundraising. So what keeps you from launching your cause right here?
