@@ -102,7 +102,16 @@ export default function Register() {
         const { token, user } = res.data.data;
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(user));
-        navigate("/dashboard");
+        if (login) login(token, user);
+
+        // Check for pending invite
+        const pendingInvite = localStorage.getItem("pendingInvite");
+        if (pendingInvite) {
+          localStorage.removeItem("pendingInvite");
+          navigate(`/invite/${pendingInvite}`);
+        } else {
+          navigate("/dashboard");
+        }
       }
     } catch (err) {
       setOtpError(err.response?.data?.message || "Invalid code. Please try again.");
