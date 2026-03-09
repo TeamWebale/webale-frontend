@@ -263,16 +263,16 @@ function Dashboard() {
         fontSize: '14px',
       }}>
         <p style={{ margin: '0 0 14px', fontStyle: 'italic', opacity: 0.85 }}>
-          Watching fundraisers manually repost to update donor groups of their campaign progress – we frowned saying; it was never meant to be that way; and got down to building <strong>Webale!</strong> for automation of that and related tasks.
+          Watching fundraisers manually repost to update donor groups of their campaign progress got us thinking – it was never meant to be that way. The next moment we folded the sleeves and got down to building <strong>Webale!</strong> for automation of that and related tasks.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          Invitation-only groups already trust each other so all they needed is a structured, transparent way to pool money. <strong>Webale!</strong> is designed with your donor circle in mind, so by an array of tools and features we delivered clarity of fundraising target and campaign progress across the board.
+          Because <strong>Webale!</strong> is designed with your donor circle in mind, across the board we delivered clarity of fundraising target, mapped the campaign progress and an array of other tools and features to enliven the task; after all invitation-only groups already trust each other and all they needed is a structured, transparent way to pool money.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          The App gets all pledges tracked and contributions logged so members are continually updated of who committed what, who fulfilled, even who quit; and the rest of the money conversation. Real time progress-bars charm members with a visual of how far or close they are to the finishing line; inspiring a 'yes we can' wave of participation.
+          The App gets all pledges and contributions tracked and logged so members are continually updated of who committed what, who fulfilled, even who quit; and the rest of the money conversation. Real time progress-bars charm members with a visual of how far or close the group is to the finishing line; thereby inspiring a 'yes we can' wave of participation.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          The rest is multi-currency conversions across 160+ countries, marks of quarterly milestones, automated reminders and acknowledgements, built-in member messaging, admin controls that put fundraisers firmly in charge, etc. Moreover that's only a peek into the arsenal of innovation we intend to deploy for the success of your fundraising. So, what – today, keeps you from launching your cause with us?
+          The rest is multi-currency conversions across 160+ countries, marks of quarterly milestones, automated reminders and acknowledgements, built-in member messaging, admin controls that put fundraisers firmly in charge, etc. Moreover that's only a peek into the arsenal of innovation we intend to deploy for the success of your fundraising. So what – today, keeps you from starting your cause here?
         </p>
         <p style={{ margin: '0 0 14px' }}>
           Be it a five member family group or five hundred diaspora contributors, <strong>Webale!</strong> is here especially to help you replace the chaos of manual record-keeping with a living and breathing dashboard that keeps everyone aligned, motivated, acknowledged and fully notified.
