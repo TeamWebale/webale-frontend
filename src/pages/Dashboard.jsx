@@ -262,25 +262,25 @@ function Dashboard() {
         lineHeight: '1.75',
         fontSize: '14px',
       }}>
-        <p style={{ margin: '0 0 14px', fontStyle: 'italic', opacity: 0.85 }}>
-          Watching fundraisers manually repost to update donor groups of their campaign progress got us thinking; it was never meant to be that way! So we folded the sleeves to build <strong>Webale!</strong> for automation of that and related tasks.
+        <p style={{ margin: '0 0 14px', opacity: 0.85 }}>
+          Watching fundraisers manually repost to update donor groups of campaign progress got us thinking; 'it was never meant to be that way!' That's when we rolled the sleeves to build <strong>Webale!</strong> for automation of a number of related tasks.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          Because <strong>Webale!</strong> is designed with your donor circle in mind, across the board we delivered clarity of fundraising target, mapped the campaign progress and an array of other tools and features to enliven the task; after all invitation-only groups already trust each other and all they needed is a structured, transparent way to pool money.
+          Because <strong>Webale!</strong> is designed with your donor circle in mind, across the board we delivered clarity of fundraising target, campaign growth and an array of other tools and features to enliven the task; after all invitation-only groups already trust each other and just needed a structured, transparent way to pool money.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          The App gets all pledges and contributions logged and tracked so members are continually updated of who committed to what, who fulfilled, even who quit; and the rest of the money conversation. Real time progress-bars charm members with a visual of how far or close the group is to the finishing line; thereby inspiring a 'yes we can' wave of participation.
+          The App gets all pledges and contributions tracked, logged so members are continually updated of who committed to what, who fulfilled, who revised or even revoked a pledge; and the rest of the money conversation. Real time progress-bars charm members with a visual of how far or close the group is to the finishing line; thereby inspiring a 'yes we can' wave of participation.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          The rest is multi-currency conversions across 160+ countries, marks of quarterly milestones, automated reminders and acknowledgements, built-in member messaging, admin controls that put fundraisers firmly in charge, etc. Moreover that's only a peek into the arsenal of innovation we intend to deploy for the success of your fundraising. So what – today, keeps you from starting your cause right here?
+          The rest is multi-currency conversions across 160+ countries, marks of quarterly milestones, automated reminders and acknowledgements, built-in member messaging, admin controls that put fundraisers firmly in charge, etc. Moreover that's only a peek into the arsenal of innovation we intend to deploy for the success of your fundraising. So what – today, keeps you from starting your cause right away?
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          Be it a five member family group or five hundred diaspora contributors, <strong>Webale!</strong> is here especially to help you replace the chaos of manual record-keeping with a living and breathing dashboard that keeps everyone aligned, motivated, acknowledged and fully notified.
+          Be it a five member family group or five hundred diaspora contributors, <strong>Webale!</strong> is here especially to help you replace the chaos of manual record-keeping with a dashboard alive and breathing that keeps everyone aligned, motivated, acknowledged and fully notified.
         </p>
         <p style={{ margin: '0 0 10px', fontWeight: 700, fontSize: '15px' }}>
           Because your cause is personal, <span style={{ color: '#00E5CC' }}>Webale! — Private Group Fundraising</span> gives you a befitting platform.
         </p>
-        <p style={{ margin: '0 0 4px', fontSize: '13px', fontStyle: 'italic', opacity: 0.7 }}>
+        <p style={{ margin: '0 0 4px', fontSize: '13px', opacity: 0.7 }}>
           Sincerely,
         </p>
         <p style={{ margin: 0 }}>
