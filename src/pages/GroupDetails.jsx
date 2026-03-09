@@ -25,9 +25,9 @@ const Modal = ({ isOpen, onClose, title, children, width = '500px' }) => {
         }}>
           <h3 style={{ margin: 0, fontSize: '17px', color: '#2d3748', fontWeight: '700' }}>{title}</h3>
           <button onClick={onClose} style={{
-            background: '#fed7d7', border: 'none', fontSize: '18px', cursor: 'pointer',
-            color: '#e53e3e', padding: '4px 10px', lineHeight: 1, borderRadius: '8px',
-            fontWeight: '700', transition: 'all 0.2s'
+            background: '#fed7d7', border: 'none', fontSize: '14px', cursor: 'pointer',
+            color: '#e53e3e', width: '28px', height: '28px', lineHeight: 1, borderRadius: '6px',
+            fontWeight: '700', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
           }}>✕</button>
         </div>
         <div style={{ padding: '24px' }}>{children}</div>
