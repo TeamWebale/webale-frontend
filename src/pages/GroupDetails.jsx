@@ -518,11 +518,11 @@ function GroupDetails() {
   const handleInvite = async () => {
     const userName = `${currentUser.first_name || ''} ${currentUser.last_name || ''}`.trim() || 'A member';
     const groupName = group?.name || 'our fundraising group';
-    const defaultMessage = `*${userName}* cordially invites you to join *${groupName}* a private fundraising group on *Webale!* You would have to sign in to 'accept' this invite and join the fundraising group; so follow the link below to sign in (if you already signed up) or to sign up so you may sign in. See you there! 🤝
+    const defaultMessage = `*${userName}* cordially invites you to join *${groupName}* a private fundraising group on *Webale!* You would have to sign in and 'accept' this invite to join the fundraising group; so follow the link below to sign in (if you already signed up) otherwise to sign up so you may sign in. See you there! 🤝
 
-*#Webale* is offering to automate hitherto manually driven fundraising campaigns (records, notifications, updates). Each group is invitation-only so participation is exclusive to trusted people (family, friends, colleagues, communities).
+*#Webale* is offering to automate hitherto manually driven fundraising campaigns (teams, targets, tracking). Each group is invitation-only so participation is exclusive to trusted people (colleagues and communities, friends and family).
 
-With time some functions will be categorized as premium (optional) and a modest fee charged to serve you better.`;
+[With time some functions will move to premium (optional) and a modest fee charged to serve you better].`;
     setInviteMessage(defaultMessage);
     setInviteEmails('');
     setInviteLink('');
