@@ -63,30 +63,30 @@ function Dashboard() {
       {/* Recent Activity */}
       <div style={{
         background: 'white',
-        borderRadius: '12px',
-        padding: '16px',
-        marginBottom: '8px',
+        borderRadius: '10px',
+        padding: '12px',
+        marginBottom: '6px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
       }}>
-        <h3 style={{ margin: '0 0 8px', fontSize: '15px', color: '#2d3748', fontWeight: '700' }}>
+        <h3 style={{ margin: '0 0 6px', fontSize: '14px', color: '#2d3748', fontWeight: '700' }}>
           📈 Recent Activity
         </h3>
 
         {recentActivity.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '12px', color: '#a0aec0' }}>
-            <p style={{ margin: 0, fontSize: '13px' }}>No recent activity</p>
+          <div style={{ textAlign: 'center', padding: '8px', color: '#a0aec0' }}>
+            <p style={{ margin: 0, fontSize: '12px' }}>No recent activity</p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
             {recentActivity.map(activity => (
               <div key={activity.id} style={{
-                padding: '10px',
+                padding: '6px 8px',
                 background: '#f7fafc',
-                borderRadius: '8px',
-                fontSize: '13px'
+                borderRadius: '6px',
+                fontSize: '12px'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '14px' }}>
                     {activity.type === 'pledge' ? '💰' : activity.type === 'payment' ? '✅' : '👋'}
                   </span>
                   <div>
@@ -110,20 +110,20 @@ function Dashboard() {
       {/* Upcoming Deadlines */}
       <div style={{
         background: 'white',
-        borderRadius: '12px',
-        padding: '16px',
+        borderRadius: '10px',
+        padding: '12px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
       }}>
-        <h3 style={{ margin: '0 0 8px', fontSize: '15px', color: '#2d3748', fontWeight: '700' }}>
+        <h3 style={{ margin: '0 0 6px', fontSize: '14px', color: '#2d3748', fontWeight: '700' }}>
           📅 Upcoming Deadlines
         </h3>
 
         {upcomingDeadlines.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '12px', color: '#a0aec0' }}>
-            <p style={{ margin: 0, fontSize: '13px' }}>No upcoming deadlines</p>
+          <div style={{ textAlign: 'center', padding: '8px', color: '#a0aec0' }}>
+            <p style={{ margin: 0, fontSize: '12px' }}>No upcoming deadlines</p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
             {upcomingDeadlines.map(group => {
               const daysLeft = Math.ceil((new Date(group.deadline) - new Date()) / (1000 * 60 * 60 * 24));
               const isUrgent = daysLeft <= 7;
@@ -132,10 +132,10 @@ function Dashboard() {
                   key={group.id}
                   onClick={() => navigate(`/groups/${group.id}`)}
                   style={{
-                    padding: '10px',
+                    padding: '6px 8px',
                     background: isUrgent ? '#fff5f5' : '#f7fafc',
-                    borderRadius: '8px',
-                    fontSize: '13px',
+                    borderRadius: '6px',
+                    fontSize: '12px',
                     cursor: 'pointer',
                     border: isUrgent ? '1px solid #fed7d7' : '1px solid transparent'
                   }}
@@ -267,22 +267,25 @@ function Dashboard() {
         fontSize: '14px',
       }}>
         <p style={{ margin: '0 0 14px', fontStyle: 'italic', opacity: 0.85 }}>
-          Watching fundraisers manually repost to update donor groups of their campaign progress – we nodded saying; it was never meant to be that way, and got down to building <strong>Webale!</strong> for automation of that and related tasks.
+          Watching fundraisers manually repost to update donor groups of their campaign progress – we frowned saying; it was never meant to be that way; and got down to building <strong>Webale!</strong> for automation of that and related tasks.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          Invitation-only groups already trust each other so all they needed is a structured, transparent way to pool money. Because <strong>Webale!</strong> is designed with your donor circle in mind, across the board we delivered clarity of fundraising target and campaign progress using an array of tools and features.
+          Invitation-only groups already trust each other so all they needed is a structured, transparent way to pool money. <strong>Webale!</strong> is designed with your donor circle in mind, so by an array of tools and features we delivered clarity of fundraising target and campaign progress across the board.
         </p>
         <p style={{ margin: '0 0 14px' }}>
           The App gets all pledges tracked and contributions logged so members are continually updated of who committed what, who fulfilled, even who quit; and the rest of the money conversation. Real time progress-bars charm members with a visual of how far or close they are to the finishing line; inspiring a 'yes we can' wave of participation.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          The rest is multi-currency conversions across 160+ countries, marks of quarterly milestones, automated reminders and acknowledgements, built-in member messaging, admin controls that put fundraisers firmly in charge, etc. Moreover that's only a peek into the arsenal of innovation we intend to deploy for the success of your fundraising so; what – today, keeps you from starting?
+          The rest is multi-currency conversions across 160+ countries, marks of quarterly milestones, automated reminders and acknowledgements, built-in member messaging, admin controls that put fundraisers firmly in charge, etc. Moreover that's only a peek into the arsenal of innovation we intend to deploy for the success of your fundraising. So, what – today, keeps you from launching your cause with us?
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          Be it a five member family group or five hundred diaspora contributors, <strong>Webale!</strong> is here especially so you replace the chaos of manual record-keeping with a living and breathing dashboard keeping everyone aligned, motivated, acknowledged and fully notified.
+          Be it a five member family group or five hundred diaspora contributors, <strong>Webale!</strong> is here especially to help you replace the chaos of manual record-keeping with a living and breathing dashboard that keeps everyone aligned, motivated, acknowledged and fully notified.
         </p>
         <p style={{ margin: '0 0 10px', fontWeight: 700, fontSize: '15px' }}>
           Because your cause is personal, <span style={{ color: '#00E5CC' }}>Webale! — Private Group Fundraising</span> gives you a befitting platform.
+        </p>
+        <p style={{ margin: '0 0 4px', fontSize: '13px', fontStyle: 'italic', opacity: 0.7 }}>
+          Sincerely,
         </p>
         <p style={{ margin: 0 }}>
           <a href="mailto:theteam@webale.net" style={{ color: '#FFB800', fontWeight: 700, fontSize: '14px', textDecoration: 'none' }}>
