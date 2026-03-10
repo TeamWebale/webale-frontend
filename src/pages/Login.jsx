@@ -32,26 +32,18 @@ export default function Login() {
       {/* ── Left: Hero Image (desktop only) ── */}
       <div style={s.heroSide} className="login-hero">
         <div style={s.heroOverlay}>
-          <div style={s.heroContent}>
-            <WebaleLogo variant="full" size="lg" theme="dark" />
-            <h1 style={s.heroTitle}>Private Group Fundraising</h1>
-            <p style={s.heroSub}>
-              Where trust meets transparency. Build your fundraising circle, 
-              track every pledge, and keep your donors aligned — all in one place.
-            </p>
-            <div style={s.heroFeatures}>
-              <span style={s.heroPill}>🔒 Invitation-Only</span>
-              <span style={s.heroPill}>💱 160+ Currencies</span>
-              <span style={s.heroPill}>📊 Real-Time Tracking</span>
-            </div>
+          <div style={s.heroPillsWrap}>
+            <span style={s.heroPill}>🔒 Invitation-Only</span>
+            <span style={s.heroPill}>💱 160+ Currencies</span>
+            <span style={s.heroPill}>📊 Real-Time Tracking</span>
           </div>
         </div>
       </div>
 
       {/* ── Right: Login Form ── */}
-      <div style={s.formSide}>
+      <div style={s.formSide} className="login-form-side">
         <div style={s.card}>
-          <div style={s.brand} className="login-mobile-logo">
+          <div style={s.brand}>
             <WebaleLogo variant="full" size="md" theme="dark" />
           </div>
           <p style={s.welcome}>(Teams, Targets, Tracking)</p>
@@ -94,15 +86,27 @@ export default function Login() {
               theteam@webale.net
             </p>
           </div>
+
+          {/* Mobile hero banner */}
+          <div className="login-hero-mobile" style={s.mobileHero}>
+            <div style={s.mobileHeroOverlay}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center' }}>
+                <span style={s.heroPill}>🔒 Invitation-Only</span>
+                <span style={s.heroPill}>💱 160+ Currencies</span>
+                <span style={s.heroPill}>📊 Real-Time Tracking</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       <style>{`
         .login-hero { display: flex; }
-        .login-mobile-logo { display: none; }
+        .login-hero-mobile { display: none; }
         @media (max-width: 900px) {
           .login-hero { display: none !important; }
-          .login-mobile-logo { display: block !important; }
+          .login-hero-mobile { display: block !important; }
+          .login-form-side { width: 100% !important; padding: 24px 16px !important; }
         }
       `}</style>
     </div>
@@ -121,30 +125,19 @@ const s = {
   },
   heroOverlay: {
     position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
-    background: "linear-gradient(135deg, rgba(13,27,46,0.85) 0%, rgba(27,45,79,0.75) 50%, rgba(74,127,193,0.6) 100%)",
-    display: "flex", alignItems: "center", justifyContent: "center",
-    padding: "40px",
+    background: "linear-gradient(180deg, rgba(13,27,46,0.3) 0%, rgba(13,27,46,0.5) 60%, rgba(13,27,46,0.85) 100%)",
+    display: "flex", alignItems: "flex-end", justifyContent: "center",
+    padding: "0 24px 32px",
   },
-  heroContent: {
-    maxWidth: "440px", color: "white",
-  },
-  heroTitle: {
-    fontSize: "32px", fontWeight: 800, margin: "20px 0 12px",
-    fontFamily: "'Segoe UI', sans-serif", lineHeight: 1.2,
-    letterSpacing: "-0.5px",
-  },
-  heroSub: {
-    fontSize: "15px", lineHeight: 1.7, opacity: 0.8,
-    fontFamily: "'Segoe UI', sans-serif", margin: "0 0 24px",
-  },
-  heroFeatures: {
-    display: "flex", flexWrap: "wrap", gap: "8px",
+  heroPillsWrap: {
+    display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "center",
   },
   heroPill: {
-    background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)",
-    borderRadius: "20px", padding: "6px 14px", fontSize: "12px",
-    fontWeight: 600, color: "rgba(255,255,255,0.9)",
+    background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)",
+    borderRadius: "20px", padding: "8px 16px", fontSize: "12px",
+    fontWeight: 600, color: "rgba(255,255,255,0.95)",
     fontFamily: "'Segoe UI', sans-serif",
+    backdropFilter: "blur(4px)",
   },
   formSide: {
     width: "480px", flexShrink: 0,
@@ -192,4 +185,16 @@ const s = {
     fontFamily: "'Segoe UI',sans-serif",
   },
   regLink: { color: "#00C2CC", textDecoration: "none", fontWeight: 500 },
+  mobileHero: {
+    width: "100%", height: "180px", marginTop: "24px",
+    borderRadius: "12px", overflow: "hidden", position: "relative",
+    backgroundImage: "url('/login-hero.jpg')",
+    backgroundSize: "cover", backgroundPosition: "center",
+  },
+  mobileHeroOverlay: {
+    position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+    background: "linear-gradient(180deg, rgba(13,27,46,0.2) 0%, rgba(13,27,46,0.75) 100%)",
+    display: "flex", alignItems: "flex-end", justifyContent: "center",
+    padding: "0 12px 14px",
+  },
 };
