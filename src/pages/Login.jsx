@@ -44,7 +44,7 @@ export default function Login() {
       <div style={s.formSide} className="login-form-side">
         <div style={s.card}>
           <div style={s.brand}>
-            <WebaleLogo variant="full" size="md" theme="dark" />
+            <WebaleLogo variant="full" size="lg" theme="dark" />
           </div>
           <p style={s.welcome}>(Teams, Targets, Tracking)</p>
 
@@ -81,19 +81,21 @@ export default function Login() {
           {/* Mobile hero banner */}
           <div className="login-hero-mobile" style={s.mobileHero}>
             <div style={s.mobileHeroOverlay}>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center' }}>
+              <div style={s.mobileTopPills}>
                 <span style={s.heroPill}>🔒 Invitation-Only</span>
                 <span style={s.heroPill}>💱 160+ Currencies</span>
+              </div>
+              <div style={s.mobileBottomPill}>
                 <span style={s.heroPill}>📊 Real-Time Tracking</span>
               </div>
             </div>
           </div>
 
-          <div style={{ marginTop: "20px", textAlign: "center", fontFamily: "'Segoe UI',sans-serif" }}>
-            <p style={{ margin: "0 0 4px", fontSize: "12px", fontWeight: 600, color: "#00E5CC", letterSpacing: "0.2px" }}>
+          <div style={{ marginTop: "12px", textAlign: "center", fontFamily: "'Segoe UI',sans-serif" }}>
+            <p style={{ margin: "0 0 2px", fontSize: "11px", fontWeight: 600, color: "#00E5CC", letterSpacing: "0.2px" }}>
               © Copyright 2026 Landfolks Aitech (U) Ltd
             </p>
-            <p style={{ margin: 0, fontSize: "12px", fontWeight: 600, color: "#FFB800", letterSpacing: "0.2px" }}>
+            <p style={{ margin: 0, fontSize: "11px", fontWeight: 600, color: "#FFB800", letterSpacing: "0.2px" }}>
               theteam@webale.net
             </p>
           </div>
@@ -108,7 +110,7 @@ export default function Login() {
           .login-hero-mobile { display: block !important; }
           .login-form-side {
             width: 100% !important;
-            padding: 24px 16px !important;
+            padding: 16px 16px !important;
             align-items: center !important;
           }
           .login-form-side > div {
@@ -156,8 +158,8 @@ const s = {
     width: "100%", maxWidth: "380px",
     display: "flex", flexDirection: "column", alignItems: "center",
   },
-  brand: { marginBottom: "12px" },
-  welcome: { fontSize: "14px", color: "#00E5CC", fontWeight: 500, marginBottom: "24px" },
+  brand: { marginBottom: "8px" },
+  welcome: { fontSize: "14px", color: "#00E5CC", fontWeight: 500, marginBottom: "16px" },
   error: {
     width: "100%", background: "rgba(220,53,69,0.15)",
     border: "1px solid rgba(220,53,69,0.4)", borderRadius: "8px",
@@ -169,7 +171,7 @@ const s = {
     background: "transparent", border: "none", color: "#ff8a8a",
     cursor: "pointer", fontSize: "14px", padding: "0",
   },
-  form: { width: "100%", display: "flex", flexDirection: "column", gap: "16px" },
+  form: { width: "100%", display: "flex", flexDirection: "column", gap: "12px" },
   field: { display: "flex", flexDirection: "column", gap: "6px" },
   label: {
     fontSize: "12px", fontWeight: 500, color: "rgba(255,255,255,0.55)",
@@ -188,20 +190,26 @@ const s = {
     fontFamily: "'Segoe UI',sans-serif",
   },
   reg: {
-    marginTop: "20px", fontSize: "14px", color: "rgba(255,255,255,0.4)",
+    marginTop: "12px", fontSize: "14px", color: "rgba(255,255,255,0.4)",
     fontFamily: "'Segoe UI',sans-serif",
   },
   regLink: { color: "#00C2CC", textDecoration: "none", fontWeight: 500 },
   mobileHero: {
-    width: "100%", height: "180px", marginTop: "24px",
+    width: "100%", height: "150px", marginTop: "16px",
     borderRadius: "12px", overflow: "hidden", position: "relative",
     backgroundImage: "url('/login-hero.jpg')",
     backgroundSize: "cover", backgroundPosition: "center",
   },
   mobileHeroOverlay: {
     position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
-    background: "linear-gradient(180deg, rgba(13,27,46,0.2) 0%, rgba(13,27,46,0.75) 100%)",
-    display: "flex", alignItems: "flex-end", justifyContent: "center",
-    padding: "0 12px 14px",
+    background: "linear-gradient(180deg, rgba(13,27,46,0.7) 0%, rgba(13,27,46,0.15) 50%, rgba(13,27,46,0.7) 100%)",
+    display: "flex", flexDirection: "column", justifyContent: "space-between",
+    padding: "10px 12px",
+  },
+  mobileTopPills: {
+    display: "flex", gap: "6px", justifyContent: "center",
+  },
+  mobileBottomPill: {
+    display: "flex", justifyContent: "center",
   },
 };
