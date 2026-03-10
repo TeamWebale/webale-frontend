@@ -210,6 +210,6 @@ const s = {
     display: "flex", gap: "6px", justifyContent: "center",
   },
   mobileBottomPill: {
-    display: "flex", justifyContent: "center",
+    display: "flex", justifyContent: "flex-end",
   },
 };
