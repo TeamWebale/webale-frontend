@@ -110,7 +110,7 @@ export default function Login() {
           .login-hero-mobile { display: block !important; }
           .login-form-side {
             width: 100% !important;
-            padding: 16px 16px !important;
+            padding: 8px 16px 16px !important;
             align-items: center !important;
           }
           .login-form-side > div {
@@ -195,7 +195,7 @@ const s = {
   },
   regLink: { color: "#00C2CC", textDecoration: "none", fontWeight: 500 },
   mobileHero: {
-    width: "100%", height: "150px", marginTop: "16px",
+    width: "100%", height: "200px", marginTop: "16px",
     borderRadius: "12px", overflow: "hidden", position: "relative",
     backgroundImage: "url('/login-hero.jpg')",
     backgroundSize: "cover", backgroundPosition: "center",
