@@ -263,7 +263,7 @@ function Dashboard() {
         fontSize: '16px',
       }}>
         <p style={{ margin: '0 0 14px', opacity: 0.85 }}>
-          Watching fundraisers manually repost to update donor groups of campaign progress meant jostling for attention with unbundled stream of randomized feed yet; 'it was never meant to be that way!' We rolled the sleeves to build <strong>Webale!</strong> for automation of that and related tasks.
+          Watching fundraisers manually repost to update donor groups of campaign progress meant jostling for attention with unbundled stream of randomized feed, yet; 'it was never meant to be that way!' We rolled the sleeves to build <strong>Webale!</strong> for automation of that and related tasks.
         </p>
         <p style={{ margin: '0 0 14px' }}>
           Because <strong>Webale!</strong> is designed with your donor circle in mind; team growth, campaign targets and actions tracking dominated the array of features and tools in our box. Moreover given that invitation-only groups already trust each other, mostly <strong>Webale!</strong> focused on privacy from general purpose platforms to offer a structured, transparent alternative and enliven the task of pooling money.
