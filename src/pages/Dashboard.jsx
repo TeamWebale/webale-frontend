@@ -260,7 +260,7 @@ function Dashboard() {
         color: 'white',
         boxShadow: '0 4px 20px rgba(27,45,79,0.25)',
         lineHeight: '1.75',
-        fontSize: '14px',
+        fontSize: '16px',
       }}>
         <p style={{ margin: '0 0 14px', opacity: 0.85 }}>
           Watching fundraisers manually repost to update donor groups of campaign progress meant jostling for attention with unbundled stream of randomized feed yet; 'it was never meant to be that way!' We rolled the sleeves to build <strong>Webale!</strong> for automation of that and related tasks.
