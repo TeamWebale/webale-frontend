@@ -78,15 +78,6 @@ export default function Login() {
             Don't have an account? <Link to="/register" style={s.regLink}>Create one</Link>
           </p>
 
-          <div style={{ marginTop: "28px", textAlign: "center", fontFamily: "'Segoe UI',sans-serif" }}>
-            <p style={{ margin: "0 0 4px", fontSize: "12px", fontWeight: 600, color: "#00E5CC", letterSpacing: "0.2px" }}>
-              © Copyright 2026 Landfolks Aitech (U) Ltd
-            </p>
-            <p style={{ margin: 0, fontSize: "12px", fontWeight: 600, color: "#FFB800", letterSpacing: "0.2px" }}>
-              theteam@webale.net
-            </p>
-          </div>
-
           {/* Mobile hero banner */}
           <div className="login-hero-mobile" style={s.mobileHero}>
             <div style={s.mobileHeroOverlay}>
@@ -97,6 +88,15 @@ export default function Login() {
               </div>
             </div>
           </div>
+
+          <div style={{ marginTop: "20px", textAlign: "center", fontFamily: "'Segoe UI',sans-serif" }}>
+            <p style={{ margin: "0 0 4px", fontSize: "12px", fontWeight: 600, color: "#00E5CC", letterSpacing: "0.2px" }}>
+              © Copyright 2026 Landfolks Aitech (U) Ltd
+            </p>
+            <p style={{ margin: 0, fontSize: "12px", fontWeight: 600, color: "#FFB800", letterSpacing: "0.2px" }}>
+              theteam@webale.net
+            </p>
+          </div>
         </div>
       </div>
 
@@ -106,7 +106,14 @@ export default function Login() {
         @media (max-width: 900px) {
           .login-hero { display: none !important; }
           .login-hero-mobile { display: block !important; }
-          .login-form-side { width: 100% !important; padding: 24px 16px !important; }
+          .login-form-side {
+            width: 100% !important;
+            padding: 24px 16px !important;
+            align-items: center !important;
+          }
+          .login-form-side > div {
+            max-width: 320px !important;
+          }
         }
       `}</style>
     </div>
@@ -125,12 +132,12 @@ const s = {
   },
   heroOverlay: {
     position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
-    background: "linear-gradient(180deg, rgba(13,27,46,0.3) 0%, rgba(13,27,46,0.5) 60%, rgba(13,27,46,0.85) 100%)",
-    display: "flex", alignItems: "flex-end", justifyContent: "center",
-    padding: "0 24px 32px",
+    background: "linear-gradient(180deg, rgba(13,27,46,0.7) 0%, rgba(13,27,46,0.2) 40%, rgba(13,27,46,0.3) 100%)",
+    display: "flex", alignItems: "flex-start", justifyContent: "flex-start",
+    padding: "28px 24px",
   },
   heroPillsWrap: {
-    display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "center",
+    display: "flex", flexDirection: "column", gap: "8px",
   },
   heroPill: {
     background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)",
