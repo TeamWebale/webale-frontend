@@ -83,10 +83,10 @@ export default function Login() {
             <div style={s.mobileHeroOverlay}>
               <div style={s.mobileTopPills}>
                 <span style={s.heroPill}>🔒 Invitation-Only</span>
-                <span style={s.heroPill}>💱 160+ Currencies</span>
+                <span style={s.heroPill}>📊 Real-Time Tracking</span>
               </div>
               <div style={s.mobileBottomPill}>
-                <span style={s.heroPill}>📊 Real-Time Tracking</span>
+                <span style={s.heroPill}>💱 160+ Currencies</span>
               </div>
             </div>
           </div>
