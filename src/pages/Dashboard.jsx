@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { groupAPI } from '../services/api';
+import { groupAPI, pledgeAPI } from '../services/api';
 import { useRightSidebar } from '../components/MainLayout';
 import { getCurrencySymbol } from '../utils/currencyConverter';
 import { formatTimeAgo } from '../utils/timeFormatter';
@@ -26,8 +26,30 @@ function Dashboard() {
       const groupsData = res.data.data?.groups || res.data.groups || res.data || [];
       setGroups(Array.isArray(groupsData) ? groupsData : []);
 
-      // Recent activity will be populated from API when available
-      setRecentActivity([]);
+      // Fetch recent activity from all user groups
+      const allActivity = [];
+      const groupsList = Array.isArray(groupsData) ? groupsData : [];
+      for (const g of groupsList.slice(0, 5)) {
+        try {
+          const pledgeRes = await pledgeAPI.getByGroup(g.id);
+          const pledgeData = pledgeRes.data.data || pledgeRes.data || [];
+          if (Array.isArray(pledgeData)) {
+            pledgeData.slice(0, 3).forEach(p => {
+              allActivity.push({
+                id: `p-${p.id}`,
+                type: p.status === 'paid' ? 'payment' : 'pledge',
+                user: p.donor_name?.trim() || p.first_name || 'Member',
+                action: p.status === 'paid' ? `paid their pledge in ${g.name}` : `pledged in ${g.name}`,
+                amount: parseFloat(p.amount || 0),
+                currency: g.currency || 'USD',
+                time: new Date(p.created_at),
+              });
+            });
+          }
+        } catch {}
+      }
+      allActivity.sort((a, b) => b.time - a.time);
+      setRecentActivity(allActivity.slice(0, 5));
     } catch (err) {
       console.error('Error loading dashboard:', err);
     } finally {
@@ -89,7 +111,7 @@ function Dashboard() {
                     <p style={{ margin: 0, color: '#2d3748' }}>
                       <strong>{activity.user}</strong> {activity.action}
                       {activity.amount && (
-                        <span style={{ color: '#48bb78', fontWeight: '600' }}> ${activity.amount}</span>
+                        <span style={{ color: '#48bb78', fontWeight: '600' }}> {getCurrencySymbol(activity.currency)}{activity.amount.toLocaleString()}</span>
                       )}
                     </p>
                     <p style={{ margin: '2px 0 0', fontSize: '11px', color: '#a0aec0' }}>

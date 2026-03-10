@@ -934,7 +934,7 @@ function GroupDetails() {
       }}>
         <div
           onClick={handleOpenFeed}
-          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: feedOpen ? '12px' : '0', cursor: 'pointer' }}
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', cursor: 'pointer' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{
@@ -942,7 +942,7 @@ function GroupDetails() {
               animation: 'pulse 2s infinite', display: 'inline-block'
             }} />
             <h3 style={{ margin: 0, fontSize: '15px', color: '#2d3748', fontWeight: '700' }}>Live Donor Feed</h3>
-            {!feedOpen && newDonorCount > 0 && (
+            {newDonorCount > 0 && (
               <span style={{
                 background: '#e53e3e', color: '#fff', borderRadius: '10px', fontSize: '10px',
                 fontWeight: 700, padding: '2px 7px', minWidth: '18px', textAlign: 'center',
@@ -950,36 +950,34 @@ function GroupDetails() {
               }}>{newDonorCount} new</span>
             )}
           </div>
-          <span style={{ fontSize: '12px', color: '#a0aec0', userSelect: 'none' }}>{feedOpen ? '▲' : '▼'}</span>
+          {pledges.length > 5 && (
+            <span style={{ fontSize: '12px', color: '#a0aec0', userSelect: 'none' }}>{feedOpen ? '▲ Less' : '▼ All'}</span>
+          )}
         </div>
-        {feedOpen && (
-          <>
-            {pledges.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '16px', color: '#a0aec0' }}>
-                <p style={{ margin: '0 0 4px', fontSize: '13px' }}>No recent pledges yet</p>
+        {pledges.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '16px', color: '#a0aec0' }}>
+            <p style={{ margin: '0 0 4px', fontSize: '13px' }}>No recent pledges yet</p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '8px' }}>
+            {pledges.slice(0, feedOpen ? pledges.length : 5).map(pledge => (
+              <div key={pledge.id} style={{ padding: '7px 10px', background: '#f7fafc', borderRadius: '8px', fontSize: '13px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ fontWeight: '600', color: '#2d3748' }}>
+                    {pledge.is_anonymous ? 'John Doe' : (pledge.donor_name?.trim() || pledge.first_name || 'Unknown')}
+                  </span>
+                  <span style={{ color: '#48bb78', fontWeight: '600' }}>
+                    {currencySymbol}{formatAmount(pledge.amount)}
+                  </span>
+                </div>
+                <span style={{ fontSize: '11px', color: '#a0aec0' }}>{formatTimeAgo(pledge.created_at)}</span>
               </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '8px' }}>
-                {pledges.slice(0, 5).map(pledge => (
-                  <div key={pledge.id} style={{ padding: '7px 10px', background: '#f7fafc', borderRadius: '8px', fontSize: '13px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ fontWeight: '600', color: '#2d3748' }}>
-                        {pledge.is_anonymous ? 'John Doe' : (pledge.donor_name?.trim() || pledge.first_name || 'Unknown')}
-                      </span>
-                      <span style={{ color: '#48bb78', fontWeight: '600' }}>
-                        {currencySymbol}{formatAmount(pledge.amount)}
-                      </span>
-                    </div>
-                    <span style={{ fontSize: '11px', color: '#a0aec0' }}>{formatTimeAgo(pledge.created_at)}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div style={{ padding: '6px 12px', background: '#faf5ff', borderRadius: '20px', textAlign: 'center' }}>
-              <span style={{ fontSize: '12px', color: '#9f7aea' }}>💡 Updates every 30 seconds</span>
-            </div>
-          </>
+            ))}
+          </div>
         )}
+        <div style={{ padding: '6px 12px', background: '#faf5ff', borderRadius: '20px', textAlign: 'center' }}>
+          <span style={{ fontSize: '12px', color: '#9f7aea' }}>💡 Updates every 30 seconds</span>
+        </div>
         {isAdmin && (
           <button onClick={handleCreateSubGoal} style={{
             width: '100%', marginTop: '12px', padding: '8px', background: 'none', border: 'none',
