@@ -32,21 +32,23 @@ function Dashboard() {
       for (const g of groupsList.slice(0, 5)) {
         try {
           const pledgeRes = await pledgeAPI.getByGroup(g.id);
-          const pledgeData = pledgeRes.data.data || pledgeRes.data || [];
-          if (Array.isArray(pledgeData)) {
-            pledgeData.slice(0, 3).forEach(p => {
-              allActivity.push({
-                id: `p-${p.id}`,
-                type: p.status === 'paid' ? 'payment' : 'pledge',
-                user: p.donor_name?.trim() || p.first_name || 'Member',
-                action: p.status === 'paid' ? `paid their pledge in ${g.name}` : `pledged in ${g.name}`,
-                amount: parseFloat(p.amount || 0),
-                currency: g.currency || 'USD',
-                time: new Date(p.created_at),
-              });
+          const raw = pledgeRes.data;
+          const pledgeData = raw?.data?.pledges || raw?.data || raw?.pledges || (Array.isArray(raw) ? raw : []);
+          const pledgeArr = Array.isArray(pledgeData) ? pledgeData : [];
+          pledgeArr.slice(0, 3).forEach(p => {
+            allActivity.push({
+              id: `p-${p.id}`,
+              type: p.status === 'paid' ? 'payment' : 'pledge',
+              user: p.donor_name?.trim() || p.first_name || p.user_name || 'Member',
+              action: p.status === 'paid' ? `paid their pledge in ${g.name}` : `pledged in ${g.name}`,
+              amount: parseFloat(p.amount || p.original_amount || 0),
+              currency: p.pledge_currency || g.currency || 'USD',
+              time: new Date(p.created_at),
             });
-          }
-        } catch {}
+          });
+        } catch (e) {
+          console.warn('Activity fetch for group', g.id, e.message);
+        }
       }
       allActivity.sort((a, b) => b.time - a.time);
       setRecentActivity(allActivity.slice(0, 5));
