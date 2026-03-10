@@ -228,7 +228,7 @@ export default function Register() {
           {/* Footer */}
           <div style={{ marginTop:"24px", textAlign:"center" }}>
             <p style={{ margin:"0 0 4px", fontSize:"12px", fontWeight:600, color:"#00E5CC" }}>
-              © Copyright 2026 Landfolks Aitech (U) Ltd
+              © Copyright 2026 Landfolks Aitech Ltd
             </p>
             <p style={{ margin:0, fontSize:"12px", fontWeight:600, color:"#FFB800" }}>
               theteam@webale.net
@@ -330,7 +330,7 @@ export default function Register() {
 
         <div style={{ marginTop:"24px", textAlign:"center" }}>
           <p style={{ margin:"0 0 4px", fontSize:"12px", fontWeight:600, color:"#00E5CC" }}>
-            © Copyright 2026 Landfolks Aitech (U) Ltd
+            © Copyright 2026 Landfolks Aitech Ltd
           </p>
           <p style={{ margin:0, fontSize:"12px", fontWeight:600, color:"#FFB800" }}>
             theteam@webale.net

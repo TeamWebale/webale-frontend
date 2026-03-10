@@ -93,7 +93,7 @@ export default function Login() {
 
           <div style={{ marginTop: "12px", textAlign: "center", fontFamily: "'Segoe UI',sans-serif" }}>
             <p style={{ margin: "0 0 2px", fontSize: "11px", fontWeight: 600, color: "#00E5CC", letterSpacing: "0.2px" }}>
-              © Copyright 2026 Landfolks Aitech (U) Ltd
+              © Copyright 2026 Landfolks Aitech Ltd
             </p>
             <p style={{ margin: 0, fontSize: "11px", fontWeight: 600, color: "#FFB800", letterSpacing: "0.2px" }}>
               theteam@webale.net
