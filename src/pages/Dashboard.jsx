@@ -293,10 +293,10 @@ function Dashboard() {
           <strong>Webale!</strong> is designed with your donor circle in mind; so team growth, campaign targets and actions tracking dominate our array of tools, features and functions. Because invitation-only groups already trust each other, what they missed is privacy away from general purpose platforms and a structured, transparent alternative that enliven the task of pooling money.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          Pledges and contributions are tracked and logged so members are continually updated of who committed to what, fulfilled, revised or even revoked a pledge. As the money conversation continues, real time progress-bars charm members with a visual of how close the group is to the finishing line; and 'fear of missing out' inspire a 'yes we can' wave of participation.
+          Pledges and contributions are tracked and logged so members are updated of who committed to what, fulfilled, revised or even revoked a pledge. Continuing the money conversation, real time progress-bars charm members with a visual of how close the group is to the finishing line; so 'fear of missing out' inspire a 'yes we can' wave of participation.
         </p>
         <p style={{ margin: '0 0 14px' }}>
-          Next is currency conversion across 160+ countries, highlights of quarterly milestones, automated reminders, acknowledgements, in-built member messaging and lot's other admin controls all put fundraisers firmly in charge.
+          Next is currency conversion across 160+ countries, highlights of quarterly milestones, automated reminders, acknowledgements, in-built member messaging and lot's other admin controls that together put fundraisers firmly in charge.
         </p>
         <p style={{ margin: '0 0 14px' }}>
           That's a peek into our arsenal of innovation for the success of your cause – so, what keeps you from launching your fundraising here today?
