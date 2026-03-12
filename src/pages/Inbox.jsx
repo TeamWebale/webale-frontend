@@ -1,357 +1,161 @@
 /**
- * Inbox.jsx — src/pages/Inbox.jsx
- * Direct messages inbox with thread view.
- * Route: /inbox
+ * Login.jsx — src/pages/Login.jsx
+ * SWAPPED VERSION: Pitch text on left, login form on right
+ * Mobile: collapsible pitch above footer
  */
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import WebaleLogo from "../components/WebaleLogo";
 
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+export default function Login() {
+  const { login } = useAuth();
+  const navigate  = useNavigate();
+  const [email,    setEmail]    = useState("");
+  const [password, setPassword] = useState("");
+  const [error,    setError]    = useState("");
+  const [loading,  setLoading]  = useState(false);
+  const [pitchExpanded, setPitchExpanded] = useState(false);
 
-const API = 'https://webale-api.onrender.com/api';
-const headers = () => ({ Authorization: `Bearer ${localStorage.getItem('token')}` });
-
-function timeAgo(d) {
-  const s = Math.floor((Date.now() - new Date(d)) / 1000);
-  if (s < 60) return 'just now';
-  if (s < 3600) return Math.floor(s / 60) + 'm ago';
-  if (s < 86400) return Math.floor(s / 3600) + 'h ago';
-  return new Date(d).toLocaleDateString();
-}
-
-export default function Inbox() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [groups, setGroups] = useState([]);
-  const [selectedGroup, setSelectedGroup] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [newMsg, setNewMsg] = useState('');
-  const [members, setMembers] = useState([]);
-  const [selectedRecipient, setSelectedRecipient] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
-  const [mobileView, setMobileView] = useState('list');
-  const [showBlocked, setShowBlocked] = useState(false);
-  const [forwardMode, setForwardMode] = useState(null); // holds message content to forward
-  const composeRef = useRef(null);
-
-  // Blocked users — stored in localStorage per user
-  const getBlockedKey = () => `blockedUsers_${user?.id || 'anon'}`;
-  const [blockedUsers, setBlockedUsers] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(`blockedUsers_${null}`) || '[]'); } catch { return []; }
-  });
-
-  // Re-load blocked list once user is available
-  useEffect(() => {
-    if (user?.id) {
-      try {
-        const stored = JSON.parse(localStorage.getItem(getBlockedKey()) || '[]');
-        setBlockedUsers(stored);
-      } catch { setBlockedUsers([]); }
-    }
-  }, [user?.id]);
-
-  const blockUser = (senderId, senderName) => {
-    if (!senderId || senderId === user?.id) return;
-    const updated = [...blockedUsers.filter(b => b.id !== senderId), { id: senderId, name: senderName }];
-    setBlockedUsers(updated);
-    localStorage.setItem(getBlockedKey(), JSON.stringify(updated));
-  };
-
-  const unblockUser = (senderId) => {
-    const updated = blockedUsers.filter(b => b.id !== senderId);
-    setBlockedUsers(updated);
-    localStorage.setItem(getBlockedKey(), JSON.stringify(updated));
-  };
-
-  const isBlocked = (senderId) => blockedUsers.some(b => b.id === senderId);
-
-  // Filter messages — hide messages from blocked users
-  const visibleMessages = messages.filter(m => !isBlocked(m.sender_id));
-
-  const handleDeleteMsg = async (msgId) => {
-    if (!msgId || !selectedGroup) return;
-    if (!window.confirm('Delete this message?')) return;
+  const handleSubmit = async (e) => {
+    e.preventDefault(); setError(""); setLoading(true);
     try {
-      await axios.delete(`${API}/messages/${msgId}`, { headers: headers() });
-      setMessages(prev => prev.filter(m => m.id !== msgId));
+      await login(email, password);
+      navigate("/dashboard");
     } catch (err) {
-      alert('Could not delete message. This feature may not be available yet.');
-    }
-  };
-
-  const handleReplyTo = (content) => {
-    const preview = (content || '').substring(0, 50).replace(/\n/g, ' ');
-    setNewMsg(`↩ "${preview}..."\n\n`);
-    // Scroll to compose field
-    setTimeout(() => {
-      composeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      composeRef.current?.querySelector('textarea')?.focus();
-    }, 100);
-  };
-
-  const handleForward = (content) => {
-    setForwardMode(content);
-    // Switch to group list so user can pick destination
-    setSelectedGroup(null);
-    setMobileView('list');
-  };
-
-  const handleSelectGroupForForward = (group) => {
-    setSelectedGroup(group);
-    setMobileView('thread');
-    setNewMsg(`📨 Forwarded:\n${forwardMode || ''}`);
-    setForwardMode(null);
-    // Scroll to compose after messages load
-    setTimeout(() => {
-      composeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      composeRef.current?.querySelector('textarea')?.focus();
-    }, 500);
-  };
-
-  useEffect(() => { loadGroups(); }, []);
-
-  useEffect(() => {
-    if (selectedGroup) {
-      loadMessages(selectedGroup.id);
-      loadMembers(selectedGroup.id);
-    }
-  }, [selectedGroup]);
-
-  // Poll for new messages every 15s
-  useEffect(() => {
-    if (!selectedGroup) return;
-    const interval = setInterval(() => loadMessages(selectedGroup.id), 15000);
-    return () => clearInterval(interval);
-  }, [selectedGroup]);
-
-  const loadGroups = async () => {
-    try {
-      const res = await axios.get(`${API}/messages/groups`, { headers: headers() });
-      const data = res.data?.data || res.data || [];
-      setGroups(data);
-      if (data.length > 0 && !selectedGroup) setSelectedGroup(data[0]);
-    } catch (err) {
-      console.error('Load groups error:', err);
+      setError(err.response?.data?.message || "Incorrect email or password. Please try again.");
     } finally { setLoading(false); }
   };
 
-  const loadMessages = async (groupId) => {
-    try {
-      const res = await axios.get(`${API}/messages/${groupId}`, { headers: headers() });
-      const data = res.data?.data || [];
-      setMessages([...data].reverse()); // API returns DESC, we want ASC
-    } catch {}
-  };
-
-  const loadMembers = async (groupId) => {
-    try {
-      const res = await axios.get(`${API}/groups/${groupId}`, { headers: headers() });
-      const m = res.data?.data?.members || res.data?.members || [];
-      setMembers(m.filter(m => (m.user_id || m.id) !== user?.id));
-    } catch {}
-  };
-
-  const sendMessage = async () => {
-    if (!newMsg.trim() || !selectedGroup) return;
-    setSending(true);
-    try {
-      await axios.post(`${API}/messages`, {
-        group_id: selectedGroup.id,
-        content: newMsg.trim(),
-        recipient_id: selectedRecipient || null,
-      }, { headers: headers() });
-      setNewMsg('');
-      await loadMessages(selectedGroup.id);
-    } catch (err) {
-      alert('Failed to send: ' + (err.response?.data?.message || err.message));
-    } finally { setSending(false); }
-  };
-
-  const handleKey = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-  };
-
-  if (loading) return (
-    <div style={s.loadWrap}>
-      <div style={s.spinner} />
-      <p style={{ color: '#94a3b8', marginTop: 12 }}>Loading messages…</p>
-    </div>
-  );
-
   return (
-    <div style={s.page} className="inbox-page">
-      {/* ── Left panel: group list ── */}
-      <div style={s.leftPanel} className={`inbox-left ${mobileView === 'thread' ? 'inbox-hide-mobile' : ''}`}>
-        <div style={s.leftHeader}>
-          <h2 style={s.leftTitle}>💬 Messages</h2>
-          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-            <button onClick={() => setShowBlocked(o => !o)} style={s.blockedToggle} title="Blocked users">
-              🚫 {blockedUsers.length > 0 ? blockedUsers.length : ''}
-            </button>
-            <button onClick={() => navigate('/dashboard')} style={s.closeBtn}>✕</button>
+    <div style={s.page}>
+
+      {/* ── Left: Pitch Text (desktop only) ── */}
+      <div style={s.pitchSide} className="login-pitch">
+        <div style={s.pitchContent}>
+          <WebaleLogo variant="full" size="lg" theme="dark" />
+
+          <div style={s.pitchPills}>
+            <span style={s.pill}>🔒 Invitation-Only</span>
+            <span style={s.pill}>💱 160+ Currencies</span>
+            <span style={s.pill}>📊 Real-Time Tracking</span>
           </div>
+
+          <p style={s.pitchPara1}>
+            Repetitive manual posts updating donor groups of campaign progress cost fundraisers time, have to jostle for attention with the unbundled stream of randomized feed, and; <em>'it was never meant to be that way!'</em> So we rolled the sleeves to build <strong>Webale!</strong> for automation of that and related tasks.
+          </p>
+          <p style={s.pitchPara}>
+            Be it a five member family group or five hundred diaspora contributors, <strong>Webale!</strong> is here to help you replace the chaos of manual record-keeping with a smart dashboard so alive and breathing it ensures that everyone is acknowledged, aligned, motivated, and updated.
+          </p>
+          <p style={s.pitchPara}>
+            Pledges and contributions are tracked and logged so members are updated of who committed to what, fulfilled, revised or even revoked a pledge. The money conversation continues as real time progress-bars charm members with a visual of how close the group is to the finishing line; so 'fear of missing out' inspire a 'yes we can' wave of participation.
+          </p>
+          <p style={s.pitchPara}>
+            <strong>Webale!</strong> is designed with your donor circle in mind; so team growth, campaign targets and action tracking dominate our array of tools, features and functions.
+          </p>
+
+          <p style={s.pitchClosing}>
+            Because your cause is personal <span style={{ color: '#00E5CC' }}>Webale! — Private Group Fundraising</span> gives you a befitting platform.
+          </p>
         </div>
-        {showBlocked && (
-          <div style={s.blockedPanel}>
-            <div style={{ fontSize: '13px', fontWeight: 700, color: '#1a202c', marginBottom: '8px' }}>Blocked Users</div>
-            {blockedUsers.length === 0 ? (
-              <div style={{ fontSize: '12px', color: '#8899AA' }}>No blocked users</div>
-            ) : (
-              blockedUsers.map(b => (
-                <div key={b.id} style={s.blockedRow}>
-                  <span style={{ fontSize: '13px', color: '#2d3748', fontWeight: 500 }}>{b.name || 'User'}</span>
-                  <button onClick={() => unblockUser(b.id)} style={s.unblockBtn}>Unblock</button>
-                </div>
-              ))
-            )}
-          </div>
-        )}
-        {forwardMode && (
-          <div style={{ padding: '10px 16px', background: '#ebf8ff', borderBottom: '1px solid #bee3f8', fontSize: '13px', color: '#2b6cb0', fontWeight: 600 }}>
-            📨 Select a group to forward the message to:
-            <button onClick={() => setForwardMode(null)} style={{ background: 'none', border: 'none', color: '#e53e3e', fontWeight: 700, cursor: 'pointer', marginLeft: '8px', fontSize: '12px' }}>Cancel</button>
-          </div>
-        )}
-        {groups.length === 0 ? (
-          <div style={s.empty}>No group conversations yet</div>
-        ) : (
-          groups.map(g => (
-            <div
-              key={g.id}
-              onClick={() => forwardMode ? handleSelectGroupForForward(g) : (setSelectedGroup(g), setMobileView('thread'))}
-              style={{ ...s.groupRow, ...(selectedGroup?.id === g.id ? s.groupRowActive : {}) }}
-            >
-              <div style={s.groupAvatar}>{g.name?.[0]?.toUpperCase() || '?'}</div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={s.groupName}>{g.name}</div>
-                <div style={s.groupPreview}>
-                  {g.last_message ? g.last_message.substring(0, 40) + (g.last_message.length > 40 ? '…' : '') : 'No messages yet'}
-                </div>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
-                {g.last_message_at && <div style={s.timeStamp}>{timeAgo(g.last_message_at)}</div>}
-                {g.unread_count > 0 && <div style={s.unreadBadge}>{g.unread_count}</div>}
-              </div>
-            </div>
-          ))
-        )}
       </div>
 
-      {/* ── Right panel: message thread ── */}
-      <div style={s.rightPanel} className={`inbox-right ${mobileView === 'list' ? 'inbox-hide-mobile' : ''}`}>
-        {!selectedGroup ? (
-          <div style={s.noSelect}>Select a group to view messages</div>
-        ) : (
-          <>
-            {/* Thread header */}
-            <div style={s.threadHeader}>
-              <button onClick={() => setMobileView('list')} className="inbox-back-btn" style={s.backBtn}>← Back</button>
-              <div style={s.groupAvatar}>{selectedGroup.name?.[0]?.toUpperCase()}</div>
-              <div>
-                <div style={s.threadTitle}>{selectedGroup.name}</div>
-                <div style={s.threadSub}>Group conversation</div>
-              </div>
-            </div>
+      {/* ── Right: Login Form ── */}
+      <div style={s.formSide} className="login-form-side">
+        <div style={s.card}>
+          <div style={s.brand}>
+            <WebaleLogo variant="full" size="lg" theme="dark" />
+          </div>
+          <p style={s.welcome}>(Teams, Targets, Tracking)</p>
 
-            {/* Messages */}
-            <div style={s.messageList} className="inbox-msg-list">
-              {visibleMessages.length === 0 ? (
-                <div style={s.noMessages}>No messages yet — say hello! 👋</div>
-              ) : (
-                [...visibleMessages].reverse().map(m => {
-                  const isMe = m.sender_id === user?.id;
-                  const senderName = isMe ? 'You' : `${m.first_name || ''} ${m.last_name || ''}`.trim();
-                  const lines = (m.content || '').split(/\\n|\n/);
-                  return (
-                    <div key={m.id} className="inbox-msg-wrapper" style={{ marginBottom: '12px' }}>
-                      <div style={{ ...s.msgRow, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-                        {!isMe && (
-                          <div style={s.msgAvatar}>{m.avatar_url || m.first_name?.[0] || '?'}</div>
-                        )}
-                        <div style={{ maxWidth: '75%', minWidth: 0 }}>
-                          {!isMe && <div style={s.senderName}>{senderName}</div>}
-                          <div className="inbox-bubble" style={{ ...s.bubble, ...(isMe ? s.bubbleMe : s.bubbleThem) }}>
-                            {lines.map((line, i) => (
-                              <span key={i}>{line}{i < lines.length - 1 && <br />}</span>
-                            ))}
-                          </div>
-                          <div style={{ ...s.msgTime, textAlign: isMe ? 'right' : 'left' }}>{timeAgo(m.created_at)}</div>
-                        </div>
-                      </div>
-                      <span style={{ display: 'inline-flex', gap: '2px', justifyContent: isMe ? 'flex-end' : 'flex-start', padding: '1px 0 4px', marginLeft: isMe ? 0 : '40px' }}>
-                        <button onClick={() => handleReplyTo(m.content)} style={{ ...s.actionBtn, color: '#3182ce' }} title="Reply">↩Reply</button>
-                        <button onClick={() => handleForward(m.content)} style={{ ...s.actionBtn, color: '#38a169' }} title="Forward">⤳Fwd</button>
-                        {isMe && <button onClick={() => handleDeleteMsg(m.id)} style={{ ...s.actionBtn, color: '#e53e3e' }} title="Delete">🗑Del</button>}
-                        {!isMe && <button onClick={() => blockUser(m.sender_id, senderName)} style={{ ...s.actionBtn, color: '#e53e3e' }} title="Block user">🚫Block</button>}
-                      </span>
-                    </div>
-                  );
-                })
-              )}
+          {error && (
+            <div style={s.error}>
+              <span>{error}</span>
+              <button onClick={() => setError("")} style={s.errClose}>✕</button>
             </div>
+          )}
 
-            {/* Compose */}
-            <div ref={composeRef} style={s.compose}>
-              {members.length > 0 && (
-                <select
-                  value={selectedRecipient}
-                  onChange={e => setSelectedRecipient(e.target.value)}
-                  style={s.recipientSelect}
-                >
-                  <option value="">To: Everyone</option>
-                  {members.map(m => (
-                    <option key={m.user_id || m.id} value={m.user_id || m.id}>
-                      To: {m.first_name} {m.last_name}
-                    </option>
-                  ))}
-                </select>
-              )}
-              <div style={s.composeRow}>
-                <textarea
-                  style={s.composeInput}
-                  placeholder="Type a message… (Enter to send)"
-                  value={newMsg}
-                  onChange={e => setNewMsg(e.target.value)}
-                  onKeyDown={handleKey}
-                  rows={2}
-                />
-                <button
-                  onClick={sendMessage}
-                  disabled={sending || !newMsg.trim()}
-                  style={{ ...s.sendBtn, opacity: sending || !newMsg.trim() ? 0.5 : 1 }}
-                >
-                  {sending ? '…' : '➤'}
+          <form onSubmit={handleSubmit} style={s.form}>
+            <div style={s.field}>
+              <label style={s.label}>Email</label>
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+                required placeholder="you@example.com" style={s.input} />
+            </div>
+            <div style={s.field}>
+              <label style={s.label}>Password</label>
+              <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+                required placeholder="••••••••" style={s.input} />
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <Link to="/forgot-password" style={s.forgot}>Forgot password?</Link>
+            </div>
+            <button type="submit" disabled={loading} style={s.btn}>
+              {loading ? "Signing in…" : "Sign In"}
+            </button>
+          </form>
+
+          <p style={s.reg}>
+            Don't have an account? <Link to="/register" style={s.regLink}>Create one</Link>
+          </p>
+
+          {/* Mobile pitch (collapsible) */}
+          <div className="login-pitch-mobile" style={s.mobilePitch}>
+            <p style={s.mobilePitchText}>
+              Repetitive manual posts updating donor groups of campaign progress cost fundraisers time... <em>'it was never meant to be that way!'</em> So we built <strong>Webale!</strong>
+            </p>
+            {!pitchExpanded && (
+              <button onClick={() => setPitchExpanded(true)} style={s.mobileReadMore}>
+                Read more ▼
+              </button>
+            )}
+            {pitchExpanded && (
+              <>
+                <p style={s.mobilePitchText}>
+                  Be it a five member family group or five hundred diaspora contributors, Webale! is here to help you replace the chaos of manual record-keeping with a smart dashboard so alive and breathing it ensures everyone is acknowledged, aligned, motivated, and updated.
+                </p>
+                <p style={s.mobilePitchText}>
+                  Pledges and contributions are tracked and logged. Real time progress-bars charm members with a visual of how close the group is to the finishing line.
+                </p>
+                <p style={{ ...s.mobilePitchText, color: '#00E5CC', fontWeight: 600 }}>
+                  Because your cause is personal — Webale! gives you a befitting platform.
+                </p>
+                <button onClick={() => setPitchExpanded(false)} style={s.mobileShowLess}>
+                  Show less ▲
                 </button>
-              </div>
+              </>
+            )}
+            <div style={s.mobilePills}>
+              <span style={s.pillSmall}>🔒 Invitation-Only</span>
+              <span style={s.pillSmall}>💱 160+ Currencies</span>
+              <span style={s.pillSmall}>📊 Real-Time Tracking</span>
             </div>
-          </>
-        )}
+          </div>
+
+          <div style={{ marginTop: "12px", textAlign: "center", fontFamily: "'Segoe UI',sans-serif" }}>
+            <p style={{ margin: "0 0 2px", fontSize: "11px", fontWeight: 600, color: "#00E5CC", letterSpacing: "0.2px" }}>
+              © Copyright 2026 Landfolks Aitech Ltd
+            </p>
+            <p style={{ margin: 0, fontSize: "11px", fontWeight: 600, color: "#FFB800", letterSpacing: "0.2px" }}>
+              theteam@webale.net
+            </p>
+          </div>
+        </div>
       </div>
 
       <style>{`
-        .inbox-back-btn { display: none; }
-        .inbox-left { width: 300px; min-width: 260px; flex-shrink: 0; }
-        @media (max-width: 768px) {
-          .inbox-page {
-            display: block !important;
-            height: auto !important;
-            min-height: calc(100vh - 140px);
-            overflow: auto !important;
-          }
-          .inbox-hide-mobile { display: none !important; }
-          .inbox-left {
+        .login-pitch { display: flex; }
+        .login-pitch-mobile { display: none; }
+        @media (max-width: 900px) {
+          .login-pitch { display: none !important; }
+          .login-pitch-mobile { display: block !important; }
+          .login-form-side {
             width: 100% !important;
-            min-width: 0 !important;
-            border-right: none !important;
-            height: calc(100vh - 140px);
+            padding: 8px 16px 16px !important;
+            align-items: center !important;
           }
-          .inbox-right {
-            width: 100% !important;
-            height: calc(100vh - 140px);
+          .login-form-side > div {
+            max-width: 320px !important;
           }
-          .inbox-back-btn { display: flex !important; }
         }
       `}</style>
     </div>
@@ -359,52 +163,117 @@ export default function Inbox() {
 }
 
 const s = {
-  page:         { display: 'flex', height: 'calc(100vh - 80px)', background: '#f8fafc', fontFamily: "'Segoe UI', sans-serif", overflow: 'hidden' },
-  loadWrap:     { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh' },
-  spinner:      { width: 36, height: 36, border: '3px solid #e2e8f0', borderTop: '3px solid #667eea', borderRadius: '50%', animation: 'spin 0.8s linear infinite' },
+  page: {
+    minHeight: "100vh", display: "flex", background: "#0D1B2E",
+  },
 
-  // Left panel
-  leftPanel:    { background: 'white', borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', overflowY: 'auto' },
-  leftHeader:   { padding: '20px 16px 12px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
-  leftTitle:    { margin: 0, fontSize: '17px', fontWeight: 700, color: '#1a202c' },
-  closeBtn:     { background: '#fee2e2', border: 'none', fontSize: '18px', color: '#e53e3e', cursor: 'pointer', padding: '6px 10px', borderRadius: '8px', fontWeight: 700 },
-  blockedToggle:{ background: '#f0f4f9', border: '1px solid #e2e8f0', fontSize: '13px', color: '#4a5568', cursor: 'pointer', padding: '5px 10px', borderRadius: '8px', fontWeight: 600 },
-  blockedPanel: { padding: '12px 16px', background: '#fef2f2', borderBottom: '1px solid #fed7d7' },
-  blockedRow:   { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid #fee2e2' },
-  unblockBtn:   { background: 'linear-gradient(135deg,#48bb78,#38a169)', border: 'none', color: '#fff', fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '6px', cursor: 'pointer' },
-  groupRow:     { display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', cursor: 'pointer', borderBottom: '1px solid #f7f7f7', transition: 'background 0.1s' },
-  groupRowActive:{ background: '#f0f4ff', borderLeft: '3px solid #667eea' },
-  groupAvatar:  { width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg,#667eea,#764ba2)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: 700, flexShrink: 0 },
-  groupName:    { fontWeight: 600, fontSize: '14px', color: '#2d3748', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  groupPreview: { fontSize: '12px', color: '#4a5568', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 },
-  timeStamp:    { fontSize: '11px', color: '#718096' },
-  unreadBadge:  { background: '#667eea', color: 'white', borderRadius: '10px', padding: '1px 7px', fontSize: '11px', fontWeight: 700 },
-  empty:        { padding: 24, color: '#4a5568', fontSize: '14px', textAlign: 'center' },
+  // Left pitch side
+  pitchSide: {
+    flex: 1, position: "relative", overflow: "auto",
+    background: "linear-gradient(135deg, #1B2D4F 0%, #2d4a7a 50%, #4A7FC1 100%)",
+    minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+    padding: "40px",
+  },
+  pitchContent: {
+    maxWidth: "480px", color: "white",
+  },
+  pitchPills: {
+    display: "flex", flexWrap: "wrap", gap: "8px", margin: "24px 0",
+  },
+  pill: {
+    background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)",
+    borderRadius: "20px", padding: "8px 16px", fontSize: "12px",
+    fontWeight: 600, color: "rgba(255,255,255,0.95)",
+    fontFamily: "'Segoe UI', sans-serif",
+  },
+  pitchPara1: {
+    fontSize: "16px", lineHeight: 1.75, color: "rgba(255,255,255,0.9)",
+    margin: "0 0 16px", fontFamily: "'Segoe UI', sans-serif",
+  },
+  pitchPara: {
+    fontSize: "15px", lineHeight: 1.75, color: "rgba(255,255,255,0.8)",
+    margin: "0 0 14px", fontFamily: "'Segoe UI', sans-serif",
+  },
+  pitchClosing: {
+    fontSize: "15px", lineHeight: 1.6, margin: "20px 0 0",
+    fontFamily: "'Segoe UI', sans-serif", color: "rgba(255,255,255,0.9)",
+  },
 
-  // Right panel
-  rightPanel:   { flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#fafbff', minWidth: 0 },
-  noSelect:     { display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: '#4a5568', fontSize: '15px' },
-  threadHeader: { display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 20px', background: 'white', borderBottom: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' },
-  backBtn:      { background: 'linear-gradient(135deg,#667eea,#764ba2)', border: 'none', borderRadius: '8px', padding: '6px 12px', fontSize: '13px', fontWeight: 700, color: '#fff', cursor: 'pointer', alignItems: 'center', marginRight: '4px', boxShadow: '0 2px 6px rgba(102,126,234,0.3)' },
-  threadTitle:  { fontWeight: 700, fontSize: '15px', color: '#2d3748' },
-  threadSub:    { fontSize: '12px', color: '#4a5568' },
+  // Right form
+  formSide: {
+    width: "480px", flexShrink: 0,
+    display: "flex", alignItems: "center", justifyContent: "center",
+    padding: "40px 32px",
+    background: "#0D1B2E",
+  },
+  card: {
+    width: "100%", maxWidth: "380px",
+    display: "flex", flexDirection: "column", alignItems: "center",
+  },
+  brand: { marginBottom: "8px" },
+  welcome: { fontSize: "14px", color: "#00E5CC", fontWeight: 500, marginBottom: "16px" },
+  error: {
+    width: "100%", background: "rgba(220,53,69,0.15)",
+    border: "1px solid rgba(220,53,69,0.4)", borderRadius: "8px",
+    padding: "10px 14px", color: "#ff8a8a", fontSize: "13px",
+    marginBottom: "16px", display: "flex", justifyContent: "space-between",
+    alignItems: "center", gap: "8px",
+  },
+  errClose: {
+    background: "transparent", border: "none", color: "#ff8a8a",
+    cursor: "pointer", fontSize: "14px", padding: "0",
+  },
+  form: { width: "100%", display: "flex", flexDirection: "column", gap: "12px" },
+  field: { display: "flex", flexDirection: "column", gap: "6px" },
+  label: {
+    fontSize: "12px", fontWeight: 500, color: "rgba(255,255,255,0.55)",
+    letterSpacing: "0.3px", fontFamily: "'Segoe UI',sans-serif",
+  },
+  input: {
+    background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)",
+    borderRadius: "10px", padding: "11px 14px", fontSize: "15px",
+    color: "#FFFFFF", outline: "none", fontFamily: "'Segoe UI',sans-serif",
+  },
+  forgot: { fontSize: "13px", color: "#00C2CC", textDecoration: "none" },
+  btn: {
+    marginTop: "4px", background: "linear-gradient(135deg,#00C2CC,#4A7FC1)",
+    color: "#FFF", border: "none", borderRadius: "10px", padding: "13px",
+    fontSize: "15px", fontWeight: 600, cursor: "pointer",
+    fontFamily: "'Segoe UI',sans-serif",
+  },
+  reg: {
+    marginTop: "12px", fontSize: "14px", color: "rgba(255,255,255,0.4)",
+    fontFamily: "'Segoe UI',sans-serif",
+  },
+  regLink: { color: "#00C2CC", textDecoration: "none", fontWeight: 500 },
 
-  // Messages
-  messageList:  { flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '20px 16px' },
-  noMessages:   { textAlign: 'center', color: '#4a5568', fontSize: '14px', marginTop: 40 },
-  msgRow:       { display: 'flex', alignItems: 'flex-end', gap: '8px', maxWidth: '100%', overflow: 'hidden' },
-  msgAvatar:    { width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#667eea,#764ba2)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0, marginBottom: 4 },
-  senderName:   { fontSize: '11px', color: '#2d3748', marginBottom: '3px', fontWeight: 600 },
-  actionBtn:    { background: 'none', border: 'none', fontSize: '11px', cursor: 'pointer', padding: '1px 4px', borderRadius: '4px', fontWeight: 600, fontFamily: "'Segoe UI', sans-serif", whiteSpace: 'nowrap', display: 'inline-block' },
-  bubble:       { padding: '10px 14px', borderRadius: '16px', fontSize: '14px', lineHeight: '1.5', wordBreak: 'break-word', overflowWrap: 'break-word' },
-  bubbleMe:     { background: 'linear-gradient(135deg,#667eea,#764ba2)', color: 'white', borderBottomRightRadius: '4px' },
-  bubbleThem:   { background: 'white', color: '#2d3748', border: '1px solid #e2e8f0', borderBottomLeftRadius: '4px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' },
-  msgTime:      { fontSize: '10px', color: '#718096', marginTop: '3px' },
-
-  // Compose
-  compose:      { background: 'white', borderTop: '1px solid #e2e8f0', padding: '12px 16px' },
-  recipientSelect:{ width: '100%', marginBottom: '8px', padding: '7px 10px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', color: '#4a5568', background: '#fafafa', outline: 'none' },
-  composeRow:   { display: 'flex', gap: '8px', alignItems: 'flex-end' },
-  composeInput: { flex: 1, padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: '12px', fontSize: '14px', resize: 'none', outline: 'none', fontFamily: "'Segoe UI', sans-serif", color: '#2d3748', background: 'white' },
-  sendBtn:      { width: 44, height: 44, borderRadius: '50%', background: 'linear-gradient(135deg,#667eea,#764ba2)', color: 'white', border: 'none', fontSize: '18px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  // Mobile pitch
+  mobilePitch: {
+    width: "100%", marginTop: "16px",
+    background: "linear-gradient(135deg, #1B2D4F 0%, #2d4a7a 100%)",
+    borderRadius: "12px", padding: "16px", overflow: "hidden",
+  },
+  mobilePitchText: {
+    fontSize: "13px", lineHeight: 1.7, color: "rgba(255,255,255,0.85)",
+    margin: "0 0 10px", fontFamily: "'Segoe UI', sans-serif",
+  },
+  mobileReadMore: {
+    background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)",
+    borderRadius: "16px", padding: "6px 16px", fontSize: "12px", fontWeight: 600,
+    color: "#00E5CC", cursor: "pointer", display: "block", margin: "4px auto 8px",
+  },
+  mobileShowLess: {
+    background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)",
+    borderRadius: "16px", padding: "4px 14px", fontSize: "11px", fontWeight: 600,
+    color: "rgba(255,255,255,0.5)", cursor: "pointer", display: "block", margin: "4px auto 8px",
+  },
+  mobilePills: {
+    display: "flex", flexWrap: "wrap", gap: "6px", justifyContent: "center", marginTop: "8px",
+  },
+  pillSmall: {
+    background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)",
+    borderRadius: "16px", padding: "4px 10px", fontSize: "10px",
+    fontWeight: 600, color: "rgba(255,255,255,0.8)",
+    fontFamily: "'Segoe UI', sans-serif",
+  },
 };
