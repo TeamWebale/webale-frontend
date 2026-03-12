@@ -11,6 +11,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [recentActivity, setRecentActivity] = useState([]);
   const [showGroupMenu, setShowGroupMenu] = useState(false);
+  const [pitchExpanded, setPitchExpanded] = useState(false);
   const { setRightSidebar } = useRightSidebar();
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -292,29 +293,52 @@ function Dashboard() {
         <p style={{ margin: '0 0 14px' }}>
           Be it a five member family group or five hundred diaspora contributors, <strong>Webale!</strong> is here to help you replace the chaos of manual record-keeping with a smart dashboard so alive and breathing it ensures that everyone is acknowledged, aligned, motivated, and updated.
         </p>
-        <p style={{ margin: '0 0 14px' }}>
-          Pledges and contributions are tracked and logged so members are updated of who committed to what, fulfilled, revised or even revoked a pledge. The money conversation continues as real time progress-bars charm members with a visual of how close the group is to the finishing line; so 'fear of missing out' inspire a 'yes we can' wave of participation.
-        </p>
-        <p style={{ margin: '0 0 14px' }}>
-          Next is currency conversion across 160+ countries, highlights of quarterly milestones, automated reminders, acknowledgements, in-built member messaging and lots of other admin controls together put fundraisers firmly in charge.
-        </p>
-        <p style={{ margin: '0 0 14px' }}>
-          <strong>Webale!</strong> is designed with your donor circle in mind; so team growth, campaign targets and action tracking dominate our array of tools, features and functions. Because invitation-only groups already trust each other, what they missed is privacy away from general purpose groups and a structured, transparent alternative that enliven the task of pooling money.
-        </p>
-        <p style={{ margin: '0 0 14px' }}>
-          That's a peek into our ever growing arsenal of innovation for the success of your cause; so what keeps you from launching your fundraising here today?
-        </p>
-        <p style={{ margin: '0 0 10px', fontSize: '15px' }}>
-          Because your cause is personal <span style={{ color: '#00E5CC' }}>Webale! — Private Group Fundraising</span> gives you a befitting platform.
-        </p>
-        <p style={{ margin: '0 0 4px', fontSize: '13px', opacity: 0.7 }}>
-          Sincerely,
-        </p>
-        <p style={{ margin: 0 }}>
-          <a href="mailto:theteam@webale.net" style={{ color: '#FFB800', fontWeight: 700, fontSize: '14px', textDecoration: 'none' }}>
-            theteam@webale.net 📧
-          </a>
-        </p>
+
+        {!pitchExpanded && (
+          <button onClick={() => setPitchExpanded(true)} style={{
+            background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)',
+            borderRadius: '20px', padding: '8px 20px', fontSize: '13px', fontWeight: 600,
+            color: '#00E5CC', cursor: 'pointer', display: 'block', margin: '0 auto',
+            transition: 'all 0.2s',
+          }}>
+            Read more ▼
+          </button>
+        )}
+
+        {pitchExpanded && (
+          <>
+            <p style={{ margin: '0 0 14px' }}>
+              Pledges and contributions are tracked and logged so members are updated of who committed to what, fulfilled, revised or even revoked a pledge. The money conversation continues as real time progress-bars charm members with a visual of how close the group is to the finishing line; so 'fear of missing out' inspire a 'yes we can' wave of participation.
+            </p>
+            <p style={{ margin: '0 0 14px' }}>
+              Next is currency conversion across 160+ countries, highlights of quarterly milestones, automated reminders, acknowledgements, in-built member messaging and lots of other admin controls together put fundraisers firmly in charge.
+            </p>
+            <p style={{ margin: '0 0 14px' }}>
+              <strong>Webale!</strong> is designed with your donor circle in mind; so team growth, campaign targets and action tracking dominate our array of tools, features and functions. Because invitation-only groups already trust each other, what they missed is privacy away from general purpose groups and a structured, transparent alternative that enliven the task of pooling money.
+            </p>
+            <p style={{ margin: '0 0 14px' }}>
+              That's a peek into our ever growing arsenal of innovation for the success of your cause; so what keeps you from launching your fundraising here today?
+            </p>
+            <p style={{ margin: '0 0 10px', fontSize: '15px' }}>
+              Because your cause is personal <span style={{ color: '#00E5CC' }}>Webale! — Private Group Fundraising</span> gives you a befitting platform.
+            </p>
+            <p style={{ margin: '0 0 4px', fontSize: '13px', opacity: 0.7 }}>
+              Sincerely,
+            </p>
+            <p style={{ margin: '0 0 8px' }}>
+              <a href="mailto:theteam@webale.net" style={{ color: '#FFB800', fontWeight: 700, fontSize: '14px', textDecoration: 'none' }}>
+                theteam@webale.net 📧
+              </a>
+            </p>
+            <button onClick={() => setPitchExpanded(false)} style={{
+              background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)',
+              borderRadius: '20px', padding: '6px 16px', fontSize: '12px', fontWeight: 600,
+              color: 'rgba(255,255,255,0.6)', cursor: 'pointer', display: 'block', margin: '0 auto',
+            }}>
+              Show less ▲
+            </button>
+          </>
+        )}
       </div>
 
       {/* Stats Cards */}

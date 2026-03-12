@@ -37,6 +37,14 @@ export default function Login() {
             <span style={s.heroPill}>💱 160+ Currencies</span>
             <span style={s.heroPill}>📊 Real-Time Tracking</span>
           </div>
+          <div style={s.heroHook}>
+            <p style={s.heroHookText}>
+              Repetitive manual posts updating donor groups... <em>'it was never meant to be that way!'</em>
+            </p>
+            <p style={s.heroHookSub}>
+              Replace the chaos of manual record-keeping with a smart dashboard that keeps everyone aligned.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -134,12 +142,25 @@ const s = {
   },
   heroOverlay: {
     position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
-    background: "linear-gradient(180deg, rgba(13,27,46,0.7) 0%, rgba(13,27,46,0.2) 40%, rgba(13,27,46,0.3) 100%)",
-    display: "flex", alignItems: "flex-start", justifyContent: "flex-start",
+    background: "linear-gradient(180deg, rgba(13,27,46,0.7) 0%, rgba(13,27,46,0.15) 35%, rgba(13,27,46,0.8) 100%)",
+    display: "flex", flexDirection: "column", justifyContent: "space-between",
     padding: "28px 24px",
   },
   heroPillsWrap: {
     display: "flex", flexDirection: "column", gap: "8px",
+  },
+  heroHook: {
+    maxWidth: "440px",
+  },
+  heroHookText: {
+    fontSize: "22px", fontWeight: 700, color: "white", lineHeight: 1.4,
+    margin: "0 0 8px", fontFamily: "'Segoe UI', sans-serif",
+    textShadow: "0 2px 8px rgba(0,0,0,0.4)",
+  },
+  heroHookSub: {
+    fontSize: "14px", color: "rgba(255,255,255,0.8)", lineHeight: 1.6,
+    margin: 0, fontFamily: "'Segoe UI', sans-serif",
+    textShadow: "0 1px 4px rgba(0,0,0,0.3)",
   },
   heroPill: {
     background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)",
