@@ -1,7 +1,8 @@
 /**
  * Login.jsx — src/pages/Login.jsx
- * Split-screen: hero image (left) + login form (right)
- * Mobile: form only with subtle background
+ * Left side: Pitch text (collapsible) on navy gradient
+ * Right side: Login form
+ * Mobile: pitch below form as collapsible card
  */
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
@@ -15,6 +16,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error,    setError]    = useState("");
   const [loading,  setLoading]  = useState(false);
+  const [pitchExpanded, setPitchExpanded] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault(); setError(""); setLoading(true);
@@ -26,25 +28,84 @@ export default function Login() {
     } finally { setLoading(false); }
   };
 
+  const PitchContent = ({ mobile }) => {
+    const fontSize = mobile ? '13px' : '15px';
+    const paraStyle = { margin: '0 0 14px', fontSize, lineHeight: 1.75, color: 'rgba(255,255,255,0.85)' };
+    const para1Style = { ...paraStyle, color: 'rgba(255,255,255,0.95)' };
+
+    return (
+      <>
+        <p style={para1Style}>
+          Repetitive manual posts updating donor groups of campaign progress cost fundraisers time, they have to jostle for attention with unbundled stream of randomized feed, and; <em>'it was never meant to be that way!'</em> So we rolled the sleeves to build <strong>Webale!</strong> for automation of that and related tasks.
+        </p>
+
+        {!pitchExpanded && (
+          <button onClick={() => setPitchExpanded(true)} style={{
+            background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)',
+            borderRadius: '20px', padding: mobile ? '6px 16px' : '8px 20px',
+            fontSize: mobile ? '12px' : '13px', fontWeight: 600,
+            color: '#00E5CC', cursor: 'pointer', display: 'block',
+            margin: '4px auto 0',
+          }}>
+            Read more ▼
+          </button>
+        )}
+
+        {pitchExpanded && (
+          <>
+            <p style={paraStyle}>
+              Be it a five member family group or five hundred diaspora contributors, <strong>Webale!</strong> is here to help you replace the chaos of manual record-keeping with a smart dashboard so alive and breathing it ensures that everyone is acknowledged, aligned, motivated, and updated.
+            </p>
+            <p style={paraStyle}>
+              Pledges and contributions are tracked and logged so members are updated of who committed to what, fulfilled, revised or even revoked a pledge. The money conversation continues as real time progress-bars charm members with a visual of how close the group is to the finishing line; so 'fear of missing out' inspire a 'yes we can' wave of participation.
+            </p>
+            <p style={paraStyle}>
+              Next is currency conversion across 160+ countries, highlights of quarterly milestones, automated reminders, acknowledgements, in-built member messaging and lots of other admin controls together put fundraisers firmly in charge.
+            </p>
+            <p style={paraStyle}>
+              <strong>Webale!</strong> is designed with your donor circle in mind; so team growth, campaign targets and action tracking dominate our array of tools, features and functions. Because invitation-only groups already trust each other, what they missed is privacy away from general purpose groups and a structured, transparent alternative that enliven the task of pooling money.
+            </p>
+            <p style={paraStyle}>
+              That's a peek into our ever growing arsenal of innovation for the success of your cause; so what keeps you from launching your fundraising here today?
+            </p>
+            <p style={{ margin: '0 0 10px', fontSize: mobile ? '14px' : '15px', color: 'rgba(255,255,255,0.9)' }}>
+              Because your cause is personal <span style={{ color: '#00E5CC' }}>Webale! — Private Group Fundraising</span> gives you a befitting platform.
+            </p>
+            <p style={{ margin: '0 0 4px', fontSize: '13px', opacity: 0.7, color: 'white' }}>
+              Sincerely,
+            </p>
+            <p style={{ margin: '0 0 8px' }}>
+              <a href="mailto:theteam@webale.net" style={{ color: '#FFB800', fontWeight: 700, fontSize: '14px', textDecoration: 'none' }}>
+                theteam@webale.net 📧
+              </a>
+            </p>
+            <button onClick={() => setPitchExpanded(false)} style={{
+              background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
+              borderRadius: '20px', padding: '5px 14px', fontSize: '11px', fontWeight: 600,
+              color: 'rgba(255,255,255,0.5)', cursor: 'pointer', display: 'block',
+              margin: '0 auto',
+            }}>
+              Show less ▲
+            </button>
+          </>
+        )}
+      </>
+    );
+  };
+
   return (
     <div style={s.page}>
 
-      {/* ── Left: Hero Image (desktop only) ── */}
-      <div style={s.heroSide} className="login-hero">
-        <div style={s.heroOverlay}>
-          <div style={s.heroPillsWrap}>
-            <span style={s.heroPill}>🔒 Invitation-Only</span>
-            <span style={s.heroPill}>💱 160+ Currencies</span>
-            <span style={s.heroPill}>📊 Real-Time Tracking</span>
+      {/* ── Left: Pitch Text (desktop only) ── */}
+      <div style={s.pitchSide} className="login-pitch">
+        <div style={s.pitchInner}>
+          <WebaleLogo variant="full" size="lg" theme="dark" />
+          <div style={s.pills}>
+            <span style={s.pill}>🔒 Invitation-Only</span>
+            <span style={s.pill}>💱 160+ Currencies</span>
+            <span style={s.pill}>📊 Real-Time Tracking</span>
           </div>
-          <div style={s.heroHook}>
-            <p style={s.heroHookText}>
-              Repetitive manual posts updating donor groups... <em>'it was never meant to be that way!'</em>
-            </p>
-            <p style={s.heroHookSub}>
-              Replace the chaos of manual record-keeping with a smart dashboard that keeps everyone aligned.
-            </p>
-          </div>
+          <PitchContent mobile={false} />
         </div>
       </div>
 
@@ -86,17 +147,9 @@ export default function Login() {
             Don't have an account? <Link to="/register" style={s.regLink}>Create one</Link>
           </p>
 
-          {/* Mobile hero banner */}
-          <div className="login-hero-mobile" style={s.mobileHero}>
-            <div style={s.mobileHeroOverlay}>
-              <div style={s.mobileTopPills}>
-                <span style={s.heroPill}>🔒 Invitation-Only</span>
-                <span style={s.heroPill}>📊 Real-Time Tracking</span>
-              </div>
-              <div style={s.mobileBottomPill}>
-                <span style={s.heroPill}>💱 160+ Currencies</span>
-              </div>
-            </div>
+          {/* Mobile: Pitch card below form */}
+          <div className="login-pitch-mobile" style={s.mobilePitch}>
+            <PitchContent mobile={true} />
           </div>
 
           <div style={{ marginTop: "12px", textAlign: "center", fontFamily: "'Segoe UI',sans-serif" }}>
@@ -111,11 +164,11 @@ export default function Login() {
       </div>
 
       <style>{`
-        .login-hero { display: flex; }
-        .login-hero-mobile { display: none; }
+        .login-pitch { display: flex; }
+        .login-pitch-mobile { display: none; }
         @media (max-width: 900px) {
-          .login-hero { display: none !important; }
-          .login-hero-mobile { display: block !important; }
+          .login-pitch { display: none !important; }
+          .login-pitch-mobile { display: block !important; }
           .login-form-side {
             width: 100% !important;
             padding: 8px 16px 16px !important;
@@ -131,73 +184,37 @@ export default function Login() {
 }
 
 const s = {
-  page: {
-    minHeight: "100vh", display: "flex", background: "#0D1B2E",
+  page: { minHeight: "100vh", display: "flex", background: "#0D1B2E" },
+  pitchSide: {
+    flex: 1, overflow: "auto",
+    background: "linear-gradient(135deg, #1B2D4F 0%, #2d4a7a 50%, #4A7FC1 100%)",
+    minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+    padding: "40px",
   },
-  heroSide: {
-    flex: 1, position: "relative", overflow: "hidden",
-    backgroundImage: "url('/login-hero.jpg')",
-    backgroundSize: "cover", backgroundPosition: "center",
-    minHeight: "100vh",
-  },
-  heroOverlay: {
-    position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
-    background: "linear-gradient(180deg, rgba(13,27,46,0.7) 0%, rgba(13,27,46,0.15) 35%, rgba(13,27,46,0.8) 100%)",
-    display: "flex", flexDirection: "column", justifyContent: "space-between",
-    padding: "28px 24px",
-  },
-  heroPillsWrap: {
-    display: "flex", flexDirection: "column", gap: "8px",
-  },
-  heroHook: {
-    maxWidth: "440px",
-  },
-  heroHookText: {
-    fontSize: "22px", fontWeight: 700, color: "white", lineHeight: 1.4,
-    margin: "0 0 8px", fontFamily: "'Segoe UI', sans-serif",
-    textShadow: "0 2px 8px rgba(0,0,0,0.4)",
-  },
-  heroHookSub: {
-    fontSize: "14px", color: "rgba(255,255,255,0.8)", lineHeight: 1.6,
-    margin: 0, fontFamily: "'Segoe UI', sans-serif",
-    textShadow: "0 1px 4px rgba(0,0,0,0.3)",
-  },
-  heroPill: {
-    background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)",
+  pitchInner: { maxWidth: "500px", color: "white" },
+  pills: { display: "flex", flexWrap: "wrap", gap: "8px", margin: "20px 0 24px" },
+  pill: {
+    background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)",
     borderRadius: "20px", padding: "8px 16px", fontSize: "12px",
-    fontWeight: 600, color: "rgba(255,255,255,0.95)",
-    fontFamily: "'Segoe UI', sans-serif",
-    backdropFilter: "blur(4px)",
+    fontWeight: 600, color: "rgba(255,255,255,0.95)", fontFamily: "'Segoe UI', sans-serif",
   },
   formSide: {
     width: "480px", flexShrink: 0,
     display: "flex", alignItems: "center", justifyContent: "center",
-    padding: "40px 32px",
-    background: "#0D1B2E",
+    padding: "40px 32px", background: "#0D1B2E",
   },
-  card: {
-    width: "100%", maxWidth: "380px",
-    display: "flex", flexDirection: "column", alignItems: "center",
-  },
+  card: { width: "100%", maxWidth: "380px", display: "flex", flexDirection: "column", alignItems: "center" },
   brand: { marginBottom: "8px" },
   welcome: { fontSize: "14px", color: "#00E5CC", fontWeight: 500, marginBottom: "16px" },
   error: {
-    width: "100%", background: "rgba(220,53,69,0.15)",
-    border: "1px solid rgba(220,53,69,0.4)", borderRadius: "8px",
-    padding: "10px 14px", color: "#ff8a8a", fontSize: "13px",
-    marginBottom: "16px", display: "flex", justifyContent: "space-between",
-    alignItems: "center", gap: "8px",
+    width: "100%", background: "rgba(220,53,69,0.15)", border: "1px solid rgba(220,53,69,0.4)",
+    borderRadius: "8px", padding: "10px 14px", color: "#ff8a8a", fontSize: "13px",
+    marginBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px",
   },
-  errClose: {
-    background: "transparent", border: "none", color: "#ff8a8a",
-    cursor: "pointer", fontSize: "14px", padding: "0",
-  },
+  errClose: { background: "transparent", border: "none", color: "#ff8a8a", cursor: "pointer", fontSize: "14px", padding: "0" },
   form: { width: "100%", display: "flex", flexDirection: "column", gap: "12px" },
   field: { display: "flex", flexDirection: "column", gap: "6px" },
-  label: {
-    fontSize: "12px", fontWeight: 500, color: "rgba(255,255,255,0.55)",
-    letterSpacing: "0.3px", fontFamily: "'Segoe UI',sans-serif",
-  },
+  label: { fontSize: "12px", fontWeight: 500, color: "rgba(255,255,255,0.55)", letterSpacing: "0.3px", fontFamily: "'Segoe UI',sans-serif" },
   input: {
     background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)",
     borderRadius: "10px", padding: "11px 14px", fontSize: "15px",
@@ -207,30 +224,13 @@ const s = {
   btn: {
     marginTop: "4px", background: "linear-gradient(135deg,#00C2CC,#4A7FC1)",
     color: "#FFF", border: "none", borderRadius: "10px", padding: "13px",
-    fontSize: "15px", fontWeight: 600, cursor: "pointer",
-    fontFamily: "'Segoe UI',sans-serif",
+    fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: "'Segoe UI',sans-serif",
   },
-  reg: {
-    marginTop: "12px", fontSize: "14px", color: "rgba(255,255,255,0.4)",
-    fontFamily: "'Segoe UI',sans-serif",
-  },
+  reg: { marginTop: "12px", fontSize: "14px", color: "rgba(255,255,255,0.4)", fontFamily: "'Segoe UI',sans-serif" },
   regLink: { color: "#00C2CC", textDecoration: "none", fontWeight: 500 },
-  mobileHero: {
-    width: "100%", height: "200px", marginTop: "16px",
-    borderRadius: "12px", overflow: "hidden", position: "relative",
-    backgroundImage: "url('/login-hero.jpg')",
-    backgroundSize: "cover", backgroundPosition: "center",
-  },
-  mobileHeroOverlay: {
-    position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
-    background: "linear-gradient(180deg, rgba(13,27,46,0.7) 0%, rgba(13,27,46,0.15) 50%, rgba(13,27,46,0.7) 100%)",
-    display: "flex", flexDirection: "column", justifyContent: "space-between",
-    padding: "10px 12px",
-  },
-  mobileTopPills: {
-    display: "flex", gap: "6px", justifyContent: "center",
-  },
-  mobileBottomPill: {
-    display: "flex", justifyContent: "flex-end",
+  mobilePitch: {
+    width: "100%", marginTop: "16px",
+    background: "linear-gradient(135deg, #1B2D4F 0%, #2d4a7a 50%, #4A7FC1 100%)",
+    borderRadius: "12px", padding: "16px",
   },
 };
