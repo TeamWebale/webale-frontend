@@ -36,7 +36,7 @@ export default function Login() {
     return (
       <>
         <p style={para1Style}>
-          Repetitive manual posts updating donor groups of campaign progress cost fundraisers time, they have to jostle for attention with unbundled stream of randomized feed, and; <em>'it was never meant to be that way!'</em> So we rolled the sleeves to build <strong>Webale!</strong> for automation of that and related tasks.
+          Repetitive manual posts updating donor groups of campaign progress cost fundraisers time, they have to jostle for attention with unbundled stream of randomized feed and; <em>'it was never meant to be that way!'</em> So we rolled the sleeves to build <strong>Webale!</strong> for automation of that and related tasks.
         </p>
 
         {!pitchExpanded && (
