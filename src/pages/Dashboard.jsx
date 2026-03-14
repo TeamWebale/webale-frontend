@@ -291,20 +291,20 @@ function Dashboard() {
           position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
           display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
         }}>
-          <div style={{
-            background: 'linear-gradient(180deg, rgba(13,27,46,0.65) 0%, rgba(13,27,46,0.0) 100%)',
+          <div className="hero-top-pills" style={{
+            background: 'linear-gradient(180deg, rgba(13,27,46,0.7) 0%, rgba(13,27,46,0.0) 100%)',
             display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-start',
             padding: '14px 16px',
           }}>
-            <span style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)' }}>🔒 Invitation-Only</span>
-            <span style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)' }}>💱 160+ Currencies</span>
-            <span className="pill-desktop-only" style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)' }}>📊 Real-Time Tracking</span>
+            <span style={{ background: 'rgba(13,27,46,0.7)', border: '1px solid rgba(255,255,255,0.4)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, color: '#ffffff', backdropFilter: 'blur(6px)' }}>🔒 Invitation-Only</span>
+            <span style={{ background: 'rgba(13,27,46,0.7)', border: '1px solid rgba(255,255,255,0.4)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, color: '#ffffff', backdropFilter: 'blur(6px)' }}>💱 160+ Currencies</span>
+            <span className="pill-desktop-only" style={{ background: 'rgba(13,27,46,0.7)', border: '1px solid rgba(255,255,255,0.4)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, color: '#ffffff', backdropFilter: 'blur(6px)' }}>📊 Real-Time Tracking</span>
           </div>
           <div className="pill-mobile-only" style={{
-            background: 'linear-gradient(0deg, rgba(13,27,46,0.6) 0%, rgba(13,27,46,0.0) 100%)',
+            background: 'linear-gradient(0deg, rgba(13,27,46,0.65) 0%, rgba(13,27,46,0.0) 100%)',
             display: 'flex', justifyContent: 'flex-end', padding: '10px 16px',
           }}>
-            <span style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)' }}>📊 Real-Time Tracking</span>
+            <span style={{ background: 'rgba(13,27,46,0.7)', border: '1px solid rgba(255,255,255,0.4)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, color: '#ffffff', backdropFilter: 'blur(6px)' }}>📊 Real-Time Tracking</span>
           </div>
         </div>
         <style>{`
@@ -312,6 +312,7 @@ function Dashboard() {
           @media (max-width: 768px) {
             .pill-desktop-only { display: none !important; }
             .pill-mobile-only { display: flex !important; }
+            .hero-top-pills { flex-direction: row !important; flex-wrap: wrap !important; }
           }
         `}</style>
       </div>
