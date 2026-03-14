@@ -312,7 +312,7 @@ function Dashboard() {
           @media (max-width: 768px) {
             .pill-desktop-only { display: none !important; }
             .pill-mobile-only { display: flex !important; }
-            .hero-top-pills { align-items: flex-end !important; }
+            .hero-top-pills { flex-direction: row !important; justify-content: space-between !important; align-items: flex-start !important; }
           }
         `}</style>
       </div>
