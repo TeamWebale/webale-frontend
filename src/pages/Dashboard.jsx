@@ -296,15 +296,15 @@ function Dashboard() {
             display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-start',
             padding: '14px 16px',
           }}>
-            <span style={{ background: 'rgba(13,27,46,0.7)', border: '1px solid rgba(255,255,255,0.4)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, color: '#ffffff', backdropFilter: 'blur(6px)' }}>🔒 Invitation-Only</span>
-            <span style={{ background: 'rgba(13,27,46,0.7)', border: '1px solid rgba(255,255,255,0.4)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, color: '#ffffff', backdropFilter: 'blur(6px)' }}>💱 160+ Currencies</span>
-            <span className="pill-desktop-only" style={{ background: 'rgba(13,27,46,0.7)', border: '1px solid rgba(255,255,255,0.4)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, color: '#ffffff', backdropFilter: 'blur(6px)' }}>📊 Real-Time Tracking</span>
+            <span style={{ background: 'rgba(74,127,193,0.65)', border: '1px solid rgba(255,255,255,0.35)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, color: '#ffffff', backdropFilter: 'blur(6px)' }}>🔒 Invitation-Only</span>
+            <span style={{ background: 'rgba(74,127,193,0.65)', border: '1px solid rgba(255,255,255,0.35)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, color: '#ffffff', backdropFilter: 'blur(6px)' }}>💱 160+ Currencies</span>
+            <span className="pill-desktop-only" style={{ background: 'rgba(74,127,193,0.65)', border: '1px solid rgba(255,255,255,0.35)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, color: '#ffffff', backdropFilter: 'blur(6px)' }}>📊 Real-Time Tracking</span>
           </div>
           <div className="pill-mobile-only" style={{
             background: 'linear-gradient(0deg, rgba(13,27,46,0.65) 0%, rgba(13,27,46,0.0) 100%)',
             display: 'flex', justifyContent: 'flex-end', padding: '10px 16px',
           }}>
-            <span style={{ background: 'rgba(13,27,46,0.7)', border: '1px solid rgba(255,255,255,0.4)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, color: '#ffffff', backdropFilter: 'blur(6px)' }}>📊 Real-Time Tracking</span>
+            <span style={{ background: 'rgba(74,127,193,0.65)', border: '1px solid rgba(255,255,255,0.35)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 700, color: '#ffffff', backdropFilter: 'blur(6px)' }}>📊 Real-Time Tracking</span>
           </div>
         </div>
         <style>{`
@@ -312,7 +312,7 @@ function Dashboard() {
           @media (max-width: 768px) {
             .pill-desktop-only { display: none !important; }
             .pill-mobile-only { display: flex !important; }
-            .hero-top-pills { flex-direction: row !important; flex-wrap: wrap !important; }
+            .hero-top-pills { align-items: flex-end !important; }
           }
         `}</style>
       </div>
