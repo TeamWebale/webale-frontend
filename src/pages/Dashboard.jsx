@@ -281,26 +281,21 @@ function Dashboard() {
         borderRadius: '14px',
         overflow: 'hidden',
         marginBottom: '20px',
-        height: '200px',
         backgroundImage: "url('/login-hero.jpg')",
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         boxShadow: '0 4px 20px rgba(27,45,79,0.25)',
       }}>
+        <img src="/login-hero.jpg" alt="" style={{ width: '100%', display: 'block', borderRadius: '14px' }} />
         <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'linear-gradient(180deg, rgba(13,27,46,0.6) 0%, rgba(13,27,46,0.1) 40%, rgba(13,27,46,0.7) 100%)',
-          display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-          padding: '16px 20px',
+          position: 'absolute', top: 0, left: 0, right: 0,
+          background: 'linear-gradient(180deg, rgba(13,27,46,0.65) 0%, rgba(13,27,46,0.0) 100%)',
+          display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'flex-start',
+          padding: '14px 16px',
         }}>
-          <p style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'white', lineHeight: 1.4, maxWidth: '500px', textShadow: '0 2px 8px rgba(0,0,0,0.4)' }}>
-            Because your cause is personal — <span style={{ color: '#00E5CC' }}>Webale!</span> gives you a befitting platform.
-          </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'flex-end' }}>
-            <span style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)' }}>🔒 Invitation-Only</span>
-            <span style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)' }}>💱 160+ Currencies</span>
-            <span style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)' }}>📊 Real-Time Tracking</span>
-          </div>
+          <span style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)' }}>🔒 Invitation-Only</span>
+          <span style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)' }}>💱 160+ Currencies</span>
+          <span style={{ background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '20px', padding: '6px 14px', fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(4px)' }}>📊 Real-Time Tracking</span>
         </div>
       </div>
 

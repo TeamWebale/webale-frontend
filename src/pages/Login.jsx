@@ -80,9 +80,9 @@ export default function Login() {
               </a>
             </p>
             <button onClick={() => setPitchExpanded(false)} style={{
-              background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
+              background: 'rgba(0,229,204,0.15)', border: '1px solid rgba(0,229,204,0.4)',
               borderRadius: '20px', padding: '5px 14px', fontSize: '11px', fontWeight: 600,
-              color: 'rgba(255,255,255,0.5)', cursor: 'pointer', display: 'block',
+              color: '#00E5CC', cursor: 'pointer', display: 'block',
               margin: '0 auto',
             }}>
               Show less ▲
@@ -99,7 +99,6 @@ export default function Login() {
       {/* ── Left: Pitch Text (desktop only) ── */}
       <div style={s.pitchSide} className="login-pitch">
         <div style={s.pitchInner}>
-          <WebaleLogo variant="full" size="lg" theme="dark" />
           <div style={s.pills}>
             <span style={s.pill}>🔒 Invitation-Only</span>
             <span style={s.pill}>💱 160+ Currencies</span>
@@ -192,7 +191,7 @@ const s = {
     padding: "40px",
   },
   pitchInner: { maxWidth: "500px", color: "white" },
-  pills: { display: "flex", flexWrap: "wrap", gap: "8px", margin: "20px 0 24px" },
+  pills: { display: "flex", flexWrap: "wrap", gap: "8px", margin: "0 0 24px" },
   pill: {
     background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)",
     borderRadius: "20px", padding: "8px 16px", fontSize: "12px",
