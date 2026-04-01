@@ -54,6 +54,14 @@ export default function Profile() {
   const [profilePublic, setProfilePublic] = useState(user?.profile_public ?? true);
   const [settSaving,    setSettSaving]    = useState(false);
 
+  const [showDeleteSection, setShowDeleteSection] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+  const [pendingPledgesList, setPendingPledgesList] = useState([]);
+  const [adminGroupsList, setAdminGroupsList] = useState([]);
+
   // ── Save profile ──────────────────────────────────────────────
   const handleSaveProfile = async () => {
     setSaving(true); setSaveMsg("");
@@ -66,8 +74,7 @@ export default function Profile() {
       const updated = res.data?.data?.user || res.data?.user || {};
       updateUser({ ...updated, first_name: firstName, last_name: lastName, country, bio, phone });
       setSaveMsg("✓ Profile saved!");
-      setTimeout(() => setSaveMsg(""), 3000);
-      setTimeout(() => navigate("/dashboard"), 1500);
+      setTimeout(() => navigate("/dashboard"), 1000);
     } catch (err) {
       setSaveMsg(err.response?.data?.message || "Failed to save profile.");
     } finally {
@@ -87,7 +94,6 @@ export default function Profile() {
       );
       updateUser({ avatar_url: selectedEmoji, avatarUrl: selectedEmoji, avatar_type: "emoji", avatarType: "emoji" });
       setSaveMsg("✓ Avatar saved!");
-      setTimeout(() => setSaveMsg(""), 3000);
     } catch (err) {
       setSaveMsg("Failed to save avatar.");
     } finally {
@@ -106,7 +112,6 @@ export default function Profile() {
         { headers: authHeaders() }
       );
       setPwMsg("✓ Password updated!");
-      setTimeout(() => setPwMsg(""), 3000);
       setCurrentPw(""); setNewPw(""); setConfirmPw("");
     } catch (err) {
       setPwMsg(err.response?.data?.message || "Failed to update password.");
@@ -127,10 +132,7 @@ export default function Profile() {
 
   return (
     <div style={styles.page}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
-        <h1 style={{ ...styles.pageTitle, marginBottom: 0 }}>My Profile</h1>
-        <button onClick={() => navigate("/dashboard")} style={styles.closeBtn}>✕</button>
-      </div>
+      <h1 style={styles.pageTitle}>My Profile</h1>
 
       {/* Tabs */}
       <div style={styles.tabs}>
@@ -290,10 +292,96 @@ export default function Profile() {
           </div>
         )}
 
-        <div style={{ textAlign: 'center', padding: '20px 0 8px' }}>
-          <a href="/terms" style={{ fontSize: '13px', color: '#667eea', textDecoration: 'none', fontWeight: 600 }}>
-            📜 Terms &amp; Conditions
-          </a>
+        {/* ── Delete Account ── */}
+        <div style={{ marginTop: '32px', borderTop: '2px solid #fed7d7', paddingTop: '20px' }}>
+          {!showDeleteSection ? (
+            <button onClick={() => setShowDeleteSection(true)} style={{
+              background: 'none', border: 'none', color: '#e53e3e', fontSize: '14px',
+              fontWeight: 500, cursor: 'pointer', fontFamily: "'Segoe UI', sans-serif",
+              padding: 0, textDecoration: 'underline',
+            }}>
+              Delete my account
+            </button>
+          ) : (
+            <div style={{ background: '#fff5f5', borderRadius: '12px', padding: '20px', border: '1px solid #fed7d7' }}>
+              <h3 style={{ margin: '0 0 8px', fontSize: '16px', color: '#e53e3e', fontWeight: 700 }}>Delete Account</h3>
+              <p style={{ margin: '0 0 12px', fontSize: '14px', color: '#4a5568', lineHeight: 1.6 }}>
+                This action is <strong>permanent and cannot be undone</strong>. Your profile, group memberships, and messages will be deleted.
+              </p>
+
+              {deleteError && (
+                <div style={{ background: '#fff', border: '1px solid #fed7d7', borderRadius: '8px', padding: '12px', marginBottom: '12px' }}>
+                  <p style={{ margin: '0 0 6px', fontSize: '13px', color: '#e53e3e', fontWeight: 600 }}>{deleteError}</p>
+                  {pendingPledgesList.length > 0 && (
+                    <div style={{ fontSize: '13px', color: '#4a5568' }}>
+                      <p style={{ margin: '0 0 4px', fontWeight: 600 }}>Pending pledges to resolve:</p>
+                      {pendingPledgesList.map((p, i) => (
+                        <p key={i} style={{ margin: '2px 0 2px 12px' }}>
+                          • {p.group_name}: {p.pledge_currency || ''} {parseFloat(p.amount).toLocaleString()}
+                          <span style={{ color: '#718096', fontSize: '12px' }}> — Go to this group → Actions Menu → Revise/Delete Pledge</span>
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                  {adminGroupsList.length > 0 && (
+                    <div style={{ fontSize: '13px', color: '#4a5568', marginTop: '8px' }}>
+                      <p style={{ margin: '0 0 4px', fontWeight: 600 }}>Groups where you must transfer ownership:</p>
+                      {adminGroupsList.map((g, i) => (
+                        <p key={i} style={{ margin: '2px 0 2px 12px' }}>
+                          • {g.name}
+                          <span style={{ color: '#718096', fontSize: '12px' }}> — Go to this group → Admin tab → Transfer Ownership</span>
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '12px' }}>
+                <div>
+                  <label style={styles.label}>Enter your password to confirm</label>
+                  <input type="password" value={deletePassword} onChange={e => setDeletePassword(e.target.value)} placeholder="Your current password" style={styles.input} />
+                </div>
+                <div>
+                  <label style={styles.label}>Type DELETE to confirm</label>
+                  <input type="text" value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)} placeholder="Type DELETE" style={styles.input} />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <button
+                  disabled={deleting || deleteConfirm !== 'DELETE' || !deletePassword}
+                  onClick={async () => {
+                    setDeleting(true); setDeleteError(""); setPendingPledgesList([]); setAdminGroupsList([]);
+                    try {
+                      await axios.delete(`${API}/auth/account`, { headers: authHeaders(), data: { password: deletePassword } });
+                      localStorage.clear();
+                      window.location.href = '/login';
+                    } catch (err) {
+                      const data = err.response?.data;
+                      setDeleteError(data?.message || 'Failed to delete account');
+                      if (data?.data?.pendingPledges) setPendingPledgesList(data.data.pendingPledges);
+                      if (data?.data?.adminGroups) setAdminGroupsList(data.data.adminGroups);
+                    } finally { setDeleting(false); }
+                  }}
+                  style={{
+                    background: deleteConfirm === 'DELETE' && deletePassword ? '#e53e3e' : '#e2e8f0',
+                    color: deleteConfirm === 'DELETE' && deletePassword ? '#fff' : '#a0aec0',
+                    border: 'none', borderRadius: '10px', padding: '10px 20px',
+                    fontSize: '14px', fontWeight: 600,
+                    cursor: deleteConfirm === 'DELETE' && deletePassword ? 'pointer' : 'not-allowed',
+                    fontFamily: "'Segoe UI', sans-serif",
+                  }}
+                >
+                  {deleting ? 'Deleting...' : 'Permanently Delete Account'}
+                </button>
+                <button onClick={() => { setShowDeleteSection(false); setDeleteError(""); setDeletePassword(""); setDeleteConfirm(""); setPendingPledgesList([]); setAdminGroupsList([]); }} style={{
+                  background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px',
+                  padding: '10px 20px', fontSize: '14px', color: '#4a5568', cursor: 'pointer', fontFamily: "'Segoe UI', sans-serif",
+                }}>Cancel</button>
+              </div>
+            </div>
+          )}
         </div>
 
       </div>
@@ -304,7 +392,6 @@ export default function Profile() {
 const styles = {
   page:       { maxWidth: "680px", margin: "0 auto" },
   pageTitle:  { fontSize: "22px", fontWeight: 700, color: "#1B2D4F", marginBottom: "20px", fontFamily: "'Segoe UI', sans-serif" },
-  closeBtn:   { background: "#fee2e2", border: "none", fontSize: "18px", color: "#e53e3e", cursor: "pointer", padding: "6px 10px", borderRadius: "8px", fontWeight: 700 },
   tabs:       { display: "flex", gap: "4px", marginBottom: "20px" },
   tabBtn:     { padding: "9px 20px", borderRadius: "8px", border: "1px solid #D8E3EE", background: "#fff", fontSize: "14px", fontWeight: 500, color: "#5A6A7E", cursor: "pointer", fontFamily: "'Segoe UI', sans-serif" },
   tabActive:  { background: "#1B2D4F", color: "#fff", borderColor: "#1B2D4F" },
