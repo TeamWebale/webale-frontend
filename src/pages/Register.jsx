@@ -97,11 +97,15 @@ export default function Register() {
         email: form.email,
         otp:   code,
       });
-      if (res.data.success) {
+      if (res.data.success || res.data.data?.token) {
         // Store token + user
-        const { token, user } = res.data.data;
-        localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(user));
+        const token = res.data.data?.token || res.data.token;
+        const user = res.data.data?.user || res.data.user;
+        if (token) localStorage.setItem("token", token);
+        if (user) localStorage.setItem("user", JSON.stringify(user));
+
+        // Small delay to ensure localStorage is written before full page reload
+        await new Promise(r => setTimeout(r, 100));
 
         // Check for pending invite, then do a full page load so AuthContext picks up the token
         const pendingInvite = localStorage.getItem("pendingInvite");
@@ -111,6 +115,7 @@ export default function Register() {
         } else {
           window.location.href = "/dashboard";
         }
+        return;
       }
     } catch (err) {
       setOtpError(err.response?.data?.message || "Invalid code. Please try again.");
