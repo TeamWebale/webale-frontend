@@ -133,20 +133,20 @@ export default function CreateGroup() {
           <div style={s.field}>
             <label style={s.label}>Group name</label>
             <input name="name" value={form.name} onChange={handleChange} required
-              placeholder="e.g. Kampala Wedding 2026" style={s.input} />
+              placeholder="e.g. Kampala Wedding 2026" style={{ ...s.input, borderLeft: '3px solid #667eea' }} />
           </div>
 
           <div style={s.field}>
             <label style={s.label}>Description <span style={s.opt}>(optional)</span></label>
             <textarea name="description" value={form.description} onChange={handleChange}
               placeholder="What is this group fundraising for?"
-              style={{ ...s.input, height: "90px", resize: "vertical" }} />
+              style={{ ...s.input, height: "90px", resize: "vertical", borderLeft: '3px solid #48bb78' }} />
           </div>
 
           <div style={s.row}>
             <div style={s.field}>
               <label style={s.label}>Currency</label>
-              <select name="currency" value={form.currency} onChange={handleChange} style={s.input}>
+              <select name="currency" value={form.currency} onChange={handleChange} style={{ ...s.input, borderLeft: '3px solid #ed8936' }}>
                 {CURRENCIES.map(c => (
                   <option key={c.code} value={c.code}>{c.flag} {c.code} — {c.name}</option>
                 ))}
@@ -155,13 +155,13 @@ export default function CreateGroup() {
             <div style={s.field}>
               <label style={s.label}>Target / goal amount <span style={s.opt}>(optional)</span></label>
               <input name="goal_amount" type="number" min="1" value={form.goal_amount}
-                onChange={handleChange} placeholder="0.00" style={s.input} />
+                onChange={handleChange} placeholder="0.00" style={{ ...s.input, borderLeft: '3px solid #e53e3e' }} />
             </div>
           </div>
 
           <div style={s.field}>
             <label style={s.label}>Deadline <span style={s.opt}>(optional)</span></label>
-            <input name="deadline" type="date" onChange={handleDeadlineChange} style={s.input} />
+            <input name="deadline" type="date" onChange={handleDeadlineChange} style={{ ...s.input, borderLeft: '3px solid #9f7aea' }} />
             {deadlineLabel && (
               <div style={s.deadlinePill}>
                 <span>📅 {deadlineLabel}</span>
@@ -189,7 +189,7 @@ const s = {
   card:             { background: "#fff", borderRadius: "16px", padding: "28px 32px", boxShadow: "0 2px 16px rgba(27,45,79,0.07)" },
   header:           { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" },
   title:            { fontSize: "20px", fontWeight: 700, color: "#1B2D4F", fontFamily: "'Segoe UI', sans-serif" },
-  closeBtn:         { background: "#fee2e2", border: "none", fontSize: "18px", color: "#e53e3e", cursor: "pointer", padding: "6px 10px", borderRadius: "8px", fontWeight: 700 },
+  closeBtn:         { background: "#fed7d7", border: "none", fontSize: "14px", color: "#e53e3e", cursor: "pointer", width: "28px", height: "28px", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, flexShrink: 0 },
   opt:              { fontWeight: 400, color: "#AAB8C8" },
   templateToggle:   { display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", background: "#F8FAFC", border: "1px solid #D8E3EE", borderRadius: "10px", padding: "9px 14px", fontSize: "13px", fontWeight: 600, color: "#1B2D4F", cursor: "pointer", fontFamily: "'Segoe UI', sans-serif", boxSizing: "border-box" },
   templateDropdown: { border: "1px solid #D8E3EE", borderTop: "none", borderRadius: "0 0 10px 10px", background: "#fff", overflow: "hidden" },
