@@ -1368,7 +1368,7 @@ function GroupDetails() {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {pledges.map(pledge => {
-                  const isMyPledge = pledge.user_id === currentUser.id;
+                  const isMyPledge = String(pledge.user_id) === String(currentUser.id);
                   const remaining = parseFloat(pledge.amount) - parseFloat(pledge.amount_paid || 0);
                   return (
                     <div key={pledge.id} style={{
