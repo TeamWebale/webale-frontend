@@ -5,6 +5,7 @@ import { getCurrencySymbol, getAllCurrencies, convertCurrency, detectUserCurrenc
 import { formatTimeAgo } from '../utils/timeFormatter';
 import { useRightSidebar } from '../components/MainLayout';
 import PaymentButton from '../components/PaymentButton';
+import PaymentModal from '../components/PaymentModal';
 
 // ==================== MODAL COMPONENT ====================
 const Modal = ({ isOpen, onClose, title, children, width = '500px' }) => {
@@ -96,6 +97,7 @@ function GroupDetails() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showRecurringModal, setShowRecurringModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentPledge, setPaymentPledge] = useState(null);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showSubGoalModal, setShowSubGoalModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -1414,6 +1416,12 @@ function GroupDetails() {
                         {isMyPledge && remaining > 0 && (
                           <PaymentButton pledge={pledge} group={group} onPaymentComplete={loadGroupData} variant="small" />
                         )}
+                        {isMyPledge && remaining > 0 && (
+                          <button onClick={() => { setPaymentPledge(pledge); setShowPaymentModal(true); }} style={{
+                            padding: '5px 10px', background: 'linear-gradient(135deg, #00C2CC, #4A7FC1)', color: 'white',
+                            border: 'none', borderRadius: '6px', fontSize: '11px', cursor: 'pointer', fontWeight: 600
+                          }}>📱 Pay Mobile Money</button>
+                        )}
                         {/* Admin: Part Payment */}
                         {isAdmin && pledge.status !== 'paid' && (
                           <button onClick={() => { setSelectedPledge(pledge); setPartPaymentForm({ amount: '' }); setShowPartPaymentModal(true); }} style={{
@@ -2327,6 +2335,15 @@ function GroupDetails() {
           </div>
         )}
       </Modal>
+
+      {/* Mobile Money Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => { setShowPaymentModal(false); setPaymentPledge(null); }}
+        pledge={paymentPledge}
+        group={group}
+        onSuccess={() => { setShowPaymentModal(false); setPaymentPledge(null); loadGroupData(); }}
+      />
 
     </div>
   );
