@@ -6,6 +6,7 @@ import { formatTimeAgo } from '../utils/timeFormatter';
 import { useRightSidebar } from '../components/MainLayout';
 import PaymentButton from '../components/PaymentButton';
 import PaymentModal from '../components/PaymentModal';
+import SubscriptionModal from '../components/SubscriptionModal';
 
 // ==================== MODAL COMPONENT ====================
 const Modal = ({ isOpen, onClose, title, children, width = '500px' }) => {
@@ -98,6 +99,8 @@ function GroupDetails() {
   const [showRecurringModal, setShowRecurringModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentPledge, setPaymentPledge] = useState(null);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showSubGoalModal, setShowSubGoalModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -171,6 +174,7 @@ function GroupDetails() {
   // ==================== DATA LOADING ====================
   useEffect(() => {
     loadGroupData();
+    checkSubscription();
   }, [id]);
 
   // Detect user's local currency on mount
@@ -220,6 +224,28 @@ function GroupDetails() {
     document.addEventListener('click', handler);
     return () => document.removeEventListener('click', handler);
   }, []);
+
+  // Check subscription status for this group
+  const checkSubscription = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`https://webale-api.onrender.com/api/subscriptions/check/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) setSubscriptionStatus(data.data);
+    } catch {}
+  };
+
+  // Gate: check if user can pledge, show subscription modal if not
+  const requireSubscription = (callback) => {
+    if (!subscriptionStatus) { callback(); return; }
+    if (subscriptionStatus.allowed) {
+      callback();
+    } else {
+      setShowSubscriptionModal(true);
+    }
+  };
 
   const loadGroupData = async () => {
     try {
@@ -308,8 +334,10 @@ function GroupDetails() {
 
   // ==================== ACTION HANDLERS ====================
   const handleMakePledge = async () => {
-    setPledgeForm({ amount: '', fulfillmentDate: '', reminderFrequency: 'none', isAnonymous: false, currency: detectedCurrency || group?.currency || 'UGX' });
-    setShowPledgeModal(true);
+    requireSubscription(() => {
+      setPledgeForm({ amount: '', fulfillmentDate: '', reminderFrequency: 'none', isAnonymous: false, currency: detectedCurrency || group?.currency || 'UGX' });
+      setShowPledgeModal(true);
+    });
   };
 
   const submitPledge = async () => {
@@ -2343,6 +2371,15 @@ function GroupDetails() {
         pledge={paymentPledge}
         group={group}
         onSuccess={() => { setShowPaymentModal(false); setPaymentPledge(null); loadGroupData(); }}
+      />
+
+      {/* Subscription Paywall Modal */}
+      <SubscriptionModal
+        isOpen={showSubscriptionModal}
+        onClose={() => setShowSubscriptionModal(false)}
+        groupId={group?.id}
+        groupName={group?.name}
+        onSubscribed={() => { setShowSubscriptionModal(false); checkSubscription(); }}
       />
 
     </div>
