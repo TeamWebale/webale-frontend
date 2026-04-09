@@ -1,14 +1,54 @@
 /**
  * SubscriptionModal.jsx — src/components/SubscriptionModal.jsx
  * Paywall popup when user exhausts 3 free pledges
- * Shows local currency equivalent, MTN/Airtel brand-colored buttons
+ * Uses user's profile country for local currency conversion
  */
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { convertCurrency, getCurrencySymbol, detectUserCurrency } from '../utils/currencyConverter';
+import { convertCurrency, getCurrencySymbol } from '../utils/currencyConverter';
 
 const API = 'https://webale-api.onrender.com/api';
 const headers = () => ({ Authorization: `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' });
+
+// Map common countries to their currency codes
+const COUNTRY_CURRENCY = {
+  'Uganda': 'UGX', 'Kenya': 'KES', 'Tanzania': 'TZS', 'Rwanda': 'RWF',
+  'Ghana': 'GHS', 'Nigeria': 'NGN', 'South Africa': 'ZAR', 'Cameroon': 'XAF',
+  'Ethiopia': 'ETB', 'Zambia': 'ZMW', 'Malawi': 'MWK', 'Mozambique': 'MZN',
+  'Zimbabwe': 'ZWL', 'Botswana': 'BWP', 'Namibia': 'NAD', 'Senegal': 'XOF',
+  'DRC': 'CDF', 'Congo': 'CDF', 'Angola': 'AOA', 'Sudan': 'SDG',
+  'Egypt': 'EGP', 'Morocco': 'MAD', 'Tunisia': 'TND', 'Algeria': 'DZD',
+  'India': 'INR', 'Pakistan': 'PKR', 'Bangladesh': 'BDT', 'Sri Lanka': 'LKR',
+  'Philippines': 'PHP', 'Indonesia': 'IDR', 'Malaysia': 'MYR', 'Thailand': 'THB',
+  'Vietnam': 'VND', 'China': 'CNY', 'Japan': 'JPY', 'South Korea': 'KRW',
+  'United Kingdom': 'GBP', 'UK': 'GBP', 'Germany': 'EUR', 'France': 'EUR',
+  'Italy': 'EUR', 'Spain': 'EUR', 'Netherlands': 'EUR', 'Belgium': 'EUR',
+  'Austria': 'EUR', 'Ireland': 'EUR', 'Portugal': 'EUR', 'Greece': 'EUR',
+  'Sweden': 'SEK', 'Norway': 'NOK', 'Denmark': 'DKK', 'Poland': 'PLN',
+  'Czech Republic': 'CZK', 'Hungary': 'HUF', 'Romania': 'RON',
+  'Canada': 'CAD', 'Mexico': 'MXN', 'Brazil': 'BRL', 'Argentina': 'ARS',
+  'Colombia': 'COP', 'Chile': 'CLP', 'Peru': 'PEN',
+  'Australia': 'AUD', 'New Zealand': 'NZD',
+  'UAE': 'AED', 'United Arab Emirates': 'AED', 'Saudi Arabia': 'SAR',
+  'Israel': 'ILS', 'Turkey': 'TRY', 'Russia': 'RUB', 'Ukraine': 'UAH',
+  'United States': 'USD', 'USA': 'USD',
+};
+
+function getUserCurrency() {
+  try {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const country = user.country || '';
+    // Try exact match first
+    if (COUNTRY_CURRENCY[country]) return COUNTRY_CURRENCY[country];
+    // Try partial match
+    for (const [key, curr] of Object.entries(COUNTRY_CURRENCY)) {
+      if (country.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(country.toLowerCase())) {
+        return curr;
+      }
+    }
+    return null;
+  } catch { return null; }
+}
 
 export default function SubscriptionModal({ isOpen, onClose, groupId, groupName, onSubscribed }) {
   const [step, setStep] = useState('info');
@@ -23,16 +63,19 @@ export default function SubscriptionModal({ isOpen, onClose, groupId, groupName,
   useEffect(() => {
     if (isOpen) {
       setStep('info'); setProvider(''); setPhoneNumber(''); setError(''); setProcessing(false);
-      try {
-        const uc = detectUserCurrency();
-        if (uc && uc !== 'USD') {
-          setLocalCurrency(uc);
-          setLocalSymbol(getCurrencySymbol(uc));
+      const uc = getUserCurrency();
+      if (uc && uc !== 'USD') {
+        setLocalCurrency(uc);
+        setLocalSymbol(getCurrencySymbol(uc));
+        try {
           const converted = convertCurrency(3.00, 'USD', uc);
           const amt = typeof converted === 'number' ? converted : (converted?.converted ?? converted?.amount ?? null);
           if (amt && !isNaN(amt) && amt > 0) setLocalAmount(Math.ceil(amt));
-        }
-      } catch {}
+          else setLocalAmount(null);
+        } catch { setLocalAmount(null); }
+      } else {
+        setLocalCurrency(''); setLocalSymbol(''); setLocalAmount(null);
+      }
     }
   }, [isOpen]);
 
@@ -65,14 +108,12 @@ export default function SubscriptionModal({ isOpen, onClose, groupId, groupName,
     } finally { setProcessing(false); }
   };
 
-  // Brand-colored MTN icon
   const MtnIcon = () => (
     <div style={{ width: 40, height: 40, borderRadius: 10, background: '#FFCC00', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
       <span style={{ fontWeight: 900, fontSize: 11, color: '#003087', fontFamily: 'Arial, sans-serif', lineHeight: 1, textAlign: 'center' }}>MTN<br/><span style={{ fontSize: 7, fontWeight: 700 }}>MoMo</span></span>
     </div>
   );
 
-  // Brand-colored Airtel icon
   const AirtelIcon = () => (
     <div style={{ width: 40, height: 40, borderRadius: 10, background: '#ED1C24', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
       <span style={{ fontWeight: 900, fontSize: 10, color: 'white', fontFamily: 'Arial, sans-serif', lineHeight: 1, textAlign: 'center' }}>airtel<br/><span style={{ fontSize: 7 }}>money</span></span>
@@ -90,7 +131,6 @@ export default function SubscriptionModal({ isOpen, onClose, groupId, groupName,
           <button onClick={onClose} style={s.closeBtn}>✕</button>
         </div>
 
-        {/* Info step */}
         {step === 'info' && (
           <div style={s.body}>
             <p style={s.mainMsg}>
@@ -104,9 +144,7 @@ export default function SubscriptionModal({ isOpen, onClose, groupId, groupName,
               </div>
               <p style={s.priceBilled}>Billed quarterly — <strong>$3 per 90 days</strong></p>
               {localAmount && localCurrency && (
-                <p style={s.localPrice}>
-                  ≈ {localSymbol}{localAmount.toLocaleString()} {localCurrency}
-                </p>
+                <p style={s.localPrice}>≈ {localSymbol}{localAmount.toLocaleString()} {localCurrency}</p>
               )}
               <div style={s.priceFeatures}>
                 <p style={s.feature}>✓ Unlimited pledges in this group</p>
@@ -140,16 +178,13 @@ export default function SubscriptionModal({ isOpen, onClose, groupId, groupName,
           </div>
         )}
 
-        {/* Phone step */}
         {step === 'phone' && (
           <div style={s.body}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
               {provider === 'mtn_momo' ? <MtnIcon /> : <AirtelIcon />}
-              <div>
-                <span style={{ fontSize: 15, fontWeight: 700, color: '#2d3748' }}>
-                  {provider === 'mtn_momo' ? 'MTN Mobile Money' : 'Airtel Money'}
-                </span>
-              </div>
+              <span style={{ fontSize: 15, fontWeight: 700, color: '#2d3748' }}>
+                {provider === 'mtn_momo' ? 'MTN Mobile Money' : 'Airtel Money'}
+              </span>
             </div>
             <p style={s.desc}>
               Enter your {provider === 'mtn_momo' ? 'MTN' : 'Airtel'} number to pay <strong>$3.00{localStr}</strong> for 90 days in <strong>{groupName}</strong>:
@@ -166,7 +201,7 @@ export default function SubscriptionModal({ isOpen, onClose, groupId, groupName,
               <button onClick={handleSubscribe} disabled={processing} style={{
                 ...s.payBtn,
                 background: provider === 'mtn_momo'
-                  ? 'linear-gradient(135deg, #FFCC00, #e6b800)' 
+                  ? 'linear-gradient(135deg, #FFCC00, #e6b800)'
                   : 'linear-gradient(135deg, #ED1C24, #c41920)',
                 color: provider === 'mtn_momo' ? '#003087' : 'white',
               }}>
@@ -176,7 +211,6 @@ export default function SubscriptionModal({ isOpen, onClose, groupId, groupName,
           </div>
         )}
 
-        {/* Success step */}
         {step === 'success' && (
           <div style={s.body}>
             <div style={s.resultWrap}>
@@ -189,7 +223,6 @@ export default function SubscriptionModal({ isOpen, onClose, groupId, groupName,
           </div>
         )}
 
-        {/* Failed step */}
         {step === 'failed' && (
           <div style={s.body}>
             <div style={s.resultWrap}>
@@ -268,8 +301,7 @@ const s = {
     borderRadius: '10px', fontSize: '14px', color: '#4a5568', cursor: 'pointer',
   },
   payBtn: {
-    flex: 1, padding: '12px', background: 'linear-gradient(135deg, #48bb78, #38a169)',
-    color: 'white', border: 'none', borderRadius: '10px', fontSize: '15px',
+    flex: 1, padding: '12px', border: 'none', borderRadius: '10px', fontSize: '15px',
     fontWeight: 700, cursor: 'pointer',
   },
   resultWrap: { textAlign: 'center', padding: '20px 0' },
