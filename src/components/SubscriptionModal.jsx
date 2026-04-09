@@ -1,7 +1,7 @@
 /**
  * SubscriptionModal.jsx — src/components/SubscriptionModal.jsx
  * Paywall popup when user exhausts 3 free pledges
- * Shows local currency equivalent, payment options inline
+ * Shows local currency equivalent, MTN/Airtel brand-colored buttons
  */
 import { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -11,32 +11,26 @@ const API = 'https://webale-api.onrender.com/api';
 const headers = () => ({ Authorization: `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' });
 
 export default function SubscriptionModal({ isOpen, onClose, groupId, groupName, onSubscribed }) {
-  const [step, setStep] = useState('info'); // info, phone, processing, success, failed
+  const [step, setStep] = useState('info');
   const [provider, setProvider] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(false);
   const [localAmount, setLocalAmount] = useState(null);
   const [localCurrency, setLocalCurrency] = useState('');
+  const [localSymbol, setLocalSymbol] = useState('');
 
-  // Detect user's currency and convert $3 to local equivalent
   useEffect(() => {
     if (isOpen) {
-      setStep('info');
-      setProvider('');
-      setPhoneNumber('');
-      setError('');
-      setProcessing(false);
-
+      setStep('info'); setProvider(''); setPhoneNumber(''); setError(''); setProcessing(false);
       try {
-        const userCurrency = detectUserCurrency();
-        if (userCurrency && userCurrency !== 'USD') {
-          setLocalCurrency(userCurrency);
-          const converted = convertCurrency(3.00, 'USD', userCurrency);
-          const amount = typeof converted === 'number' ? converted : (converted?.converted ?? converted?.amount ?? null);
-          if (amount && !isNaN(amount) && amount > 0) {
-            setLocalAmount(Math.ceil(amount));
-          }
+        const uc = detectUserCurrency();
+        if (uc && uc !== 'USD') {
+          setLocalCurrency(uc);
+          setLocalSymbol(getCurrencySymbol(uc));
+          const converted = convertCurrency(3.00, 'USD', uc);
+          const amt = typeof converted === 'number' ? converted : (converted?.converted ?? converted?.amount ?? null);
+          if (amt && !isNaN(amt) && amt > 0) setLocalAmount(Math.ceil(amt));
         }
       } catch {}
     }
@@ -44,56 +38,51 @@ export default function SubscriptionModal({ isOpen, onClose, groupId, groupName,
 
   if (!isOpen) return null;
 
+  const localStr = localAmount && localCurrency ? ` (≈ ${localSymbol}${localAmount.toLocaleString()} ${localCurrency})` : '';
+
   const handleSubscribe = async () => {
-    if (provider === 'mtn_momo' || provider === 'airtel_money') {
-      if (!phoneNumber || phoneNumber.length < 10) {
-        setError('Please enter a valid phone number');
-        return;
-      }
+    if (!phoneNumber || phoneNumber.length < 10) {
+      setError('Please enter a valid phone number'); return;
     }
-
-    setError('');
-    setProcessing(true);
-
+    setError(''); setProcessing(true);
     try {
       const payRes = await axios.post(`${API}/payments/initiate`, {
-        groupId,
-        amount: 3.00,
-        currency: 'USD',
-        provider,
+        groupId, amount: 3.00, currency: 'USD', provider,
         phoneNumber: phoneNumber || undefined,
       }, { headers: headers() });
 
       if (payRes.data.success) {
         const subRes = await axios.post(`${API}/subscriptions/subscribe`, {
-          groupId,
-          paymentId: payRes.data.data.paymentId,
+          groupId, paymentId: payRes.data.data.paymentId,
         }, { headers: headers() });
-
         if (subRes.data.success) {
           setStep('success');
           if (onSubscribed) setTimeout(onSubscribed, 2000);
-        } else {
-          setStep('failed');
-          setError(subRes.data.message || 'Failed to activate subscription');
-        }
-      } else {
-        setStep('failed');
-        setError(payRes.data.message || 'Payment failed');
-      }
+        } else { setStep('failed'); setError(subRes.data.message || 'Failed to activate subscription'); }
+      } else { setStep('failed'); setError(payRes.data.message || 'Payment failed'); }
     } catch (err) {
-      setStep('failed');
-      setError(err.response?.data?.message || 'Something went wrong. Please try again.');
-    } finally {
-      setProcessing(false);
-    }
+      setStep('failed'); setError(err.response?.data?.message || 'Something went wrong. Please try again.');
+    } finally { setProcessing(false); }
   };
+
+  // Brand-colored MTN icon
+  const MtnIcon = () => (
+    <div style={{ width: 40, height: 40, borderRadius: 10, background: '#FFCC00', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      <span style={{ fontWeight: 900, fontSize: 11, color: '#003087', fontFamily: 'Arial, sans-serif', lineHeight: 1, textAlign: 'center' }}>MTN<br/><span style={{ fontSize: 7, fontWeight: 700 }}>MoMo</span></span>
+    </div>
+  );
+
+  // Brand-colored Airtel icon
+  const AirtelIcon = () => (
+    <div style={{ width: 40, height: 40, borderRadius: 10, background: '#ED1C24', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      <span style={{ fontWeight: 900, fontSize: 10, color: 'white', fontFamily: 'Arial, sans-serif', lineHeight: 1, textAlign: 'center' }}>airtel<br/><span style={{ fontSize: 7 }}>money</span></span>
+    </div>
+  );
 
   return (
     <div style={s.overlay} onClick={onClose}>
       <div style={s.modal} onClick={e => e.stopPropagation()}>
 
-        {/* Header */}
         <div style={s.header}>
           <h3 style={s.title}>
             {step === 'success' ? '🎉 Subscribed!' : '🔓 Upgrade to Continue'}
@@ -105,10 +94,9 @@ export default function SubscriptionModal({ isOpen, onClose, groupId, groupName,
         {step === 'info' && (
           <div style={s.body}>
             <p style={s.mainMsg}>
-              You have used up your <strong>3 free Actions</strong> in this group. For more any/all Actions in <strong>{groupName}</strong> subscribe for <strong>$1/month</strong> (billed quarterly — $3) or continue with free 'view only' membership.
+              You have used up your <strong>3 free Actions</strong> in this group. For more of any/all Actions in <strong>{groupName}</strong> subscribe for <strong>$1/month</strong> (billed quarterly — $3{localStr}) or continue with the free 'view only' membership.
             </p>
 
-            {/* Price card */}
             <div style={s.priceCard}>
               <div style={s.priceTop}>
                 <span style={s.priceAmount}>$1</span>
@@ -117,7 +105,7 @@ export default function SubscriptionModal({ isOpen, onClose, groupId, groupName,
               <p style={s.priceBilled}>Billed quarterly — <strong>$3 per 90 days</strong></p>
               {localAmount && localCurrency && (
                 <p style={s.localPrice}>
-                  ≈ {getCurrencySymbol(localCurrency)}{localAmount.toLocaleString()} {localCurrency} in your country
+                  ≈ {localSymbol}{localAmount.toLocaleString()} {localCurrency}
                 </p>
               )}
               <div style={s.priceFeatures}>
@@ -128,18 +116,17 @@ export default function SubscriptionModal({ isOpen, onClose, groupId, groupName,
               </div>
             </div>
 
-            {/* Payment methods */}
             <p style={s.methodLabel}>Pay with:</p>
             <div style={s.methods}>
-              <button onClick={() => { setProvider('mtn_momo'); setStep('phone'); }} style={s.methodBtn}>
-                <span style={s.methodIcon}>📱</span>
+              <button onClick={() => { setProvider('mtn_momo'); setStep('phone'); }} style={{ ...s.methodBtn, borderColor: '#FFCC00' }}>
+                <MtnIcon />
                 <div>
                   <span style={s.methodName}>MTN Mobile Money</span>
                   <span style={s.methodDesc}>Uganda, Ghana, Rwanda, Cameroon</span>
                 </div>
               </button>
-              <button onClick={() => { setProvider('airtel_money'); setStep('phone'); }} style={s.methodBtn}>
-                <span style={s.methodIcon}>📱</span>
+              <button onClick={() => { setProvider('airtel_money'); setStep('phone'); }} style={{ ...s.methodBtn, borderColor: '#ED1C24' }}>
+                <AirtelIcon />
                 <div>
                   <span style={s.methodName}>Airtel Money</span>
                   <span style={s.methodDesc}>Uganda, Kenya, Tanzania, Nigeria</span>
@@ -156,25 +143,34 @@ export default function SubscriptionModal({ isOpen, onClose, groupId, groupName,
         {/* Phone step */}
         {step === 'phone' && (
           <div style={s.body}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+              {provider === 'mtn_momo' ? <MtnIcon /> : <AirtelIcon />}
+              <div>
+                <span style={{ fontSize: 15, fontWeight: 700, color: '#2d3748' }}>
+                  {provider === 'mtn_momo' ? 'MTN Mobile Money' : 'Airtel Money'}
+                </span>
+              </div>
+            </div>
             <p style={s.desc}>
-              Enter your {provider === 'mtn_momo' ? 'MTN' : 'Airtel'} number to pay <strong>$3.00</strong>
-              {localAmount && localCurrency ? ` (≈ ${getCurrencySymbol(localCurrency)}${localAmount.toLocaleString()} ${localCurrency})` : ''}
-              {' '}for 90 days in <strong>{groupName}</strong>:
+              Enter your {provider === 'mtn_momo' ? 'MTN' : 'Airtel'} number to pay <strong>$3.00{localStr}</strong> for 90 days in <strong>{groupName}</strong>:
             </p>
             <input
-              type="tel"
-              value={phoneNumber}
+              type="tel" value={phoneNumber}
               onChange={e => setPhoneNumber(e.target.value.replace(/[^0-9+]/g, ''))}
-              placeholder="e.g. 256771234567"
-              style={s.phoneInput}
-              autoFocus
+              placeholder="e.g. 256771234567" style={s.phoneInput} autoFocus
             />
             <p style={s.hint}>Include country code (e.g. 256 for Uganda, 254 for Kenya)</p>
             {error && <p style={s.error}>{error}</p>}
             <div style={s.btnRow}>
               <button onClick={() => { setStep('info'); setError(''); }} style={s.backBtn}>← Back</button>
-              <button onClick={handleSubscribe} disabled={processing} style={s.payBtn}>
-                {processing ? 'Processing...' : `Pay $3.00`}
+              <button onClick={handleSubscribe} disabled={processing} style={{
+                ...s.payBtn,
+                background: provider === 'mtn_momo'
+                  ? 'linear-gradient(135deg, #FFCC00, #e6b800)' 
+                  : 'linear-gradient(135deg, #ED1C24, #c41920)',
+                color: provider === 'mtn_momo' ? '#003087' : 'white',
+              }}>
+                {processing ? 'Processing...' : `Pay $3.00${localStr}`}
               </button>
             </div>
           </div>
@@ -230,9 +226,7 @@ const s = {
     fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   },
   body: { padding: '20px 24px' },
-  mainMsg: {
-    fontSize: '15px', color: '#2d3748', lineHeight: 1.7, margin: '0 0 16px',
-  },
+  mainMsg: { fontSize: '15px', color: '#2d3748', lineHeight: 1.7, margin: '0 0 16px' },
   priceCard: {
     background: 'linear-gradient(135deg, #1B2D4F, #4A7FC1)', borderRadius: '14px',
     padding: '20px', color: 'white', marginBottom: '16px', textAlign: 'center',
@@ -252,16 +246,14 @@ const s = {
   methods: { display: 'flex', flexDirection: 'column', gap: '8px' },
   methodBtn: {
     display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px',
-    background: '#f7fafc', border: '2px solid #e2e8f0', borderRadius: '12px',
-    cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s', width: '100%',
+    background: '#fff', border: '2px solid #e2e8f0', borderRadius: '12px',
+    cursor: 'pointer', textAlign: 'left', width: '100%',
   },
-  methodIcon: { fontSize: '22px' },
   methodName: { fontSize: '14px', fontWeight: 700, color: '#2d3748', display: 'block' },
   methodDesc: { fontSize: '11px', color: '#718096', display: 'block' },
   freeNote: {
     fontSize: '12px', color: '#718096', marginTop: '16px', lineHeight: 1.6,
-    background: '#f7fafc', borderRadius: '8px', padding: '10px 14px',
-    border: '1px solid #e2e8f0',
+    background: '#f7fafc', borderRadius: '8px', padding: '10px 14px', border: '1px solid #e2e8f0',
   },
   desc: { fontSize: '14px', color: '#4a5568', lineHeight: 1.6, margin: '0 0 12px' },
   phoneInput: {
