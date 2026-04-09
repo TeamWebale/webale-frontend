@@ -1,10 +1,11 @@
 /**
  * SubscriptionModal.jsx — src/components/SubscriptionModal.jsx
- * Pops up when user tries to pledge without subscription (after 3 free pledges)
- * Offers payment options to subscribe: $3/quarter per group
+ * Paywall popup when user exhausts 3 free pledges
+ * Shows local currency equivalent, payment options inline
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { convertCurrency, getCurrencySymbol, detectUserCurrency } from '../utils/currencyConverter';
 
 const API = 'https://webale-api.onrender.com/api';
 const headers = () => ({ Authorization: `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' });
@@ -15,6 +16,31 @@ export default function SubscriptionModal({ isOpen, onClose, groupId, groupName,
   const [phoneNumber, setPhoneNumber] = useState('');
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [localAmount, setLocalAmount] = useState(null);
+  const [localCurrency, setLocalCurrency] = useState('');
+
+  // Detect user's currency and convert $3 to local equivalent
+  useEffect(() => {
+    if (isOpen) {
+      setStep('info');
+      setProvider('');
+      setPhoneNumber('');
+      setError('');
+      setProcessing(false);
+
+      try {
+        const userCurrency = detectUserCurrency();
+        if (userCurrency && userCurrency !== 'USD') {
+          setLocalCurrency(userCurrency);
+          const converted = convertCurrency(3.00, 'USD', userCurrency);
+          const amount = typeof converted === 'number' ? converted : (converted?.converted ?? converted?.amount ?? null);
+          if (amount && !isNaN(amount) && amount > 0) {
+            setLocalAmount(Math.ceil(amount));
+          }
+        }
+      } catch {}
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -30,7 +56,6 @@ export default function SubscriptionModal({ isOpen, onClose, groupId, groupName,
     setProcessing(true);
 
     try {
-      // First initiate payment for subscription
       const payRes = await axios.post(`${API}/payments/initiate`, {
         groupId,
         amount: 3.00,
@@ -40,8 +65,6 @@ export default function SubscriptionModal({ isOpen, onClose, groupId, groupName,
       }, { headers: headers() });
 
       if (payRes.data.success) {
-        // For sandbox testing, activate subscription immediately
-        // In production, this would happen via webhook after payment confirmation
         const subRes = await axios.post(`${API}/subscriptions/subscribe`, {
           groupId,
           paymentId: payRes.data.data.paymentId,
@@ -73,7 +96,7 @@ export default function SubscriptionModal({ isOpen, onClose, groupId, groupName,
         {/* Header */}
         <div style={s.header}>
           <h3 style={s.title}>
-            {step === 'success' ? '🎉 Subscribed!' : '🔒 Subscription Required'}
+            {step === 'success' ? '🎉 Subscribed!' : '🔓 Upgrade to Continue'}
           </h3>
           <button onClick={onClose} style={s.closeBtn}>✕</button>
         </div>
@@ -81,46 +104,51 @@ export default function SubscriptionModal({ isOpen, onClose, groupId, groupName,
         {/* Info step */}
         {step === 'info' && (
           <div style={s.body}>
-            <div style={s.badge}>FREE TRIAL ENDED</div>
-            <p style={s.desc}>
-              You've used your <strong>3 free pledges</strong>. To continue making pledges and contributions in <strong>{groupName}</strong>, subscribe to unlock unlimited access.
+            <p style={s.mainMsg}>
+              You have used up your <strong>3 free Actions</strong> in this group. For more any/all Actions in <strong>{groupName}</strong> subscribe for <strong>$1/month</strong> (billed quarterly — $3) or continue with free 'view only' membership.
             </p>
 
+            {/* Price card */}
             <div style={s.priceCard}>
               <div style={s.priceTop}>
                 <span style={s.priceAmount}>$1</span>
                 <span style={s.pricePer}>/month</span>
               </div>
               <p style={s.priceBilled}>Billed quarterly — <strong>$3 per 90 days</strong></p>
+              {localAmount && localCurrency && (
+                <p style={s.localPrice}>
+                  ≈ {getCurrencySymbol(localCurrency)}{localAmount.toLocaleString()} {localCurrency} in your country
+                </p>
+              )}
               <div style={s.priceFeatures}>
                 <p style={s.feature}>✓ Unlimited pledges in this group</p>
                 <p style={s.feature}>✓ Make and fulfill contributions</p>
-                <p style={s.feature}>✓ Full access to all group features</p>
+                <p style={s.feature}>✓ Full access to all group actions</p>
                 <p style={s.feature}>✓ Cancel anytime</p>
               </div>
             </div>
 
-            <p style={s.methodLabel}>Choose payment method:</p>
-
+            {/* Payment methods */}
+            <p style={s.methodLabel}>Pay with:</p>
             <div style={s.methods}>
               <button onClick={() => { setProvider('mtn_momo'); setStep('phone'); }} style={s.methodBtn}>
                 <span style={s.methodIcon}>📱</span>
                 <div>
                   <span style={s.methodName}>MTN Mobile Money</span>
-                  <span style={s.methodDesc}>Pay with MTN MoMo</span>
+                  <span style={s.methodDesc}>Uganda, Ghana, Rwanda, Cameroon</span>
                 </div>
               </button>
               <button onClick={() => { setProvider('airtel_money'); setStep('phone'); }} style={s.methodBtn}>
                 <span style={s.methodIcon}>📱</span>
                 <div>
                   <span style={s.methodName}>Airtel Money</span>
-                  <span style={s.methodDesc}>Pay with Airtel Money</span>
+                  <span style={s.methodDesc}>Uganda, Kenya, Tanzania, Nigeria</span>
                 </div>
               </button>
             </div>
 
-            <p style={s.footnote}>
-              Registration, group creation, joining groups, and messaging are always free.
+            <p style={s.freeNote}>
+              <strong>Free features:</strong> Registration, group creation, joining groups, messaging, and viewing group activity remain free forever.
             </p>
           </div>
         )}
@@ -129,7 +157,9 @@ export default function SubscriptionModal({ isOpen, onClose, groupId, groupName,
         {step === 'phone' && (
           <div style={s.body}>
             <p style={s.desc}>
-              Enter your {provider === 'mtn_momo' ? 'MTN' : 'Airtel'} phone number to pay <strong>$3.00</strong> for 90 days access to <strong>{groupName}</strong>:
+              Enter your {provider === 'mtn_momo' ? 'MTN' : 'Airtel'} number to pay <strong>$3.00</strong>
+              {localAmount && localCurrency ? ` (≈ ${getCurrencySymbol(localCurrency)}${localAmount.toLocaleString()} ${localCurrency})` : ''}
+              {' '}for 90 days in <strong>{groupName}</strong>:
             </p>
             <input
               type="tel"
@@ -139,12 +169,12 @@ export default function SubscriptionModal({ isOpen, onClose, groupId, groupName,
               style={s.phoneInput}
               autoFocus
             />
-            <p style={s.hint}>Include country code (e.g. 256 for Uganda)</p>
+            <p style={s.hint}>Include country code (e.g. 256 for Uganda, 254 for Kenya)</p>
             {error && <p style={s.error}>{error}</p>}
             <div style={s.btnRow}>
               <button onClick={() => { setStep('info'); setError(''); }} style={s.backBtn}>← Back</button>
               <button onClick={handleSubscribe} disabled={processing} style={s.payBtn}>
-                {processing ? 'Processing...' : 'Pay $3.00'}
+                {processing ? 'Processing...' : `Pay $3.00`}
               </button>
             </div>
           </div>
@@ -168,7 +198,7 @@ export default function SubscriptionModal({ isOpen, onClose, groupId, groupName,
           <div style={s.body}>
             <div style={s.resultWrap}>
               <div style={s.failIcon}>✕</div>
-              <p style={s.resultTitle}>Payment Failed</p>
+              <p style={s.resultTitle}>Payment Not Completed</p>
               <p style={s.resultDesc}>{error}</p>
               <button onClick={() => { setStep('info'); setError(''); }} style={s.retryBtn}>Try Again</button>
             </div>
@@ -200,12 +230,9 @@ const s = {
     fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   },
   body: { padding: '20px 24px' },
-  badge: {
-    display: 'inline-block', background: '#fff5f5', color: '#e53e3e', fontSize: '11px',
-    fontWeight: 700, padding: '4px 12px', borderRadius: '12px', border: '1px solid #fed7d7',
-    marginBottom: '12px', letterSpacing: '0.5px',
+  mainMsg: {
+    fontSize: '15px', color: '#2d3748', lineHeight: 1.7, margin: '0 0 16px',
   },
-  desc: { fontSize: '14px', color: '#4a5568', lineHeight: 1.6, margin: '0 0 16px' },
   priceCard: {
     background: 'linear-gradient(135deg, #1B2D4F, #4A7FC1)', borderRadius: '14px',
     padding: '20px', color: 'white', marginBottom: '16px', textAlign: 'center',
@@ -213,8 +240,13 @@ const s = {
   priceTop: { display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '2px' },
   priceAmount: { fontSize: '42px', fontWeight: 800 },
   pricePer: { fontSize: '16px', opacity: 0.8 },
-  priceBilled: { fontSize: '13px', opacity: 0.7, margin: '4px 0 16px' },
-  priceFeatures: { textAlign: 'left' },
+  priceBilled: { fontSize: '13px', opacity: 0.7, margin: '4px 0 4px' },
+  localPrice: {
+    fontSize: '14px', fontWeight: 700, color: '#00E5CC',
+    margin: '2px 0 14px', background: 'rgba(0,229,204,0.15)',
+    borderRadius: '8px', padding: '6px 12px', display: 'inline-block',
+  },
+  priceFeatures: { textAlign: 'left', marginTop: '10px' },
   feature: { fontSize: '13px', margin: '4px 0', opacity: 0.9 },
   methodLabel: { fontSize: '14px', color: '#4a5568', fontWeight: 600, margin: '0 0 10px' },
   methods: { display: 'flex', flexDirection: 'column', gap: '8px' },
@@ -226,7 +258,12 @@ const s = {
   methodIcon: { fontSize: '22px' },
   methodName: { fontSize: '14px', fontWeight: 700, color: '#2d3748', display: 'block' },
   methodDesc: { fontSize: '11px', color: '#718096', display: 'block' },
-  footnote: { fontSize: '11px', color: '#a0aec0', marginTop: '14px', textAlign: 'center', lineHeight: 1.5 },
+  freeNote: {
+    fontSize: '12px', color: '#718096', marginTop: '16px', lineHeight: 1.6,
+    background: '#f7fafc', borderRadius: '8px', padding: '10px 14px',
+    border: '1px solid #e2e8f0',
+  },
+  desc: { fontSize: '14px', color: '#4a5568', lineHeight: 1.6, margin: '0 0 12px' },
   phoneInput: {
     width: '100%', padding: '12px 14px', fontSize: '16px', border: '2px solid #e2e8f0',
     borderRadius: '10px', outline: 'none', boxSizing: 'border-box', letterSpacing: '1px',

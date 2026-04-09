@@ -392,7 +392,11 @@ function GroupDetails() {
       showPledgeToast('✅ Pledge created successfully!');
     } catch (err) {
       const msg = err.response?.data?.message || err.message || 'Unknown error';
-      if (!err.response) {
+      const data = err.response?.data?.data;
+      if (data?.subscriptionRequired) {
+        setShowPledgeModal(false);
+        setShowSubscriptionModal(true);
+      } else if (!err.response) {
         alert('Could not reach the server. Please wait a moment and try again — the server may be waking up.');
       } else {
         alert('Failed to create pledge: ' + msg);
